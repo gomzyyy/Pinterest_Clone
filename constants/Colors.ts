@@ -14,7 +14,10 @@ export const colors = {
     PressedIn2:'#636363',
     PressedOut:'#ffffff',
     link:"#4280ef",
-    tabActive:"#7b9654",
+    tabActiveGreen:"#7b9654",
+    tabActivePink:'#fc6464',
+    tabActiveBlue:'#498cff',
+    tabActiveYellow:"#ffcd3a",
     filterCol:"rgb(236, 236, 236)"
   },
   light: {

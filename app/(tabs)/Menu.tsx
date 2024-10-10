@@ -9,14 +9,14 @@ export default function Menu() {
 
   return (
     <View style={{ flex: 1}}>
-      <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, paddingTop: 35, backgroundColor:colors.col.tabActive, height:100}}>
+      <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, paddingTop: 35, backgroundColor:colors.col.tabActiveBlue, height:100}}>
         <FontAwesome name="user-circle-o" size={24} color={colors.col.white} />
         <Text style={{fontSize:24, color:colors.col.white}}
         >
         Profile
         </Text>
         <View style={{ position: "absolute", right: 25, bottom:17 }}>
-        <Ionicons name="exit-outline" size={26} color="white" />
+        <Ionicons name="exit-outline" size={26} color={colors.col.white} />
         </View>
       </View>
       <ScrollView>

@@ -10,9 +10,9 @@ import {
 import { PropsWithChildren } from "react";
 import React, { useEffect, useState, useContext } from "react";
 import { BackIcon } from "@/constants/icon";
-import { Redirect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { colors } from "@/constants/Colors";
-import { messages, userController } from "@/constants/GlobalConstants";
+import { messages, userController, userFound } from "@/constants/GlobalConstants";
 import STATE from "@/ContextAPI";
 import { GlobalState } from "@/ContextAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -58,9 +58,16 @@ function SignInFun() {
   const handleLoggedin = async () => {
     const res = await alreadyLoggedIn();
     const user = await AsyncStorage.getItem("userName");
-    if (res && user !== null) {
-      router.replace("/(tabs)/Discover");
-      ToastAndroid.show(`Welcome ${user}`, ToastAndroid.SHORT);
+    if (res && user !== null ) {
+      if(user.trim()!==""){
+      const userRes = await userFound(user);
+       if(userRes){
+        router.replace("/(tabs)/Discover");
+        ToastAndroid.show(`Welcome ${user}`, ToastAndroid.SHORT);
+       }
+      }
+      setReturnMessage("unable to login!")
+      return;
     }
     return null;
   };

@@ -19,7 +19,7 @@ export default function GetStarted() {
     <View style={{ flex: 1 }}>
       <View
         style={{
-          height: "55%",
+          height: "60%",
           width: width,
           overflow: "hidden",
           alignSelf: "center",
@@ -55,7 +55,7 @@ export default function GetStarted() {
               textAlign: "center",
               fontSize: 15,
               fontFamily: "pop-reg",
-              marginTop: "3%",
+              marginTop: "4%",
               paddingHorizontal: 25,
             }}
           >
@@ -69,7 +69,7 @@ export default function GetStarted() {
               textAlign: "center",
               fontSize: 35,
               fontFamily: "pop-reg",
-              marginTop: "7%",
+              marginTop: "4%",
             }}
           >
             Get Started!
@@ -85,7 +85,7 @@ export default function GetStarted() {
             alignItems: "center",
             justifyContent: "center",
             alignSelf: "center",
-            marginTop:"5%"
+            marginTop:"1%"
           }}
           onPressIn={pressedIn}
           onPressOut={pressedOut}

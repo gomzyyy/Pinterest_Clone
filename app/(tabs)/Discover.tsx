@@ -21,6 +21,9 @@ export default function Discover() {
 
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [filtercount, setFiltercount] = useState<number>(6);
+  const [collectionName, setCollectionName] = useState<string>("");
+  const [filterApplied, setFilterApplied] = useState<boolean>(false);
+  const [filterResult, setFilterResult] = useState<string[] | null>([]);
 
   const handleFilterCount = () => setFiltercount((p) => p + 1);
 
@@ -39,6 +42,43 @@ export default function Discover() {
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
   }, [returnMessage]);
 
+  const handleSuggestedFilter = (f: string) => {
+    setFilterApplied(true);
+    let data: string[] = [];
+    imageData.forEach((i) => {
+      const c: string = i.collection;
+      if (c.trim().toLocaleLowerCase().includes(f.trim().toLowerCase())) {
+        setCollectionName(c);
+        i.images.forEach((i) => {
+          if (!data.includes(i.image)) {
+            data.push(i.image);
+          }
+        });
+      }
+    });
+    let searchoptions;
+    imageData.forEach((a) => {
+      a.images.forEach((i) => {
+        searchoptions = i.tags;
+        searchoptions.forEach((s) => {
+          if (s.trim().toLowerCase().includes(f.trim().toLowerCase())) {
+            if (!data.includes(i.image)) {
+              console.log(i.image);
+              data.push(i.image);
+            }
+          }
+        });
+      });
+    });
+    console.log(data);
+    setFilterResult(data);
+    if (data.length === 0) {
+      setFilterResult(null);
+    }
+
+    return null;
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <View
@@ -48,7 +88,7 @@ export default function Discover() {
           justifyContent: "center",
           gap: 4,
           paddingTop: 35,
-          backgroundColor: colors.col.tabActive,
+          backgroundColor: colors.col.tabActiveGreen,
           height: 100,
           position: "relative",
         }}
@@ -96,6 +136,7 @@ export default function Discover() {
                     backgroundColor: colors.col.filterCol,
                     borderRadius: 10,
                   }}
+                  onPress={() => handleSuggestedFilter(item.item.name)}
                 >
                   <Text style={{ color: colors.col.Black, fontSize: 20 }}>
                     {item.item.name}
@@ -107,49 +148,116 @@ export default function Discover() {
         />
       </View>
       <View style={{ flex: 1 }}>
-        <FlatList
-          data={imageData}
-          keyExtractor={(item) => item.collection}
-          renderItem={({ item }) => (
-            <View
+        {filterResult !== null && filterResult.length !== 0 ? (
+          <View
+            style={{
+              flex: 1,
+              margin: 5,
+              borderRadius: 20,
+              backgroundColor: colors.col.filterCol,
+              overflow: "hidden",
+              alignItems: "center",
+            }}
+          >
+            <Pressable
               style={{
-                flex: 1,
-                margin: 5,
-                borderRadius: 20,
-                backgroundColor: colors.col.filterCol,
-                overflow: "hidden",
-                alignItems: "center",
+                position: "absolute",
+                left: 20,
+                top: 14,
+              }}
+              onPress={() => setFilterApplied(false)}
+            >
+              <Ionicons name="chevron-back" size={22} color={colors.col.Black} />
+            </Pressable>
+            <Text
+              style={{
+                fontSize: 20,
+                marginVertical: 8,
+                fontFamily: "pop-b",
               }}
             >
-              
-                <Text style={{fontSize:20, marginVertical:8, fontFamily:'pop-b'}}>
-                  {item.collection}
-                </Text>
-              
-              <FlatList
-                data={item.images.slice(0,4) || []}
-                keyExtractor={(image) => image.image}
-                numColumns={2}
-                renderItem={({ item, index }) => (
+              {collectionName}
+            </Text>
+            <FlatList
+              data={filterResult}
+              keyExtractor={(i) => i}
+              numColumns={2}
+              renderItem={({ item }) => (
+                <>
                   <Image
-                    source={{ uri: item.image }}
+                    source={{ uri: item }}
                     style={{
-                      width: index % 2 === 0 && 200 || index % 3 === 0 && 140 || 120,
-                      height: index % 2 === 0 && 150 || index % 3 === 0 && 150 || 180,
+                      width: 160,
+                      height: 160,
                       margin: 5,
                       borderRadius: 10,
                     }}
                   />
-                )}
-              />
-              <Pressable>
-              <Text style={{fontSize:20, marginVertical:8, fontFamily:'pop-b', textDecorationLine:'underline'}}>
-                  More
+                </>
+              )}
+            />
+          </View>
+        ) : (
+          <Text></Text>
+        )}
+
+        {!filterApplied && (
+          <FlatList
+            data={imageData}
+            keyExtractor={(item) => item.collection}
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  flex: 1,
+                  margin: 5,
+                  borderRadius: 20,
+                  backgroundColor: colors.col.filterCol,
+                  overflow: "hidden",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 20,
+                    marginVertical: 8,
+                    fontFamily: "pop-b",
+                  }}
+                >
+                  {item.collection}
                 </Text>
-              </Pressable>
-            </View>
-          )}
-        />
+
+                <FlatList
+                  data={item.images.slice(0, 4) || []}
+                  keyExtractor={(image) => image.image}
+                  numColumns={2}
+                  renderItem={({ item }) => (
+                    <Image
+                      source={{ uri: item.image }}
+                      style={{
+                        width: 160,
+                        height: 160,
+                        margin: 5,
+                        borderRadius: 10,
+                      }}
+                    />
+                  )}
+                />
+                <Pressable>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      marginVertical: 8,
+                      fontFamily: "pop-b",
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    More
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          />
+        )}
       </View>
     </View>
   );

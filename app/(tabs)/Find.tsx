@@ -5,17 +5,41 @@ import {
   Pressable,
   TextInput,
   Image,
+  ToastAndroid
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Feather from "@expo/vector-icons/Feather";
 import { colors } from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { imageData } from "@/constants/data";
+import { userController, messages } from "@/constants/GlobalConstants";
+import { useRouter } from "expo-router";
+import STATE from "@/ContextAPI";
 
 export default function Find() {
+  const logout = userController.logoutUser;
+  const {loginFalse, loginTrue} = useContext(STATE)
+  const router = useRouter();
+  const [returnMessage, setReturnMessage] = useState<string>("");
   const [searchText, setSearchText] = useState<string>("");
   const [searchResult, setSearchResult] = useState<string[]>([]);
+
+  const handleLogOut = async () => {
+    const userRes = await logout();
+    setReturnMessage(messages.user.returnMessage);
+    if (userRes) {
+      loginFalse()
+      router.replace("/components/AuthPage/SignIn/SignIn");
+    } else {
+      setReturnMessage("Error occured while logging out!");
+    }
+  };
+
+  useEffect(() => {
+    if (returnMessage !== "" || returnMessage !== null)
+      return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
+  }, [returnMessage]);
 
   const getSearchResult = (t: string) => {
     let searchoptions;
@@ -52,15 +76,17 @@ export default function Find() {
           justifyContent: "center",
           gap: 4,
           paddingTop: 35,
-          backgroundColor: colors.col.tabActive,
+          backgroundColor: colors.col.tabActivePink,
           height: 100,
         }}
       >
         <Feather name="search" size={28} color={colors.col.white} />
         <Text style={{ fontSize: 24, color: colors.col.white }}>Search</Text>
-        <View style={{ position: "absolute", right: 25, bottom: 17 }}>
+        <Pressable 
+        onPress={handleLogOut}
+        style={{ position: "absolute", right: 25, bottom: 17 }}>
           <Ionicons name="exit-outline" size={26} color="white" />
-        </View>
+        </Pressable>
       </View>
       {/* //search bar */}
       <View>
@@ -70,7 +96,7 @@ export default function Find() {
             alignSelf: "flex-start",
             height: 60,
             width: "86%",
-            paddingHorizontal: 10,
+            paddingHorizontal: 20,
             fontSize: 25,
           }}
           value={searchText}
@@ -95,25 +121,24 @@ export default function Find() {
               fontSize: 16,
             }}
           >
-            Searches will appear here!
+            {searchResult.length===0&&searchText.trim()!==""?"No result found":"Results will appear here!"}
           </Text>
         ) : (
           <FlatList
             data={searchResult}
             keyExtractor={(i) => i}
             numColumns={2}
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
               <>
                 <Pressable>
                   <Image
                     source={{ uri: item }}
                     style={{
-                      width: index % 2 === 0 ? 200 : 120,
-                      height: index % 2 === 0 ? 200 : 150,
+                      width: 160,
+                      height: 160,
                       margin: 5,
                       borderRadius: 10,
                     }}
-                    alt='Error'
                   />
                 </Pressable>
               </>

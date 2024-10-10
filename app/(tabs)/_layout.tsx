@@ -3,6 +3,7 @@ import { colors } from "@/constants/Colors";
 import React from "react";
 import Feather from "@expo/vector-icons/Feather";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from '@expo/vector-icons/Ionicons';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -25,7 +26,7 @@ export default function MyTabs() {
                 height: "100%",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: focused ? colors.col.tabActive : "transparent",
+                backgroundColor: focused ? colors.col.tabActiveGreen : "transparent",
                 borderRadius: 16,
               }}
             >
@@ -47,11 +48,34 @@ export default function MyTabs() {
                 height: "100%",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: focused ? colors.col.tabActive : "transparent",
+                backgroundColor: focused ? colors.col.tabActivePink : "transparent",
                 borderRadius: 16,
               }}
             >
               <Feather name="search" size={24} color={focused?colors.col.white:colors.col.Black}/>
+            </View>
+          ),
+          tabBarStyle: iconStyle.tabStyle,
+          tabBarShowLabel: false,
+        }}
+      />
+      <Tabs.Screen
+        name="Create"
+        options={{
+          title: "Create",
+
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={{
+                width: "100%",
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: focused ? colors.col.tabActiveYellow : "transparent",
+                borderRadius: 16,
+              }}
+            >
+              <Ionicons name="add-circle-outline" size={26} color={focused?colors.col.white:colors.col.Black} />
             </View>
           ),
           tabBarStyle: iconStyle.tabStyle,
@@ -68,7 +92,7 @@ export default function MyTabs() {
                 height: "100%",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: focused ? colors.col.tabActive : "transparent",
+                backgroundColor: focused ? colors.col.tabActiveBlue : "transparent",
                 borderRadius: 16,
               }}
             >
