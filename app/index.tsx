@@ -3,7 +3,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Dimensions,
-  ScrollView,
+  ScrollView
 } from "react-native";
 import GetStarted from "./components/GetStarted/GetStarted";
 import { useFonts } from "expo-font";
