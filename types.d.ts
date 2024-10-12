@@ -17,4 +17,6 @@ type collectionData = {
 export interface InitialState{
     discoveryFilter:DiscoveryFilter | [];
     collectionData:collectionData | [];
+    loading:boolean;
+    error:string | null;
 }

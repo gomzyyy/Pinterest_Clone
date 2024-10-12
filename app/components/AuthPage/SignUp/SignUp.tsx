@@ -31,6 +31,14 @@ const GoogleLogo = ({ h, w }: pngIcon) => {
     />
   );
 };
+type bodyType = {
+  userName: string;
+  userId: string;
+  password: string;
+  confirmPassword: string;
+};
+
+const baseUrl = `http://192.168.1.64:6600/`;
 
 export default function SignUp() {
   const router = useRouter();
@@ -48,6 +56,32 @@ export default function SignUp() {
   const [confirmPassText, setConfirmPassText] = useState("");
   const [returnMessage, setReturnMessage] = useState("");
 
+  const SignUpBackend = async () => {
+    try {
+      if (userNametext && idtext && passText && confirmPassText) {
+        const signupAPI = await fetch(`http://192.168.1.64:6600/api/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userName: userNametext,
+            userId: idtext,
+            email:"gomzd@gmail.com",
+            password: passText,
+            confirmPassword: confirmPassText,
+          }),
+        });
+        const res = await signupAPI.json();
+        console.log(res.message);
+      } else {
+        console.log("Entries missing!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleSignIn = async () => {
     const NewUser = {
       userName: userNametext,
@@ -55,7 +89,7 @@ export default function SignUp() {
       password: passText,
       confirmPassword: confirmPassText,
     };
-  const userRes =  await signUpUser(NewUser);
+    const userRes = await signUpUser(NewUser);
     setReturnMessage(messages.user.returnMessage);
     if (userRes) {
       const success = await userCreatedSuccessPopUp();
@@ -131,7 +165,7 @@ export default function SignUp() {
           style={{
             height: 60,
             width: 50,
-            marginTop: "9%",
+            marginTop: "4%",
             alignItems: "center",
             justifyContent: "center",
             flexGrow: 1,
@@ -156,7 +190,7 @@ export default function SignUp() {
       </View>
       <View
         style={{
-          marginTop: 40,
+          marginTop: 10,
         }}
         // Greeting message
       >
@@ -233,7 +267,7 @@ export default function SignUp() {
           //login buttons
           style={{ marginTop: 30, gap: 10 }}
         >
-          <Pressable style={loginStyles.loginBtn} onPress={handleSignIn}>
+          <Pressable style={loginStyles.loginBtn} onPress={SignUpBackend}>
             <Text style={loginStyles.loginBtnText}>Signup</Text>
           </Pressable>
           <Text
@@ -283,7 +317,7 @@ const loginStyles = StyleSheet.create({
   getLoginDataContainer: {
     padding: 15,
     gap: 10,
-    marginTop: 20,
+    marginTop: 10,
   },
   getLoginData: {
     borderWidth: 1,

@@ -26,7 +26,7 @@ const confirmPopUp = (): Promise<boolean> => {
 export const userCreatedSuccessPopUp = (): Promise<boolean> => {
   return new Promise((resolve) => {
     Alert.alert(
-      "signup Successfull",
+      "Signup successfull",
       "User created successfully, press 'Ok' to redirect to Login page.",
       [
         {

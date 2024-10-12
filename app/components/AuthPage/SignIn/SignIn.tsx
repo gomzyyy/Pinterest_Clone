@@ -134,7 +134,7 @@ function SignInFun() {
           style={{
             height: 60,
             width: 50,
-            marginTop: "9%",
+            marginTop: "6%",
             alignItems: "center",
             justifyContent: "center",
             flexGrow: 1,
@@ -176,7 +176,7 @@ function SignInFun() {
         <Text
           style={{
             textAlign: "center",
-            marginTop: 60,
+            marginTop: 30,
             fontSize: 22,
             fontFamily: "pop-reg",
             paddingHorizontal: 15,

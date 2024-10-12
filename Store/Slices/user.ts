@@ -1,13 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { InitialState } from "../../types";
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import {getUserInfo} from '../Thunk/userThunk'
 
 let i: InitialState = {
   discoveryFilter: [],
   collectionData: [],
+  loading:false,
+  error:null
 };
-
-const getUserInfo = createAsyncThunk("user/getId", async () => {});
 
 const userSlice = createSlice({
   name: "user",

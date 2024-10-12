@@ -28,6 +28,33 @@ export default function Create(): React.JSX.Element {
   const [mediaPermissionGranted, setMediaPermissionGranted] =
     useState<boolean>(false);
 
+    // const createBackend = async () => {
+    //   try {
+    //     if (imageUri) {
+    //       const signupAPI = await fetch(`http://192.168.1.64:6600/api/signup`, {
+    //         method: "POST",
+    //         headers: {
+    //           "Content-Type": "application/json",
+    //           "authorization": `Bearer `
+    //         },
+    //         body: JSON.stringify({
+    //           userName: userNametext,
+    //           userId: idtext,
+    //           email:"gomzd@gmail.com",
+    //           password: passText,
+    //           confirmPassword: confirmPassText,
+    //         }),
+    //       });
+    //       const res = await signupAPI.json();
+    //       console.log(res.message);
+    //     } else {
+    //       console.log("Entries missing!");
+    //     }
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
+
   const handleLogOut = async () => {
     const userRes = await logout();
     setReturnMessage(messages.user.returnMessage);
@@ -38,6 +65,16 @@ export default function Create(): React.JSX.Element {
       setReturnMessage("Error occured while logging out!");
     }
   };
+
+  // useEffect(() => {
+  //   console.log("fetching started")
+  //   fetch("http://192.168.115.12:6600/")
+  //     .then((res) => res.json())
+  //     .then((data) => console.log(data))
+  //     .catch((err) => console.log(err));
+  // }, []);
+
+// USE PICKER FOR PICKING CATEGORY
 
   const getImageUri = async () => {
     try {
@@ -134,9 +171,9 @@ export default function Create(): React.JSX.Element {
               style={{ height: 300, width: 300 }}
             />
           ) : (
-            <Text
-            style={{fontFamily:'pop-mid', fontSize:13}}
-            >No Image selected yet!</Text>
+            <Text style={{ fontFamily: "pop-mid", fontSize: 13 }}>
+              No Image selected yet!
+            </Text>
           )}
         </View>
       </View>
