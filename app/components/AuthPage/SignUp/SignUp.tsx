@@ -12,10 +12,8 @@ import { useRouter, useNavigation } from "expo-router";
 import { colors } from "@/constants/Colors";
 import { BackIcon } from "@/constants/icon";
 import { PropsWithChildren } from "react";
-import {
-  messages,
-  userCreatedSuccessPopUp,
-} from "@/constants/GlobalConstants";
+import { messages, requestMediaPermission } from "@/constants/GlobalConstants";
+import * as ImagePicker from "expo-image-picker";
 
 type pngIcon = PropsWithChildren<{
   h: number;
@@ -41,7 +39,6 @@ const baseUrl = `http://192.168.1.64:6600/api/`;
 
 export default function SignUp() {
   const router = useRouter();
-  // const signUpUser = userController.createUser;
 
   const [hidePass, setHidePass] = useState(true);
   const [hideConfirmPass, setHideConfirmPass] = useState(true);
@@ -54,11 +51,20 @@ export default function SignUp() {
   const [passText, setpassText] = useState("");
   const [confirmPassText, setConfirmPassText] = useState("");
   const [returnMessage, setReturnMessage] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [mediaPermissionGranted, setMediaPermissionGranted] =
+    useState<boolean>(false);
 
   const SignUpBackend = async () => {
     try {
-      if (userNametext && idtext && passText && confirmPassText) {
-        const signupAPI = await fetch(`http://192.168.1.64:6600/api/signup`, {
+      if (
+        userNametext.trim() !== "" &&
+        idtext.trim() !== "" &&
+        passText.trim() !== "" &&
+        confirmPassText.trim() !== ""
+      ) {
+        setLoading(true);
+        const signupAPI = await fetch(baseUrl + "signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -71,16 +77,27 @@ export default function SignUp() {
           }),
         });
         const res = await signupAPI.json();
-        console.log(res.message);
+        setLoading(false);
+        setReturnMessage(res.message);
+        if (res.success) {
+          router.replace("/components/AuthPage/SignIn/SignIn");
+        }
       } else {
-        console.log("Entries missing!");
+        setReturnMessage("Entries missing!");
       }
     } catch (error) {
+      setLoading(false);
+      setReturnMessage("Error occured while creating account.");
       console.log(error);
     }
   };
 
-  
+  useEffect(() => {
+    if (returnMessage !== "") {
+      ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
+    }
+  }, [returnMessage]);
+
   const checkUserName = (t: string) => {
     if (t.trim() === "") setErrMsgUserName(messages.error.emptyField);
     else {
@@ -246,7 +263,9 @@ export default function SignUp() {
           style={{ marginTop: 30, gap: 10 }}
         >
           <Pressable style={loginStyles.loginBtn} onPress={SignUpBackend}>
-            <Text style={loginStyles.loginBtnText}>Signup</Text>
+            <Text style={loginStyles.loginBtnText}>
+              {loading ? "loading..." : "Signup"}
+            </Text>
           </Pressable>
           <Text
             style={{ alignSelf: "center", fontFamily: "pop-mid", fontSize: 16 }}
@@ -320,23 +339,23 @@ const loginStyles = StyleSheet.create({
 });
 
 // const handleSignIn = async () => {
-  //   const NewUser = {
-  //     userName: userNametext,
-  //     userID: idtext,
-  //     password: passText,
-  //     confirmPassword: confirmPassText,
-  //   };
-  //   const userRes = await signUpUser(NewUser);
-  //   setReturnMessage(messages.user.returnMessage);
-  //   if (userRes) {
-  //     const success = await userCreatedSuccessPopUp();
-  //     if (success) {
-  //       router.replace("/components/AuthPage/SignIn/SignIn");
-  //     }
-  //   }
-  //   return null;
-  // };
-  // useEffect(() => {
-  //   if (returnMessage !== "" || returnMessage !== null)
-  //     return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
-  // }, [returnMessage]);
+//   const NewUser = {
+//     userName: userNametext,
+//     userID: idtext,
+//     password: passText,
+//     confirmPassword: confirmPassText,
+//   };
+//   const userRes = await signUpUser(NewUser);
+//   setReturnMessage(messages.user.returnMessage);
+//   if (userRes) {
+//     const success = await userCreatedSuccessPopUp();
+//     if (success) {
+//       router.replace("/components/AuthPage/SignIn/SignIn");
+//     }
+//   }
+//   return null;
+// };
+// useEffect(() => {
+//   if (returnMessage !== "" || returnMessage !== null)
+//     return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
+// }, [returnMessage]);

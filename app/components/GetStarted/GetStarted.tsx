@@ -85,7 +85,7 @@ export default function GetStarted() {
             alignItems: "center",
             justifyContent: "center",
             alignSelf: "center",
-            marginTop:"1%"
+            marginTop:"2%"
           }}
           onPressIn={pressedIn}
           onPressOut={pressedOut}

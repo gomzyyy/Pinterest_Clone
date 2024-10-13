@@ -12,7 +12,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { BackIcon } from "@/constants/icon";
 import { useRouter } from "expo-router";
 import { colors } from "@/constants/Colors";
-import { messages, userFound } from "@/constants/GlobalConstants";
+import { messages } from "@/constants/GlobalConstants";
 import STATE from "@/ContextAPI";
 import { GlobalState } from "@/ContextAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -54,6 +54,7 @@ function SignInFun() {
   const [idtext, setidtext] = useState<string>("");
   const [passText, setpassText] = useState<string>("");
   const [returnMessage, setReturnMessage] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
@@ -90,6 +91,7 @@ function SignInFun() {
       if (idtext.trim() === "" || passText.trim() === "") {
         return setReturnMessage("Empty fields are not allowed!");
       }
+      setLoading(true);
       const loginEndPt = await fetch(baseUrl + "login", {
         method: "POST",
         headers: {
@@ -101,14 +103,19 @@ function SignInFun() {
         }),
       });
       const res = await loginEndPt.json();
-      console.log(res);
-      if (!res.status) {
+      if (!res.success) {
         setReturnMessage(res.message);
+        setLoading(false);
+        return null;
       }
       await AsyncStorage.setItem("token", res.token);
       loginTrue();
+      setLoading(false);
+      setReturnMessage(res.message);
       router.replace("/(tabs)/Discover");
+      return null;
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   };
@@ -116,20 +123,29 @@ function SignInFun() {
   useEffect(() => {
     const checkLoggedIn = async () => {
       try {
+        setLoading(true);
         const token = await AsyncStorage.getItem("token");
-        console.log(token)
         if (token === null) {
+          setLoading(false);
           return null;
         }
-        setReturnMessage("Login success!")
+        setReturnMessage("Login success!");
         loginTrue();
+        setLoading(false);
         router.replace("/(tabs)/Discover");
       } catch (error) {
         console.log(error);
+        setLoading(false);
       }
     };
     checkLoggedIn();
   }, []);
+
+  useEffect(() => {
+    if (returnMessage !== "") {
+      ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
+    }
+  }, [returnMessage]);
 
   return (
     <View
@@ -231,7 +247,9 @@ function SignInFun() {
           style={{ marginTop: 30, gap: 8 }}
         >
           <Pressable style={loginStyles.loginBtn} onPress={handleSignIn}>
-            <Text style={loginStyles.loginBtnText}>Login</Text>
+            <Text style={loginStyles.loginBtnText}>
+              {loading ? "loading..." : "Login"}
+            </Text>
           </Pressable>
           <Text
             style={{ alignSelf: "center", fontFamily: "pop-reg", fontSize: 17 }}
