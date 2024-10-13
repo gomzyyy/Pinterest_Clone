@@ -13,12 +13,17 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { userController, messages } from "@/constants/GlobalConstants";
 import { useRouter } from "expo-router";
-import { discoverFilters, imageData } from "../../constants/data";
+import { imageData } from "../../constants/data";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const baseUrlGet = `http://192.168.1.64:6600/api/user/get/`;
+const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
 
 export default function Discover() {
   const router = useRouter();
   const logout = userController.logoutUser;
 
+  const [discoverFilters, setDiscoverFilters] = useState<string[]>([]);
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [filtercount, setFiltercount] = useState<number>(6);
   const [collectionName, setCollectionName] = useState<string>("");
@@ -28,14 +33,63 @@ export default function Discover() {
   const handleFilterCount = () => setFiltercount((p) => p + 1);
 
   const handleLogOut = async () => {
-    const userRes = await logout();
-    setReturnMessage(messages.user.returnMessage);
-    if (userRes) {
-      router.replace("/components/AuthPage/SignIn/SignIn");
-    } else {
-      setReturnMessage("Error occured while logging out!");
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setReturnMessage("unauthorised action!");
+        return null;
+      }
+      const signoutAPI = await fetch(baseUrlUser + "logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!signoutAPI) {
+        throw new Error("Server error!");
+      }
+      const res = await signoutAPI.json();
+      console.log(res);
+
+      if (res.success) {
+        console.log("called");
+        await AsyncStorage.removeItem("token");
+        router.replace('/components/GetStarted/GetStarted')
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
     }
   };
+
+  // useEffect(() => {
+  //   const getCategories = async () => {
+  //     try {
+  //       const token = await AsyncStorage.getItem("token");
+  //       if (!token) {
+  //         return setReturnMessage("no token found!, Can't load data!");
+  //       }
+  //       const loginEndPt = await fetch(baseUrlGet + "post-categories", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+  //       const res = await loginEndPt.json();
+  //       setDiscoverFilters(res.data ? res.data : []);
+  //       console.log(discoverFilters);
+  //       if (!res.status) {
+  //         setReturnMessage(res.message);
+  //         return null;
+  //       }
+  //       return null;
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   getCategories();
+  // }, []);
 
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
@@ -102,10 +156,13 @@ export default function Discover() {
           <Ionicons name="exit-outline" size={26} color="white" />
         </Pressable>
       </View>
-      <View>
+
+      {/* filters */}
+
+      {/* <View>
         <FlatList
           data={discoverFilters.slice(0, filtercount)}
-          keyExtractor={(item) => item.name}
+          keyExtractor={(item) => item}
           numColumns={3}
           style={{ padding: 5 }}
           renderItem={(item) => (
@@ -133,21 +190,25 @@ export default function Discover() {
                     alignItems: "center",
                     justifyContent: "center",
                     paddingVertical: 15,
+                    paddingHorizontal: 8,
                     backgroundColor: colors.col.filterCol,
                     borderRadius: 10,
                   }}
-                  onPress={() => handleSuggestedFilter(item.item.name)}
+                  onPress={() => handleSuggestedFilter(item.item)}
                 >
-                  <Text style={{ color: colors.col.Black, fontSize: 20 }}>
-                    {item.item.name}
+                  <Text style={{ color: colors.col.Black, fontSize: 16 }}>
+                    {item.item}
                   </Text>
                 </Pressable>
               )}
             </>
           )}
         />
-      </View>
-      <View style={{ flex: 1 }}>
+      </View> */}
+
+      {/* render data according to the filter */}
+
+      {/* <View style={{ flex: 1 }}>
         {filterResult !== null && filterResult.length !== 0 ? (
           <View
             style={{
@@ -198,67 +259,65 @@ export default function Discover() {
             />
           </View>
         ) : (
-          <Text></Text>
-        )}
+          <Text>No pins available for this category</Text>
+        )} */}
 
-        {!filterApplied && (
-          <FlatList
-            data={imageData}
-            keyExtractor={(item) => item.collection}
-            renderItem={({ item }) => (
-              <View
+      <FlatList
+        data={imageData}
+        keyExtractor={(item) => item.collection}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              flex: 1,
+              margin: 5,
+              borderRadius: 20,
+              backgroundColor: colors.col.filterCol,
+              overflow: "hidden",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                marginVertical: 8,
+                fontFamily: "pop-b",
+              }}
+            >
+              {item.collection}
+            </Text>
+
+            <FlatList
+              data={item.images.slice(0, 4) || []}
+              keyExtractor={(image) => image.image}
+              numColumns={2}
+              renderItem={({ item }) => (
+                <Image
+                  source={{ uri: item.image }}
+                  style={{
+                    width: 160,
+                    height: 160,
+                    margin: 5,
+                    borderRadius: 10,
+                  }}
+                />
+              )}
+            />
+            <Pressable>
+              <Text
                 style={{
-                  flex: 1,
-                  margin: 5,
-                  borderRadius: 20,
-                  backgroundColor: colors.col.filterCol,
-                  overflow: "hidden",
-                  alignItems: "center",
+                  fontSize: 20,
+                  marginVertical: 8,
+                  fontFamily: "pop-b",
+                  textDecorationLine: "underline",
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 20,
-                    marginVertical: 8,
-                    fontFamily: "pop-b",
-                  }}
-                >
-                  {item.collection}
-                </Text>
-
-                <FlatList
-                  data={item.images.slice(0, 4) || []}
-                  keyExtractor={(image) => image.image}
-                  numColumns={2}
-                  renderItem={({ item }) => (
-                    <Image
-                      source={{ uri: item.image }}
-                      style={{
-                        width: 160,
-                        height: 160,
-                        margin: 5,
-                        borderRadius: 10,
-                      }}
-                    />
-                  )}
-                />
-                <Pressable>
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      marginVertical: 8,
-                      fontFamily: "pop-b",
-                      textDecorationLine: "underline",
-                    }}
-                  >
-                    More
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-          />
+                More
+              </Text>
+            </Pressable>
+          </View>
         )}
-      </View>
+      />
     </View>
+    // </View>
   );
 }

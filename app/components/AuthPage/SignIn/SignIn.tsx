@@ -12,7 +12,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { BackIcon } from "@/constants/icon";
 import { useRouter } from "expo-router";
 import { colors } from "@/constants/Colors";
-import { messages, userController, userFound } from "@/constants/GlobalConstants";
+import { messages, userFound } from "@/constants/GlobalConstants";
 import STATE from "@/ContextAPI";
 import { GlobalState } from "@/ContextAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -38,57 +38,23 @@ const SignIn = () => {
     </GlobalState>
   );
 };
+const baseUrl = `http://192.168.1.64:6600/api/`;
 
 function SignInFun() {
   const router = useRouter();
-  const loginUser = userController.loginUser;
+  // const loginUser = userController.loginUser;
   const context = useContext(STATE);
   if (!context) {
     throw new Error("error");
   }
   const { login, loginTrue } = context;
-  const [errMsgId, setErrMsgId] = useState("");
-  const [errMsgPass, setErrMsgPass] = useState("");
+  const [errMsgId, setErrMsgId] = useState<string>("");
+  const [errMsgPass, setErrMsgPass] = useState<string>("");
   const [hidePass, setHidePass] = useState(true);
-  const [idtext, setidtext] = useState("");
-  const [passText, setpassText] = useState("");
-  const [returnMessage, setReturnMessage] = useState("");
+  const [idtext, setidtext] = useState<string>("");
+  const [passText, setpassText] = useState<string>("");
+  const [returnMessage, setReturnMessage] = useState<string>("");
 
-  const alreadyLoggedIn = userController.alreadyLoggedIn;
-  const handleLoggedin = async () => {
-    const res = await alreadyLoggedIn();
-    const user = await AsyncStorage.getItem("userName");
-    if (res && user !== null ) {
-      if(user.trim()!==""){
-      const userRes = await userFound(user);
-       if(userRes){
-        router.replace("/(tabs)/Discover");
-        ToastAndroid.show(`Welcome ${user}`, ToastAndroid.SHORT);
-       }
-      }
-      setReturnMessage("unable to login!")
-      return;
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    handleLoggedin();
-  }, []);
-
-  const handleSignInUser = async () => {
-    const user = {
-      userID: idtext,
-      password: passText,
-    };
-    const loginRes = await loginUser(user);
-    setReturnMessage(messages.user.returnMessage);
-    if (loginRes) {
-      loginTrue();
-      router.replace("/(tabs)/Discover");
-    }
-    return;
-  };
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
@@ -118,6 +84,52 @@ function SignInFun() {
     chectPass(passText);
     return;
   }, [passText]);
+
+  const handleSignIn = async () => {
+    try {
+      if (idtext.trim() === "" || passText.trim() === "") {
+        return setReturnMessage("Empty fields are not allowed!");
+      }
+      const loginEndPt = await fetch(baseUrl + "login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: idtext,
+          password: passText,
+        }),
+      });
+      const res = await loginEndPt.json();
+      console.log(res);
+      if (!res.status) {
+        setReturnMessage(res.message);
+      }
+      await AsyncStorage.setItem("token", res.token);
+      loginTrue();
+      router.replace("/(tabs)/Discover");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    const checkLoggedIn = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        console.log(token)
+        if (token === null) {
+          return null;
+        }
+        setReturnMessage("Login success!")
+        loginTrue();
+        router.replace("/(tabs)/Discover");
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    checkLoggedIn();
+  }, []);
 
   return (
     <View
@@ -218,7 +230,7 @@ function SignInFun() {
           //login buttons
           style={{ marginTop: 30, gap: 8 }}
         >
-          <Pressable style={loginStyles.loginBtn} onPress={handleSignInUser}>
+          <Pressable style={loginStyles.loginBtn} onPress={handleSignIn}>
             <Text style={loginStyles.loginBtnText}>Login</Text>
           </Pressable>
           <Text
@@ -295,3 +307,39 @@ const loginStyles = StyleSheet.create({
 });
 
 export default SignIn;
+
+// const alreadyLoggedIn = userController.alreadyLoggedIn;
+// const handleLoggedin = async () => {
+//   const res = await alreadyLoggedIn();
+//   const user = await AsyncStorage.getItem("userName");
+//   if (res && user !== null ) {
+//     if(user.trim()!==""){
+//     const userRes = await userFound(user);
+//      if(userRes){
+//       router.replace("/(tabs)/Discover");
+//       ToastAndroid.show(`Welcome ${user}`, ToastAndroid.SHORT);
+//      }
+//     }
+//     setReturnMessage("unable to login!")
+//     return;
+//   }
+//   return null;
+// };
+
+// useEffect(() => {
+//   handleLoggedin();
+// }, []);
+
+// const handleSignInUser = async () => {
+//   const user = {
+//     userID: idtext,
+//     password: passText,
+//   };
+//   const loginRes = await loginUser(user);
+//   setReturnMessage(messages.user.returnMessage);
+//   if (loginRes) {
+//     loginTrue();
+//     router.replace("/(tabs)/Discover");
+//   }
+//   return;
+// };

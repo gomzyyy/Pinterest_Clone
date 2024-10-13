@@ -14,7 +14,6 @@ import { BackIcon } from "@/constants/icon";
 import { PropsWithChildren } from "react";
 import {
   messages,
-  userController,
   userCreatedSuccessPopUp,
 } from "@/constants/GlobalConstants";
 
@@ -38,11 +37,11 @@ type bodyType = {
   confirmPassword: string;
 };
 
-const baseUrl = `http://192.168.1.64:6600/`;
+const baseUrl = `http://192.168.1.64:6600/api/`;
 
 export default function SignUp() {
   const router = useRouter();
-  const signUpUser = userController.createUser;
+  // const signUpUser = userController.createUser;
 
   const [hidePass, setHidePass] = useState(true);
   const [hideConfirmPass, setHideConfirmPass] = useState(true);
@@ -67,7 +66,6 @@ export default function SignUp() {
           body: JSON.stringify({
             userName: userNametext,
             userId: idtext,
-            email:"gomzd@gmail.com",
             password: passText,
             confirmPassword: confirmPassText,
           }),
@@ -82,27 +80,7 @@ export default function SignUp() {
     }
   };
 
-  const handleSignIn = async () => {
-    const NewUser = {
-      userName: userNametext,
-      userID: idtext,
-      password: passText,
-      confirmPassword: confirmPassText,
-    };
-    const userRes = await signUpUser(NewUser);
-    setReturnMessage(messages.user.returnMessage);
-    if (userRes) {
-      const success = await userCreatedSuccessPopUp();
-      if (success) {
-        router.replace("/components/AuthPage/SignIn/SignIn");
-      }
-    }
-    return null;
-  };
-  useEffect(() => {
-    if (returnMessage !== "" || returnMessage !== null)
-      return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
-  }, [returnMessage]);
+  
   const checkUserName = (t: string) => {
     if (t.trim() === "") setErrMsgUserName(messages.error.emptyField);
     else {
@@ -340,3 +318,25 @@ const loginStyles = StyleSheet.create({
     fontSize: 17,
   },
 });
+
+// const handleSignIn = async () => {
+  //   const NewUser = {
+  //     userName: userNametext,
+  //     userID: idtext,
+  //     password: passText,
+  //     confirmPassword: confirmPassText,
+  //   };
+  //   const userRes = await signUpUser(NewUser);
+  //   setReturnMessage(messages.user.returnMessage);
+  //   if (userRes) {
+  //     const success = await userCreatedSuccessPopUp();
+  //     if (success) {
+  //       router.replace("/components/AuthPage/SignIn/SignIn");
+  //     }
+  //   }
+  //   return null;
+  // };
+  // useEffect(() => {
+  //   if (returnMessage !== "" || returnMessage !== null)
+  //     return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
+  // }, [returnMessage]);
