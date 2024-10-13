@@ -30,9 +30,10 @@ export default function Discover() {
   const [filterApplied, setFilterApplied] = useState<boolean>(false);
   const [filterResult, setFilterResult] = useState<string[] | null>([]);
 
-  const handleFilterCount = () => setFiltercount((p) => p + 1);
+  // const handleFilterCount = () => setFiltercount((p) => p + 1);
 
   const handleLogOut = async () => {
+    console.log("working")
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -49,10 +50,8 @@ export default function Discover() {
         throw new Error("Server error!");
       }
       const res = await signoutAPI.json();
-      console.log(res);
 
       if (res.success) {
-        console.log("called");
         await AsyncStorage.removeItem("token");
         router.replace('/components/GetStarted/GetStarted')
       }
