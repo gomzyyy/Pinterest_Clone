@@ -16,6 +16,9 @@ import STATE from "@/ContextAPI";
 import { requestMediaPermission } from "../../constants/GlobalConstants";
 import * as imagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const baseUrl = "http://192.168.1.64:6600/api/user/";
 
@@ -26,49 +29,73 @@ export default function Create(): React.JSX.Element {
 
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [imageUri, setImageUri] = useState<string>("");
-  const [title, setTitle] = useState<string>(""); // Added title state
+  const [title, setTitle] = useState<string>("");
   const [mediaPermissionGranted, setMediaPermissionGranted] =
     useState<boolean>(false);
+  const [tags, setTags] = useState<string>();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const createPost = async () => {
     try {
-      
-      if (!imageUri || imageUri.trim() === "" || !title || title.trim() === "") {
+      setLoading(true);
+      if (
+        !imageUri ||
+        imageUri.trim() === "" ||
+        !title ||
+        title.trim() === "" ||
+        !tags ||
+        tags.trim() === ""
+      ) {
         setReturnMessage("All fields are required!");
+        setLoading(false);
         return;
       }
-
+      const tagsArray: string[] = tags
+        .trim()
+        .split("#")
+        .filter((t) => t);
       const token = await AsyncStorage.getItem("token");
       const formData = new FormData();
-      console.log(imageUri)
+      console.log(tags);
       formData.append("post", {
         uri: imageUri,
         type: "image/jpeg",
-        name: "photo.jpg",  
+        name: "photo.jpg",
       } as any);
       formData.append("title", title);
-      formData.append("tags", JSON.stringify(["arti", "puja"]))
-      console.log(formData)
-      const createPostAPI = await fetch(`http://192.168.1.64:6600/api/user/upload`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      formData.append("tags", tagsArray.join(","));
+      console.log(formData);
+      const createPostAPI = await fetch(
+        `http://192.168.1.64:6600/api/user/upload`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       const res = await createPostAPI.json();
       if (res.success) {
         ToastAndroid.show(res.message, ToastAndroid.SHORT);
         setImageUri("");
-        setTitle(""); // Reset title after submission
+        setTitle("");
+        setTags("");
         setReturnMessage("");
+        setLoading(false);
+        return null;
       } else {
+        setLoading(false);
         ToastAndroid.show(res.message, ToastAndroid.SHORT);
       }
     } catch (error) {
       console.log(error);
-      ToastAndroid.show("An error occurred while creating post.", ToastAndroid.SHORT);
+      setLoading(false);
+      ToastAndroid.show(
+        "An error occurred while creating post.",
+        ToastAndroid.SHORT
+      );
     }
   };
 
@@ -114,7 +141,11 @@ export default function Create(): React.JSX.Element {
           height: 100,
         }}
       >
-        <Ionicons name="add-circle-outline" size={24} color={colors.col.white} />
+        <Ionicons
+          name="add-circle-outline"
+          size={24}
+          color={colors.col.white}
+        />
         <Text style={{ fontSize: 24, color: colors.col.white }}>Create</Text>
         <Pressable
           onPress={handleLogOut}
@@ -123,58 +154,77 @@ export default function Create(): React.JSX.Element {
           <Ionicons name="exit-outline" size={26} color="white" />
         </Pressable>
       </View>
+      <View style={{ padding: 20 }}>
+        <Text style={styles.instructionText}>
+          Choose Image from local file.
+        </Text>
 
-      <Text style={styles.instructionText}>
-        Upload an image or GIF and enter a title.
-      </Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Enter title"
-        value={title}
-        onChangeText={setTitle} // Update title state on change
-      />
-
-      <Pressable
-        style={styles.imagePicker}
-        onPress={getImageUri}
-      >
-        <Text>Click to select image</Text>
-      </Pressable>
-
-      <View style={{ alignItems: "center", marginTop: 10 }}>
-        {imageUri.trim() !== "" ? (
-          <>
-            <Pressable
-              style={styles.clearButton}
-              onPress={() => setImageUri("")}
-            >
-              <Ionicons name="chevron-back" size={22} color={colors.col.Black} />
-            </Pressable>
+        {imageUri.trim() === "" && (
+          <Pressable style={styles.imagePicker} onPress={getImageUri}>
+            <MaterialIcons name="file-upload" size={36} color="black" />
+            <Text style={{ alignSelf: "center", fontSize: 16 }}>
+              Click to choose image
+            </Text>
+          </Pressable>
+        )}
+        <View style={{ alignItems: "center", marginTop: 10 }}>
+          {imageUri.trim() !== "" ? (
             <Image
               source={{ uri: imageUri }}
-              style={{ height: 200, width: 200 }}
+              style={{ height: 250, width: 320, borderRadius: 10, opacity:loading?0.4:1 }}
             />
-          </>
-        ) : (
-          <Text style={styles.noImageText}>
-            No Image selected yet!
-          </Text>
+          ) : (
+            <Text style={styles.noImageText}>No Image selected yet!</Text>
+          )}
+        </View>
+
+        {imageUri.trim() !== "" && (
+          <View>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter title"
+              value={title}
+              onChangeText={setTitle}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Tags (don't add spaces b/w tags i.e #image#photo)"
+              value={tags}
+              onChangeText={setTags}
+            />
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <Pressable
+                style={[styles.uploadButton, { flexDirection: "row" }]}
+                onPress={createPost}
+              >
+                {!loading&&<AntDesign
+                  name="cloudupload"
+                  size={20}
+                  color={colors.col.Black}
+                />}
+                <Text>{loading?'Uploading...':'Upload'}</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.clearButton, { flexDirection: "row" }]}
+                onPress={() => setImageUri("")}
+              >
+                <MaterialCommunityIcons
+                  name="delete"
+                  size={20}
+                  color={colors.col.Black}
+                />
+                <Text>Delete</Text>
+              </Pressable>
+            </View>
+          </View>
         )}
+
+        {returnMessage ? (
+          <Text style={styles.errorMessage}>{returnMessage}</Text>
+        ) : null}
       </View>
-
-      {imageUri.trim() !== "" && (
-        <Pressable
-          style={styles.uploadButton}
-          onPress={createPost}
-        >
-          <Text>Upload</Text>
-        </Pressable>
-      )}
-
-      {returnMessage ? (
-        <Text style={styles.errorMessage}>{returnMessage}</Text>
-      ) : null}
     </View>
   );
 }
@@ -190,23 +240,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 10,
-    borderRadius: 5,
-    margin: 20,
+    borderRadius: 10,
+    marginVertical: 10,
   },
   imagePicker: {
     padding: 10,
     borderWidth: 1,
-    borderRadius: 10,
-    width: 150,
+    borderRadius: 80,
+    height: 160,
+    width: 160,
+    marginTop: 100,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
   },
   clearButton: {
-    position: "absolute",
-    left: 20,
-    top: 14,
-    zIndex: 999,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 10,
+    width: "49%",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 10,
   },
   noImageText: {
     fontFamily: "pop-mid",
@@ -216,7 +272,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     borderRadius: 10,
-    width: 80,
+    width: "49%",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
@@ -228,4 +284,3 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-
