@@ -15,8 +15,9 @@ import { userController, messages } from "@/constants/GlobalConstants";
 import { useRouter } from "expo-router";
 import { imageData } from "../../constants/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { POST } from "@/types";
 
-const baseUrlGet = `http://192.168.1.64:6600/api/user/get/`;
+const baseUrlGetPosts = `http://192.168.1.64:6600/api/user/get-posts`;
 const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
 
 export default function Discover() {
@@ -27,13 +28,12 @@ export default function Discover() {
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [filtercount, setFiltercount] = useState<number>(6);
   const [collectionName, setCollectionName] = useState<string>("");
-  const [filterApplied, setFilterApplied] = useState<boolean>(false);
-  const [filterResult, setFilterResult] = useState<string[] | null>([]);
-
-  // const handleFilterCount = () => setFiltercount((p) => p + 1);
+  const [tags, setTags] = useState<boolean>(false);
+  const [result, setResult] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleLogOut = async () => {
-    console.log("working")
+    console.log("working");
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -53,7 +53,7 @@ export default function Discover() {
 
       if (res.success) {
         await AsyncStorage.removeItem("token");
-        router.replace('/components/GetStarted/GetStarted')
+        router.replace("/components/GetStarted/GetStarted");
       }
     } catch (error) {
       console.log(error);
@@ -61,76 +61,47 @@ export default function Discover() {
     }
   };
 
-  // useEffect(() => {
-  //   const getCategories = async () => {
-  //     try {
-  //       const token = await AsyncStorage.getItem("token");
-  //       if (!token) {
-  //         return setReturnMessage("no token found!, Can't load data!");
-  //       }
-  //       const loginEndPt = await fetch(baseUrlGet + "post-categories", {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-  //       const res = await loginEndPt.json();
-  //       setDiscoverFilters(res.data ? res.data : []);
-  //       console.log(discoverFilters);
-  //       if (!res.status) {
-  //         setReturnMessage(res.message);
-  //         return null;
-  //       }
-  //       return null;
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   getCategories();
-  // }, []);
+  useEffect(() => {
+    const getPosts = async () => {
+      try {
+        setLoading(true);
+        console.log("requested");
+        const token = await AsyncStorage.getItem("token");
+        if (token !== null) {
+          const getPostsAPI = await fetch(baseUrlGetPosts, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log("requested");
+          const res = await getPostsAPI.json();
+          setLoading(false);
+          if (res.success) {
+            setResult((r: any) => [...res.data]);
+            setReturnMessage(`Data served!`);
+            return null;
+          } else {
+            setReturnMessage(res.message);
+          }
+        } else {
+          setReturnMessage("No token found!");
+          return null;
+        }
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
+        return null;
+      }
+    };
+    getPosts();
+  }, []);
+  console.log(result);
 
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
   }, [returnMessage]);
-
-  const handleSuggestedFilter = (f: string) => {
-    setFilterApplied(true);
-    let data: string[] = [];
-    imageData.forEach((i) => {
-      const c: string = i.collection;
-      if (c.trim().toLocaleLowerCase().includes(f.trim().toLowerCase())) {
-        setCollectionName(c);
-        i.images.forEach((i) => {
-          if (!data.includes(i.image)) {
-            data.push(i.image);
-          }
-        });
-      }
-    });
-    let searchoptions;
-    imageData.forEach((a) => {
-      a.images.forEach((i) => {
-        searchoptions = i.tags;
-        searchoptions.forEach((s) => {
-          if (s.trim().toLowerCase().includes(f.trim().toLowerCase())) {
-            if (!data.includes(i.image)) {
-              console.log(i.image);
-              data.push(i.image);
-            }
-          }
-        });
-      });
-    });
-    console.log(data);
-    setFilterResult(data);
-    if (data.length === 0) {
-      setFilterResult(null);
-    }
-
-    return null;
-  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -155,168 +126,30 @@ export default function Discover() {
           <Ionicons name="exit-outline" size={26} color="white" />
         </Pressable>
       </View>
-
-      {/* filters */}
-
       {/* <View>
+
+        <Text>
+          Refresh
+        </Text>
+      </View> */}
+      <View style={{ flex: 1, alignItems: "center" }}>
         <FlatList
-          data={discoverFilters.slice(0, filtercount)}
-          keyExtractor={(item) => item}
-          numColumns={3}
-          style={{ padding: 5 }}
-          renderItem={(item) => (
-            <>
-              {filtercount === item.index + 1 ? (
-                <Pressable
-                  style={{
-                    margin: 5,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    paddingVertical: 10,
-                    backgroundColor: "colors.col.filterCol",
-                    borderRadius: 10,
-                    width: 80,
-                  }}
-                  onPress={handleFilterCount}
-                >
-                  <Ionicons name="add-circle-outline" size={28} color="black" />
-                </Pressable>
-              ) : (
-                <Pressable
-                  style={{
-                    flex: 1,
-                    margin: 5,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    paddingVertical: 15,
-                    paddingHorizontal: 8,
-                    backgroundColor: colors.col.filterCol,
-                    borderRadius: 10,
-                  }}
-                  onPress={() => handleSuggestedFilter(item.item)}
-                >
-                  <Text style={{ color: colors.col.Black, fontSize: 16 }}>
-                    {item.item}
-                  </Text>
-                </Pressable>
-              )}
-            </>
+          data={result}
+          keyExtractor={(r) => r._id}
+          numColumns={2}
+          renderItem={({ item }) => (
+            <Image
+              source={{ uri: item.image }}
+              style={{
+                width: 160,
+                height: 160,
+                margin: 5,
+                borderRadius: 10,
+              }}
+            />
           )}
         />
-      </View> */}
-
-      {/* render data according to the filter */}
-
-      {/* <View style={{ flex: 1 }}>
-        {filterResult !== null && filterResult.length !== 0 ? (
-          <View
-            style={{
-              flex: 1,
-              margin: 5,
-              borderRadius: 20,
-              backgroundColor: colors.col.filterCol,
-              overflow: "hidden",
-              alignItems: "center",
-            }}
-          >
-            <Pressable
-              style={{
-                position: "absolute",
-                left: 20,
-                top: 14,
-              }}
-              onPress={() => setFilterApplied(false)}
-            >
-              <Ionicons name="chevron-back" size={22} color={colors.col.Black} />
-            </Pressable>
-            <Text
-              style={{
-                fontSize: 20,
-                marginVertical: 8,
-                fontFamily: "pop-b",
-              }}
-            >
-              {collectionName}
-            </Text>
-            <FlatList
-              data={filterResult}
-              keyExtractor={(i) => i}
-              numColumns={2}
-              renderItem={({ item }) => (
-                <>
-                  <Image
-                    source={{ uri: item }}
-                    style={{
-                      width: 160,
-                      height: 160,
-                      margin: 5,
-                      borderRadius: 10,
-                    }}
-                  />
-                </>
-              )}
-            />
-          </View>
-        ) : (
-          <Text>No pins available for this category</Text>
-        )} */}
-
-      <FlatList
-        data={imageData}
-        keyExtractor={(item) => item.collection}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              flex: 1,
-              margin: 5,
-              borderRadius: 20,
-              backgroundColor: colors.col.filterCol,
-              overflow: "hidden",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                marginVertical: 8,
-                fontFamily: "pop-b",
-              }}
-            >
-              {item.collection}
-            </Text>
-
-            <FlatList
-              data={item.images.slice(0, 4) || []}
-              keyExtractor={(image) => image.image}
-              numColumns={2}
-              renderItem={({ item }) => (
-                <Image
-                  source={{ uri: item.image }}
-                  style={{
-                    width: 160,
-                    height: 160,
-                    margin: 5,
-                    borderRadius: 10,
-                  }}
-                />
-              )}
-            />
-            <Pressable>
-              <Text
-                style={{
-                  fontSize: 20,
-                  marginVertical: 8,
-                  fontFamily: "pop-b",
-                  textDecorationLine: "underline",
-                }}
-              >
-                More
-              </Text>
-            </Pressable>
-          </View>
-        )}
-      />
+      </View>
     </View>
-    // </View>
   );
 }

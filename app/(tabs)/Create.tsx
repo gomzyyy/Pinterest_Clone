@@ -213,9 +213,9 @@ export default function Create(): React.JSX.Element {
                 <MaterialCommunityIcons
                   name="delete"
                   size={20}
-                  color={colors.col.Black}
+                  color={colors.col.white}
                 />
-                <Text>Delete</Text>
+                <Text style={{color:colors.col.white}}>Delete</Text>
               </Pressable>
             </View>
           </View>
@@ -255,10 +255,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   clearButton: {
-    padding: 10,
     borderWidth: 1,
     borderRadius: 10,
+    height: 40,
     width: "49%",
+    backgroundColor:colors.col.dangerRed,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
@@ -269,9 +270,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   uploadButton: {
-    padding: 10,
     borderWidth: 1,
     borderRadius: 10,
+    height: 40,
     width: "49%",
     alignItems: "center",
     justifyContent: "center",

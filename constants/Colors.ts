@@ -18,7 +18,8 @@ export const colors = {
     tabActivePink:'#fc6464',
     tabActiveBlue:'#498cff',
     tabActiveYellow:"#ffcd3a",
-    filterCol:"rgb(236, 236, 236)"
+    filterCol:"rgb(236, 236, 236)",
+    dangerRed:"#f21d1d"
   },
   light: {
     text: '#11181C',
