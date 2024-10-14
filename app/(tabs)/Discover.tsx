@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { imageData } from "../../constants/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { POST } from "@/types";
+import ImageDiscovery from "./components/image_Discovery";
 
 const baseUrlGetPosts = `http://192.168.1.64:6600/api/user/get-posts`;
 const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
@@ -78,7 +79,7 @@ export default function Discover() {
           const res = await getPostsAPI.json();
           setLoading(false);
           if (res.success) {
-            setResult((r: any) => [...res.data]);
+            setResult(() => [...res.data.reverse()]);
             setReturnMessage(`Data served!`);
             return null;
           } else {
@@ -127,28 +128,35 @@ export default function Discover() {
         </Pressable>
       </View>
       {/* <View>
-
         <Text>
           Refresh
         </Text>
       </View> */}
       <View style={{ flex: 1, alignItems: "center" }}>
-        <FlatList
-          data={result}
-          keyExtractor={(r) => r._id}
-          numColumns={2}
-          renderItem={({ item }) => (
-            <Image
-              source={{ uri: item.image }}
+        {loading ? (
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <Text
               style={{
-                width: 160,
-                height: 160,
-                margin: 5,
-                borderRadius: 10,
+                fontFamily: "pop-b",
+                fontSize: 20,
+                position: "relative",
+                bottom: 80,
               }}
-            />
-          )}
-        />
+            >
+              Loading...
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={result}
+            keyExtractor={(r) => r._id}
+            numColumns={1}
+            renderItem={({ item }) => <ImageDiscovery i={item} a={item.admin} />}
+            style={{marginBottom:70}}
+          />
+        )}
       </View>
     </View>
   );

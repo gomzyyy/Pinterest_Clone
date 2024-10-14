@@ -15,6 +15,7 @@ export const colors = {
     PressedOut:'#ffffff',
     link:"#4280ef",
     tabActive:"#7b9654",
+    postBg:'#00b761',
     filterCol:"rgb(236, 236, 236)"
   },
   light: {

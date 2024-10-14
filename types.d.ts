@@ -36,3 +36,23 @@ export interface POST {
   updatedAt: string;
   visible: boolean;
 }
+export interface USER{
+  _id :string;
+  userName :string;
+  userId :string;
+  password :string;
+  avatar :string;
+  posts :POST[];
+  followers :USER[];
+  following :USER[];
+  bookmarks :POST[];
+  reportStatus :[];
+  isDisabled :boolean;
+  isPrivate :boolean;
+  premiumUser :boolean;
+  verified :boolean;
+  createdAt :Date
+  updatedAt :Date
+  __v :number
+}
+
