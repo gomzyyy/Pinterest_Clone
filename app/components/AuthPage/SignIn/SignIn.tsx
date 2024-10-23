@@ -121,27 +121,6 @@ function SignInFun() {
   };
 
   useEffect(() => {
-    const checkLoggedIn = async () => {
-      try {
-        setLoading(true);
-        const token = await AsyncStorage.getItem("token");
-        if (token === null) {
-          setLoading(false);
-          return null;
-        }
-        setReturnMessage("Login success!");
-        loginTrue();
-        setLoading(false);
-        router.replace("/(tabs)/Discover");
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
-      }
-    };
-    checkLoggedIn();
-  }, []);
-
-  useEffect(() => {
     if (returnMessage !== "") {
       ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
     }
@@ -361,3 +340,26 @@ export default SignIn;
 //   }
 //   return;
 // };
+
+
+
+ // useEffect(() => {
+  //   const checkLoggedIn = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const token = await AsyncStorage.getItem("token");
+  //       if (token === null) {
+  //         setLoading(false);
+  //         return null;
+  //       }
+  //       setReturnMessage("Login success!");
+  //       loginTrue();
+  //       setLoading(false);
+  //       router.replace("/(tabs)/Discover");
+  //     } catch (error) {
+  //       console.log(error);
+  //       setLoading(false);
+  //     }
+  //   };
+  //   checkLoggedIn();
+  // }, []);

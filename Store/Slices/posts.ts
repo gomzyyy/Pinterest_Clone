@@ -1,13 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { InitialStateUser } from "../../types";
+import { InitialStatePost } from "../../types";
 import {getUserInfo} from '../Thunk/userThunk'
 
-let i:InitialStateUser = {
-  user:[],
-  filteredUsers:[],
-  loading: false,
-  error:null,
-}
+let i: InitialStatePost = {
+  posts: [],
+  filteredPosts: [],
+  loading:false,
+  error:null
+};
 
 const userSlice = createSlice({
   name: "user",

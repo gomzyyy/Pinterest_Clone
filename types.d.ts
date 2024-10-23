@@ -14,9 +14,15 @@ type collectionData = {
   images: imageObj[];
 };
 
-export interface InitialState {
-  discoveryFilter: DiscoveryFilter | [];
-  collectionData: collectionData | [];
+export interface InitialStatePost {
+  posts: POST | [];
+  filteredPosts: POST | [];
+  loading: boolean;
+  error: string | null;
+}
+export interface InitialStateUser {
+  user: USER | [];
+  filteredUsers: USER | [];
   loading: boolean;
   error: string | null;
 }

@@ -1491,3 +1491,6 @@ export const imageData: collectionData[] = [
     ],
   },
 ];
+
+export const profleImageSkeleton =
+"https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";

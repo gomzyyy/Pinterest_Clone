@@ -6,6 +6,7 @@ import {
   FlatList,
   Pressable,
   ToastAndroid,
+  Button,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { colors } from "@/constants/Colors";
@@ -16,7 +17,7 @@ import { useRouter } from "expo-router";
 import { imageData } from "../../constants/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { POST } from "@/types";
-import ImageDiscovery from "./components/image_Discovery";
+import ImageDiscovery from "../components/postImage/image_Discovery";
 
 const baseUrlGetPosts = `http://192.168.1.64:6600/api/user/get-posts`;
 const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
@@ -32,9 +33,10 @@ export default function Discover() {
   const [tags, setTags] = useState<boolean>(false);
   const [result, setResult] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   const handleLogOut = async () => {
-    console.log("working");
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -66,7 +68,7 @@ export default function Discover() {
     const getPosts = async () => {
       try {
         setLoading(true);
-        console.log("requested");
+        setError(false);
         const token = await AsyncStorage.getItem("token");
         if (token !== null) {
           const getPostsAPI = await fetch(baseUrlGetPosts, {
@@ -75,12 +77,12 @@ export default function Discover() {
               Authorization: `Bearer ${token}`,
             },
           });
-          console.log("requested");
           const res = await getPostsAPI.json();
           setLoading(false);
           if (res.success) {
             setResult(() => [...res.data.reverse()]);
             setReturnMessage(`Data served!`);
+            if (error) setError(false);
             return null;
           } else {
             setReturnMessage(res.message);
@@ -91,18 +93,80 @@ export default function Discover() {
         }
       } catch (error) {
         console.log(error);
+        setError(true);
         setLoading(false);
         return null;
       }
     };
     getPosts();
-  }, []);
-  console.log(result);
+  }, [refresh]);
 
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
   }, [returnMessage]);
+
+  const DiscoverPage = (): React.JSX.Element => {
+    return (
+      <>
+        <View style={{ flex: 1, alignItems: "center" }}>
+          {loading ? (
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "pop-b",
+                  fontSize: 20,
+                  position: "relative",
+                  bottom: 80,
+                }}
+              >
+                Loading...
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={result}
+              keyExtractor={(r) => r._id}
+              numColumns={1}
+              renderItem={({ item, index }) => (
+                <ImageDiscovery
+                  i={item}
+                  a={item.admin}
+                  margin={index === result.length - 1 ? 10 : 0}
+                />
+              )}
+            />
+          )}
+        </View>
+      </>
+    );
+  };
+
+  const ErrorPage = () => {
+    return (
+      <>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+          }}
+        >
+          <Text style={{ fontFamily: "pop-b", fontSize: 16 }}>
+            Error occured while fetching data.
+          </Text>
+          <Button title="Refresh" onPress={() => setRefresh((e) => !e)} />
+        </View>
+      </>
+    );
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -127,37 +191,7 @@ export default function Discover() {
           <Ionicons name="exit-outline" size={26} color="white" />
         </Pressable>
       </View>
-      {/* <View>
-        <Text>
-          Refresh
-        </Text>
-      </View> */}
-      <View style={{ flex: 1, alignItems: "center" }}>
-        {loading ? (
-          <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
-            <Text
-              style={{
-                fontFamily: "pop-b",
-                fontSize: 20,
-                position: "relative",
-                bottom: 80,
-              }}
-            >
-              Loading...
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={result}
-            keyExtractor={(r) => r._id}
-            numColumns={1}
-            renderItem={({ item }) => <ImageDiscovery i={item} a={item.admin} />}
-            style={{marginBottom:70}}
-          />
-        )}
-      </View>
+      {error ? <ErrorPage /> : <DiscoverPage />}
     </View>
   );
 }

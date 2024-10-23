@@ -10,8 +10,9 @@ export const colors = {
   col:{
     white:'#ffffff',
     Black:'#000000',
-    PressedIn:'#efefef',
-    PressedIn2:'#636363',
+    PressedIn:'#a8a8a8',
+    PressedIn2:'#cccccc',
+    PressedIn3:'#aaaaaa',
     PressedOut:'#ffffff',
     link:"#4280ef",
     tabActiveGreen:"#7b9654",

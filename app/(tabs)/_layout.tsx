@@ -83,7 +83,7 @@ export default function MyTabs() {
         }}
       />
       <Tabs.Screen
-        name="Menu"
+        name="Profile"
         options={{
           tabBarIcon: ({ focused }) => (
             <View
@@ -110,13 +110,13 @@ export default function MyTabs() {
 const iconStyle = StyleSheet.create({
   icon: {},
   tabStyle: {
-    position: "absolute",
-    bottom: 15,  
-    left: 20,
-    right: 20,
+    // position: "absolute",
+    // bottom: 15,  
+    // left: 20,
+    // right: 20,
     height: 55,
-    alignSelf: "center",
-    borderRadius: 20,
+    // alignSelf: "center",
+    // borderRadius: 20,
     paddingHorizontal: 3,
     paddingBottom: 3,
     paddingTop: 3,
@@ -128,6 +128,6 @@ const iconStyle = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    zIndex: 10, // Ensure it overlaps other components
+    // zIndex: 10, // Ensure it overlaps other components
   },
 });
