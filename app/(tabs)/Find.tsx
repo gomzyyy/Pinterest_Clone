@@ -76,7 +76,7 @@ export default function Find() {
           justifyContent: "center",
           gap: 4,
           paddingTop: 35,
-          backgroundColor: colors.col.tabActivePink,
+          backgroundColor: colors.col.PressedIn,
           height: 100,
         }}
       >

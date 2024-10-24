@@ -23,6 +23,31 @@ const confirmPopUp = (): Promise<boolean> => {
     );
   });
 };
+
+
+export const redirectToLoginPage = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    Alert.alert(
+      "Session Expired!",
+      "Would you like to login again?",
+      [
+        
+        {
+          text: "Cancel",
+          onPress: () => resolve(false),
+          style: "cancel",
+        },
+        {
+          text: "Login",
+          onPress: () => resolve(true),
+          style: "default",
+        }
+      ],
+      { cancelable: true }
+    );
+  });
+};
+
 export const userCreatedSuccessPopUp = (): Promise<boolean> => {
   return new Promise((resolve) => {
     Alert.alert(

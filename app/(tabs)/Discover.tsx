@@ -80,8 +80,8 @@ export default function Discover() {
           const res = await getPostsAPI.json();
           setLoading(false);
           if (res.success) {
+            setReturnMessage(`Welcome!`);
             setResult(() => [...res.data.reverse()]);
-            setReturnMessage(`Data served!`);
             if (error) setError(false);
             return null;
           } else {
@@ -134,6 +134,7 @@ export default function Discover() {
               data={result}
               keyExtractor={(r) => r._id}
               numColumns={1}
+              showsVerticalScrollIndicator={false}
               renderItem={({ item, index }) => (
                 <ImageDiscovery
                   i={item}
@@ -177,9 +178,11 @@ export default function Discover() {
           justifyContent: "center",
           gap: 4,
           paddingTop: 35,
-          backgroundColor: colors.col.tabActiveGreen,
+          backgroundColor:colors.col.PressedIn,
           height: 100,
           position: "relative",
+          borderBottomColor:colors.col.PressedIn,
+          borderBottomWidth:1.2
         }}
       >
         <AntDesign name="find" size={28} color={colors.col.white} />
@@ -188,7 +191,7 @@ export default function Discover() {
           onPress={handleLogOut}
           style={{ position: "absolute", right: 25, bottom: 17 }}
         >
-          <Ionicons name="exit-outline" size={26} color="white" />
+          <Ionicons name="exit-outline" size={26} color={colors.col.white} />
         </Pressable>
       </View>
       {error ? <ErrorPage /> : <DiscoverPage />}

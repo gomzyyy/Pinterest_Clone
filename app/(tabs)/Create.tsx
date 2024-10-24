@@ -137,7 +137,7 @@ export default function Create(): React.JSX.Element {
           justifyContent: "center",
           gap: 4,
           paddingTop: 35,
-          backgroundColor: colors.col.tabActiveYellow,
+          backgroundColor: colors.col.PressedIn,
           height: 100,
         }}
       >
