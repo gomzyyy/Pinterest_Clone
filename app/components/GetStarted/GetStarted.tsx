@@ -23,7 +23,7 @@ const { width } = Dimensions.get("window");
 export default function GetStartedPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const {admin} = useSelector((e:RootState)=>e.admin)
+  const { admin } = useSelector((e: RootState) => e.admin);
   // console.log(admin)
 
   const [pressed, setPressed] = useState<boolean>(false);
@@ -33,33 +33,51 @@ export default function GetStartedPage() {
   const pressedIn = () => setPressed(true);
   const pressedOut = () => setPressed(false);
 
-  const baseUrl = `http://192.168.1.64:6600/api/`;
+  const redirectToLoginPageIfNeeded=async()=>{
+    setReturnMessage("Authentication required!3")
+    const userRes = await redirectToLoginPage();
+    if (userRes) {
+      router.push("/components/AuthPage/SignIn/SignIn");
+    } else {
+      return setReturnMessage("Please login again!");
+    }
+  }
 
   const handleNextPage = async () => {
-    const token: string | null = await AsyncStorage.getItem("token");
-    if (!token) {
-      const userRes = await redirectToLoginPage();
-      if (userRes) {
-        router.push("/components/AuthPage/SignIn/SignIn");
+    try {
+      const token: string | null = await AsyncStorage.getItem("token");
+      if (!token) {redirectToLoginPageIfNeeded()}
+      console.log(token)
+      const res = await dispatch(getAdmin(token));
+      if (getAdmin.fulfilled.match(res)) {
+        const { payload } = res;
+        if (payload.success) {
+          console.log(payload.success)
+          router.push("/(tabs)/Discover");
+        }
+        else{
+          console.log(payload.message)
+          setReturnMessage("Authentication required!2");
+          redirectToLoginPageIfNeeded()
+        }
       } else {
-        return setReturnMessage("Authentication Required");
+        setReturnMessage("Authentication required!1");
+        const userRes = await redirectToLoginPage();
+        if (userRes) {
+          router.push("/components/AuthPage/SignIn/SignIn");
+          return null;
+        } else {
+          return setReturnMessage("Please login again!");
+        }
       }
-    }
-    const res = await dispatch(getAdmin(token));
-    if (getAdmin.fulfilled.match(res)) {
-      const { payload } = res;
-      if (payload.success) {
-        router.push("/(tabs)/Discover");
-      }
-      return null;
-    } else {
-      setReturnMessage("Authentication required!");
-      const userRes = await redirectToLoginPage();
-      if(userRes){
-        router.push('/components/AuthPage/SignIn/SignIn');
-        return null
-      }else{
-        return setReturnMessage('Please login again!')
+    } catch (error) {
+      if (error) {
+        const userRes = await redirectToLoginPage();
+        if (userRes) {
+          router.push("/components/AuthPage/SignIn/SignIn");
+        } else {
+          return setReturnMessage("Authentication Required");
+        }
       }
     }
   };

@@ -15,8 +15,8 @@ import { colors } from "@/constants/Colors";
 import { InitialStateAdmin, USER } from "../../types";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Store/store";
-import { NavigationContainer } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import { requestMediaPermission } from "@/constants/GlobalConstants";
 
 const profleImageSkeleton =
   "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
@@ -25,6 +25,7 @@ const baseUrl = `http://192.168.1.64:6600/api/`;
 export default function Menu(): React.JSX.Element {
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [adminData, setAdminData] = useState<USER>();
+  const [avatarUri, setAvatarUri] = useState<string>("")
   const admin: InitialStateAdmin = useSelector((s: RootState) => s.admin);
   const router = useRouter();
 
@@ -128,7 +129,7 @@ export default function Menu(): React.JSX.Element {
             <Pressable
               style={profileMenuStyles.profileOptions}
               onPress={() =>
-                router.push({ pathname: "components/Profile/EditProfile" })
+                router.push({ pathname: '/components/Profile/EditProfile' })
               }
             >
               <Text
@@ -136,16 +137,6 @@ export default function Menu(): React.JSX.Element {
               >Account center</Text>
               <AntDesign name="right" size={20} color="black" style={profileMenuStyles.right_icon} />
             </Pressable>
-            {/* <Pressable
-              style={profileMenuStyles.profileOptions}
-              // onPress={() =>
-              //   router.push({ pathname: "components/Profile/EditProfile" })
-              // }
-            >
-              <Text
-              style={profileMenuStyles.profileOptionsText}
-              >View profile</Text>
-            </Pressable> */}
           </View>
         </View>
       </ScrollView>

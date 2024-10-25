@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import {getAdminSlice} from "./Slices/admin";
+import {getAdminSliceFunction,updateAdminSliceFunction } from "./Slices/admin";
 
 const Store = configureStore({
   reducer: {
-    admin: getAdminSlice,
+    admin: getAdminSliceFunction,
+    updateAdmin: updateAdminSliceFunction,
   },
 });
 

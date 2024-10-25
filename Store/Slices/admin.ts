@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { InitialStateAdmin } from "../../types";
-import { getAdmin } from "../Thunk/userThunk";
+import { InitialStateAdmin, InitialStateUpdatedAdmin } from "../../types";
+import { getAdmin,updateAdmin } from "../Thunk/userThunk";
 
-let i: InitialStateAdmin = {
+let admin: InitialStateAdmin = {
   response: {
     message: "",
     admin: [],
@@ -13,9 +13,9 @@ let i: InitialStateAdmin = {
   error: null,
 };
 
-const userSlice = createSlice({
+const adminSlice = createSlice({
   name: "user",
-  initialState: i,
+  initialState: admin,
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -50,4 +50,38 @@ const userSlice = createSlice({
   },
 });
 
-export const getAdminSlice = userSlice.reducer;
+export const getAdminSliceFunction = adminSlice.reducer;
+
+const updatedAdminState:InitialStateUpdatedAdmin={
+  response: {
+    message: "",
+    success: false,
+  },
+  loading: false,
+  error: null,
+}
+const updateAdminSlice = createSlice({
+  name:'updateAdmin',
+  initialState: updatedAdminState,
+  reducers:{},
+  extraReducers:(builder)=>{
+    builder.addCase(updateAdmin.pending, (state)=>{
+      if(!state.loading)state.loading = true
+    })
+    .addCase(updateAdmin.fulfilled, (state, action)=>{
+      if(state.loading){
+        state.loading = false
+      }
+      if (action.payload !== null || action.payload !== undefined){
+        state.response = action.payload
+      }
+    })
+    .addCase(updateAdmin.rejected, (state, action)=>{
+      if(state.loading){
+        state.loading = false
+      }
+      action.error = state.error
+    })
+  }
+})
+export const updateAdminSliceFunction = updateAdminSlice.reducer

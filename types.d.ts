@@ -26,6 +26,11 @@ export interface InitialStateAdmin {
   loading: boolean;
   error: SerializedError | null;
 }
+export interface InitialStateUpdatedAdmin {
+  response: { message: string; success: boolean };
+  loading: boolean;
+  error: SerializedError | null;
+}
 export interface POST {
   _id: string;
   admin: string;
@@ -53,6 +58,7 @@ export interface USER {
   following: USER[];
   bookmarks: POST[];
   reportStatus: [];
+  dateOfBirth:Date;
   isDisabled: boolean;
   isPrivate: boolean;
   premiumUser: boolean;

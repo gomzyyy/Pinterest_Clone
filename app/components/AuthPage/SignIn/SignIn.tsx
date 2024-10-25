@@ -108,6 +108,10 @@ function SignInFun() {
         setLoading(false);
         return null;
       }
+      const tokenAvailable = await AsyncStorage.getItem('token');
+      if(tokenAvailable!==null){
+        await AsyncStorage.removeItem('token');
+      }
       await AsyncStorage.setItem("token", res.token);
       loginTrue();
       setLoading(false);

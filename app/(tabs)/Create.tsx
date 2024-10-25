@@ -7,6 +7,9 @@ import {
   StyleSheet,
   Image,
   ToastAndroid,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
 } from "react-native";
 import { colors } from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -129,7 +132,14 @@ export default function Create(): React.JSX.Element {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+  >
+    <ScrollView
+    contentContainerStyle={{flexGrow:1}}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -225,7 +235,8 @@ export default function Create(): React.JSX.Element {
           <Text style={styles.errorMessage}>{returnMessage}</Text>
         ) : null}
       </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
