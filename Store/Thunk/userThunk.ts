@@ -1,4 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { AdminUpdateData } from "@/types";
 
 const convertToJson = (t: any) => {
   let f = JSON.stringify(t);
@@ -32,24 +33,32 @@ export const logoutInfo = createAsyncThunk("user/logout", async () => {});
 export const deleteInfo = createAsyncThunk("user/delete", async () => {});
 export const updateAdmin = createAsyncThunk(
   "user/update",
-  async (updatedData, token) => {
+  async (updatedData:AdminUpdateData,{ rejectWithValue }) => {
     try {
+      const data = {
+        ...(updatedData.userName && { userName: updatedData.userName }),
+        ...(updatedData.password && { password: updatedData.password }),
+        ...(updatedData.isPrivate !== undefined && { isPrivate: updatedData.isPrivate }),
+        ...(updatedData.gender && { gender: updatedData.gender }),
+        ...(updatedData.dateOfBirth && { dateOfBirth: updatedData.dateOfBirth }),
+        ...(updatedData.bio && { bio: updatedData.bio }),
+      }
       const updateAdmin = await fetch(
         `http://192.168.1.64:6600/api/user/profile/update`,
         {
           method: "POST",
           headers: {
             "Content-Type":"application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${updatedData.token}`,
           },
-          body: convertToJson(updatedData),
+          body: JSON.stringify(data),
         }
       );
       const res = await updateAdmin.json();
       return res;
     } catch (error) {
       console.log(error);
-      return error;
+     return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred")
     }
   }
 );

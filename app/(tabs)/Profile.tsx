@@ -10,39 +10,98 @@ import {
 import React, { useEffect, useState } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { colors } from "@/constants/Colors";
-import { InitialStateAdmin, USER } from "../../types";
-import { useSelector } from "react-redux";
-import { RootState } from "@/Store/store";
+import { InitialStateAdmin, USER, InitialStateUpdatedAdmin } from "../../types";
+import { useSelector, useDispatch } from "react-redux";
+import { updateAdmin } from "@/Store/Thunk/userThunk";
+import { RootState, AppDispatch } from "@/Store/store";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { requestMediaPermission } from "@/constants/GlobalConstants";
 
 const profleImageSkeleton =
   "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
 
-const baseUrl = `http://192.168.1.64:6600/api/`;
 export default function Menu(): React.JSX.Element {
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [adminData, setAdminData] = useState<USER>();
-  const [avatarUri, setAvatarUri] = useState<string>("")
+  const [postsData, setPostsData] = useState<USER>();
+  const [avatarUri, setAvatarUri] = useState<string>("");
+  const [privacyResponse, setPrivacyResponse] = useState<boolean>(false);
+  const [privateAccount, setPrivateAccount] = useState<boolean>(privacyResponse);
+  const [refreshOnUpdate, setRefreshOnUpdate] = useState<boolean>(false);
+  const [postsLength, setPostsLength] = useState<number | string>();
+  const [bookmarksLength, setBookmarksLength] = useState<number | string>();
   const admin: InitialStateAdmin = useSelector((s: RootState) => s.admin);
+  const updatedAdmin: InitialStateUpdatedAdmin = useSelector((s: RootState) => s.updateAdmin);
+
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
 
   const a: USER | [] = admin.admin;
+  const p: string[] | [] = admin.posts;
+  const b: string[] | [] = admin.bookmarks;
 
-  const checkAdmin = (t: any) => {
+  const checkIfArray = (t: any) => {
     if (!Array.isArray(t) || t !== undefined || t !== null) return t;
+    else {
+      return null;
+    }
   };
-
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
   }, [returnMessage]);
+
   useEffect(() => {
-    const adm = checkAdmin(a);
-    setAdminData(adm);
+    const adm = checkIfArray(a);
+    const pst = checkIfArray(p);
+    const bmk = checkIfArray(b);
+    if (adm) {
+      setAdminData(adm);
+    }
+    if (pst) {
+      setPostsData(pst);
+    }
+    setPostsLength(pst.length);
+    setBookmarksLength(bmk.length);
   }, []);
+
+  const getPrivacyValue=()=>{
+//
+  }
+
+  const editProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        return setReturnMessage("Authentication required!");
+      }
+      console.log(privateAccount)
+      const data = {
+        isPrivate: privateAccount,
+        token
+      };
+      const res = await dispatch(updateAdmin(data));
+      if (updateAdmin.fulfilled.match(res)) {
+        const { payload } = res;
+        if (payload.success) {
+          setPrivacyResponse(payload.data.isPrivate)
+          setPrivateAccount((p) => !p);
+         return setReturnMessage(payload.message);
+        }else{
+          console.log("Error: ",payload.error)
+          return setReturnMessage(payload.error)
+        }
+      }else{
+        return setReturnMessage('Error occured while updating!')
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      return setReturnMessage("An unexpected error occurred. Please try again.");
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -123,19 +182,109 @@ export default function Menu(): React.JSX.Element {
         </View>
         <View style={{ marginTop: 30 }}>
           <Text
-          style={{paddingHorizontal:10, fontFamily:'pop-b', fontSize:20}}
-          >Your account</Text>
+            style={{ paddingHorizontal: 10, fontFamily: "pop-b", fontSize: 20 }}
+          >
+            Your account
+          </Text>
           <View style={{ marginTop: 10 }}>
             <Pressable
               style={profileMenuStyles.profileOptions}
               onPress={() =>
-                router.push({ pathname: '/components/Profile/EditProfile' })
+                router.push({ pathname: "/components/Profile/EditProfile" })
               }
             >
-              <Text
-              style={profileMenuStyles.profileOptionsText}
-              >Account center</Text>
-              <AntDesign name="right" size={20} color="black" style={profileMenuStyles.right_icon} />
+              <Text style={profileMenuStyles.profileOptionsTextDark}>
+                Acount center
+              </Text>
+              <AntDesign
+                name="right"
+                size={20}
+                color="black"
+                style={profileMenuStyles.right_icon}
+              />
+            </Pressable>
+          </View>
+        </View>
+        <View style={{ marginTop: 30 }}>
+          <Text
+            style={{ paddingHorizontal: 10, fontFamily: "pop-b", fontSize: 20 }}
+          >
+            Summary
+          </Text>
+          <View style={{ marginTop: 10 }}>
+            <Pressable style={profileMenuStyles.profileOptions}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={profileMenuStyles.profileOptionsTextDark}>
+                  My Posts
+                </Text>
+                <View style={profileMenuStyles.lengthIcon}>
+                  <Text style={{ color: colors.col.white, fontSize: 14 }}>
+                    {postsLength}
+                  </Text>
+                </View>
+              </View>
+              <View>
+                <AntDesign
+                  name="right"
+                  size={20}
+                  color={colors.col.PressedIn4}
+                />
+              </View>
+            </Pressable>
+            <Pressable style={profileMenuStyles.profileOptions}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={profileMenuStyles.profileOptionsTextDark}>
+                  Saved posts
+                </Text>
+                <View style={profileMenuStyles.lengthIcon}>
+                  <Text style={{ color: colors.col.white, fontSize: 14 }}>
+                    {bookmarksLength}
+                  </Text>
+                </View>
+              </View>
+              <View>
+                <AntDesign
+                  name="right"
+                  size={20}
+                  color={colors.col.PressedIn4}
+                />
+              </View>
+            </Pressable>
+            <Pressable style={profileMenuStyles.profileOptions}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={profileMenuStyles.profileOptionsTextDark}>
+                  Privacy
+                </Text>
+              </View>
+              <Pressable
+                style={profileMenuStyles.customOnOffToogleBtn}
+                onPress={editProfile}
+              >
+                <Text style={profileMenuStyles.ToogleBtnText}>
+                  {privateAccount ? "ON":"OFF" }
+                </Text>
+              </Pressable>
             </Pressable>
           </View>
         </View>
@@ -149,20 +298,50 @@ const profileMenuStyles = StyleSheet.create({
     height: 60,
     borderBottomWidth: 1,
     borderBottomColor: colors.col.PressedIn,
-    alignItems:'center',
-    paddingHorizontal:20,
-    flexDirection:'row',
-    justifyContent:'space-between'
-   
+    alignItems: "center",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    // backgroundColor: "red",
   },
-  profileOptionsText:{
- fontFamily:'pop-mid',
- fontSize:14,
- marginTop:5
+  profileOptionsText: {
+    fontFamily: "pop-mid",
+    fontSize: 14,
+    marginTop: 5,
   },
-  right_icon:{
-  position:'relative',
-  }
+  right_icon: {
+    position: "relative",
+  },
+  profileOptionsTextDark: {
+    fontFamily: "pop-mid",
+    fontSize: 16,
+    marginTop: 5,
+    color: colors.col.PressedIn4,
+  },
+  lengthIcon: {
+    maxHeight: 20,
+    minWidth: 20,
+    height: "auto",
+    width: "auto",
+    padding: 4,
+    borderRadius: 8,
+    backgroundColor: colors.col.PressedIn,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  customOnOffToogleBtn: {
+    height: 30,
+    width: 50,
+    padding: 7,
+    borderRadius: 8,
+    backgroundColor: colors.col.PressedIn,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ToogleBtnText: {
+    fontSize: 16,
+    color: colors.col.white,
+  },
 });
 
 // const getAdmin = async () => {

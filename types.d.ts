@@ -25,10 +25,29 @@ export interface InitialStateAdmin {
   admin: USER | [];
   loading: boolean;
   error: SerializedError | null;
+  posts: string[] | [];
+  bookmarks: string[] | [];
+}
+export interface AdminUpdateData {
+  userName?: string;
+  password?: string;
+  isPrivate?: boolean;
+  gender?: "male" | "female" | "";
+  dateOfBirth?: Date;
+  bio?: string;
+  token: string | null;
 }
 export interface InitialStateUpdatedAdmin {
   response: { message: string; success: boolean };
   loading: boolean;
+  updatedData: {
+    userName?: string;
+    password?: string;
+    isPrivate?: boolean;
+    gender?: "male" | "female" | "";
+    dateOfBirth?: string;
+    bio?: string;
+  };
   error: SerializedError | null;
 }
 export interface POST {
@@ -51,14 +70,13 @@ export interface USER {
   _id: string;
   userName: string;
   userId: string;
-  password: string;
   avatar: string;
-  posts: POST[];
+  posts: string[];
   followers: USER[];
   following: USER[];
   bookmarks: POST[];
   reportStatus: [];
-  dateOfBirth:Date;
+  dateOfBirth: Date;
   isDisabled: boolean;
   isPrivate: boolean;
   premiumUser: boolean;

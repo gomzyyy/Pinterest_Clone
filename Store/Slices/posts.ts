@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { InitialStatePost } from "../../types";
-import {getUserInfo} from '../Thunk/userThunk'
+// import {getUserInfo} from '../Thunk/userThunk'
 
 let i: InitialStatePost = {
   posts: [],
@@ -16,12 +16,12 @@ const userSlice = createSlice({
     createPost: (state, action) => {},
     deletePost: (state, action) => {},
   },
-  extraReducers:(builder)=>{
-    builder
-    .addCase(getUserInfo.pending, (state)=>{})
-    .addCase(getUserInfo.fulfilled,(state)=>{})
-    .addCase(getUserInfo.rejected,(state)=>{})
-  }
+  // extraReducers:(builder)=>{
+  //   builder
+  //   .addCase(getUserInfo.pending, (state)=>{})
+  //   .addCase(getUserInfo.fulfilled,(state)=>{})
+  //   .addCase(getUserInfo.rejected,(state)=>{})
+  // }
 });
 
 export default userSlice.reducer;

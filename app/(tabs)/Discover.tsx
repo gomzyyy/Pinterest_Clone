@@ -26,7 +26,7 @@ export default function Discover() {
   const router = useRouter();
   const logout = userController.logoutUser;
 
-  const [discoverFilters, setDiscoverFilters] = useState<string[]>([]);
+  const [updatedPosts, setUpdatedPosts] = useState<string[]>([]);
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [filtercount, setFiltercount] = useState<number>(6);
   const [collectionName, setCollectionName] = useState<string>("");
@@ -100,6 +100,11 @@ export default function Discover() {
     };
     getPosts();
   }, [refresh]);
+
+  // useEffect(()=>{
+  //   setInterval(()=>setRefreshAtInterval(r=>!r), refreshInterval)
+  //   getPosts();
+  // },[refreshAtInterval])
 
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
