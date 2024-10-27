@@ -33,32 +33,43 @@ export const logoutInfo = createAsyncThunk("user/logout", async () => {});
 export const deleteInfo = createAsyncThunk("user/delete", async () => {});
 export const updateAdmin = createAsyncThunk(
   "user/update",
-  async (updatedData:AdminUpdateData,{ rejectWithValue }) => {
+  async (updatedData: AdminUpdateData, { rejectWithValue }) => {
     try {
-      const data = {
-        ...(updatedData.userName && { userName: updatedData.userName }),
-        ...(updatedData.password && { password: updatedData.password }),
-        ...(updatedData.isPrivate !== undefined && { isPrivate: updatedData.isPrivate }),
-        ...(updatedData.gender && { gender: updatedData.gender }),
-        ...(updatedData.dateOfBirth && { dateOfBirth: updatedData.dateOfBirth }),
-        ...(updatedData.bio && { bio: updatedData.bio }),
+      let formData = new FormData();
+
+      if (updatedData.avatar) {
+        formData.append("avatar", {
+          uri: updatedData.avatar,
+          name: "avatar.jpg",
+          type: "image/jpeg", 
+        } as any);
       }
-      const updateAdmin = await fetch(
+
+      if (updatedData.userName) formData.append("userName", updatedData.userName);
+      if (updatedData.password) formData.append("password", updatedData.password);
+      if (updatedData.isPrivate !== undefined) 
+        formData.append("isPrivate", updatedData.isPrivate.toString());
+      if (updatedData.gender) formData.append("gender", updatedData.gender);
+      if (updatedData.dateOfBirth) 
+        formData.append("dateOfBirth", updatedData.dateOfBirth.toISOString()); // Use toISOString for proper date format
+      if (updatedData.bio) formData.append("bio", updatedData.bio);
+
+      const updateAdminResponse = await fetch(
         `http://192.168.1.64:6600/api/user/profile/update`,
         {
           method: "POST",
           headers: {
-            "Content-Type":"application/json",
             Authorization: `Bearer ${updatedData.token}`,
           },
-          body: JSON.stringify(data),
+          body: formData,
         }
       );
-      const res = await updateAdmin.json();
+
+      const res = await updateAdminResponse.json();
       return res;
     } catch (error) {
       console.log(error);
-     return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred")
+      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
     }
   }
 );

@@ -60,6 +60,7 @@ const updatedAdminState:InitialStateUpdatedAdmin={
     userName:"",
     password:"",
     isPrivate:false,
+    avatar:'',
     gender:'',
     dateOfBirth:new Date().toLocaleDateString(),
     bio:"",
@@ -84,6 +85,7 @@ const updateAdminSlice = createSlice({
         state.response.success = action.payload.success
         state.updatedData.userName = action.payload.userName
         state.updatedData.isPrivate = action.payload.isPrivate
+        state.updatedData.avatar = action.payload.avatar
         state.updatedData.gender = action.payload.gender
         state.updatedData.bio = action.payload.bio
         state.updatedData.password = action.payload.password

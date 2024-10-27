@@ -70,6 +70,7 @@ export default function MyTabs() {
             ),
             tabBarStyle: iconStyle.tabStyle,
             tabBarShowLabel: false,
+            tabBarHideOnKeyboard: true
           }}
         />
         <Tabs.Screen
@@ -98,6 +99,7 @@ export default function MyTabs() {
             ),
             tabBarStyle: iconStyle.tabStyle,
             tabBarShowLabel: false,
+            tabBarHideOnKeyboard: true
           }}
         />
         <Tabs.Screen
@@ -124,6 +126,7 @@ export default function MyTabs() {
             ),
             tabBarStyle: iconStyle.tabStyle,
             tabBarShowLabel: false,
+            tabBarHideOnKeyboard: true
           }}
         />
       </Tabs>

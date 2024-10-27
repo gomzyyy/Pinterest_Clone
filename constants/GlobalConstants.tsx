@@ -135,6 +135,63 @@ interface LOGIN_USER {
   password: string;
 }
 
+
+
+interface MESSAGE {
+  error: {
+    emptyField: string;
+    userUnavailable: string;
+    incorrectID: string;
+    incorrectPassword: string;
+  };
+  user: {
+    status:
+      | "loginOk"
+      | "loginNot"
+      | "loginClashed"
+      | "signupOk"
+      | "signupNot"
+      | "signupClashed"
+      | "logoutOk"
+      | "logoutNot"
+      | "";
+    returnMessage: string;
+  };
+}
+
+export let messages: MESSAGE = {
+  error: {
+    emptyField: "*Required",
+    userUnavailable: "user not found",
+    incorrectID: "Incorrect username or ID",
+    incorrectPassword: "password didn't matched",
+  },
+  user: {
+    status: "",
+    returnMessage: "",
+  },
+};
+export const generateRandomNumber = (i: number, l: number) => {
+  let randoomNumber: number;
+};
+import * as imagePicker from "expo-image-picker"
+
+export const requestMediaPermission = async (state:(value:boolean)=>void) => {
+  try {
+    const req = await imagePicker.requestMediaLibraryPermissionsAsync();
+    if (req.status !== "granted") {
+      alert("Media permission required!");
+    }
+    state(true);
+    return;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+
 export const userController = {
   handleUserFound: async () => {
     try {
@@ -290,56 +347,4 @@ export const userController = {
       return false;
     }
   },
-};
-
-interface MESSAGE {
-  error: {
-    emptyField: string;
-    userUnavailable: string;
-    incorrectID: string;
-    incorrectPassword: string;
-  };
-  user: {
-    status:
-      | "loginOk"
-      | "loginNot"
-      | "loginClashed"
-      | "signupOk"
-      | "signupNot"
-      | "signupClashed"
-      | "logoutOk"
-      | "logoutNot"
-      | "";
-    returnMessage: string;
-  };
-}
-
-export let messages: MESSAGE = {
-  error: {
-    emptyField: "*Required",
-    userUnavailable: "user not found",
-    incorrectID: "Incorrect username or ID",
-    incorrectPassword: "password didn't matched",
-  },
-  user: {
-    status: "",
-    returnMessage: "",
-  },
-};
-export const generateRandomNumber = (i: number, l: number) => {
-  let randoomNumber: number;
-};
-import * as imagePicker from "expo-image-picker"
-
-export const requestMediaPermission = async (state:(value:boolean)=>void) => {
-  try {
-    const req = await imagePicker.requestMediaLibraryPermissionsAsync();
-    if (req.status !== "granted") {
-      alert("Media permission required!");
-    }
-    state(true);
-    return;
-  } catch (error) {
-    console.log(error);
-  }
 };

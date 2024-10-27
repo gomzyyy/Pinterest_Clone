@@ -119,12 +119,13 @@ export default function Create(): React.JSX.Element {
       if (mediaPermissionGranted) {
         const image = await imagePicker.launchImageLibraryAsync();
         if (image.canceled) {
-          return (messages.user.returnMessage = "Action canceled by user");
+          return null;
         } else {
           let imagePath = image.assets[0].uri;
-          console.log(imagePath);
           setImageUri(imagePath);
         }
+      }else{
+        return null
       }
     } catch (error) {
       console.log(error);

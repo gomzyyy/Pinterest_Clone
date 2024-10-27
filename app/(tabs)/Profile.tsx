@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Octicons from "@expo/vector-icons/Octicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { colors } from "@/constants/Colors";
 import { InitialStateAdmin, USER, InitialStateUpdatedAdmin } from "../../types";
@@ -19,6 +20,7 @@ import { RootState, AppDispatch } from "@/Store/store";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { requestMediaPermission } from "@/constants/GlobalConstants";
+import { POST } from "../../types";
 
 const profleImageSkeleton =
   "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
@@ -29,19 +31,23 @@ export default function Menu(): React.JSX.Element {
   const [postsData, setPostsData] = useState<USER>();
   const [avatarUri, setAvatarUri] = useState<string>("");
   const [privacyResponse, setPrivacyResponse] = useState<boolean>(false);
-  const [privateAccount, setPrivateAccount] = useState<boolean>(privacyResponse);
+  const [privateAccount, setPrivateAccount] =
+    useState<boolean>(privacyResponse);
   const [refreshOnUpdate, setRefreshOnUpdate] = useState<boolean>(false);
   const [postsLength, setPostsLength] = useState<number | string>();
   const [bookmarksLength, setBookmarksLength] = useState<number | string>();
   const admin: InitialStateAdmin = useSelector((s: RootState) => s.admin);
-  const updatedAdmin: InitialStateUpdatedAdmin = useSelector((s: RootState) => s.updateAdmin);
+  const updatedAdmin: InitialStateUpdatedAdmin = useSelector(
+    (s: RootState) => s.updateAdmin
+  );
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
   const a: USER | [] = admin.admin;
-  const p: string[] | [] = admin.posts;
+  const p: POST[] | [] = admin.posts;
   const b: string[] | [] = admin.bookmarks;
+  const loading: boolean = updatedAdmin.loading;
 
   const checkIfArray = (t: any) => {
     if (!Array.isArray(t) || t !== undefined || t !== null) return t;
@@ -68,9 +74,9 @@ export default function Menu(): React.JSX.Element {
     setBookmarksLength(bmk.length);
   }, []);
 
-  const getPrivacyValue=()=>{
-//
-  }
+  const getPrivacyValue = () => {
+    //
+  };
 
   const editProfile = async () => {
     try {
@@ -78,33 +84,34 @@ export default function Menu(): React.JSX.Element {
       if (!token) {
         return setReturnMessage("Authentication required!");
       }
-      console.log(privateAccount)
       const data = {
         isPrivate: privateAccount,
-        token
+        token,
       };
       const res = await dispatch(updateAdmin(data));
       if (updateAdmin.fulfilled.match(res)) {
         const { payload } = res;
         if (payload.success) {
-          setPrivacyResponse(payload.data.isPrivate)
+          setPrivacyResponse(payload.data.isPrivate);
           setPrivateAccount((p) => !p);
-         return setReturnMessage(payload.message);
-        }else{
-          console.log("Error: ",payload.error)
-          return setReturnMessage(payload.error)
+          return null;
+        } else {
+          console.log("Error: ", payload.error);
+          return setReturnMessage(payload.error);
         }
-      }else{
-        return setReturnMessage('Error occured while updating!')
+      } else {
+        return setReturnMessage("Error occured while updating!");
       }
     } catch (error) {
       console.error("An error occurred:", error);
-      return setReturnMessage("An unexpected error occurred. Please try again.");
+      return setReturnMessage(
+        "An unexpected error occurred. Please try again."
+      );
     }
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
       <View
         style={{
           flexDirection: "row",
@@ -142,10 +149,7 @@ export default function Menu(): React.JSX.Element {
           >
             <Image
               source={{
-                uri:
-                  adminData?.avatar.trim() !== ""
-                    ? adminData?.avatar
-                    : profleImageSkeleton,
+                uri: adminData?.avatar ? adminData?.avatar : profleImageSkeleton,
               }}
               style={{ height: "100%" }}
             />
@@ -156,7 +160,9 @@ export default function Menu(): React.JSX.Element {
               height: "100%",
             }}
           >
-            <View>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
               <Text
                 style={{
                   fontFamily: "pop-b1",
@@ -166,6 +172,23 @@ export default function Menu(): React.JSX.Element {
               >
                 {adminData?.userName}
               </Text>
+              {!adminData?.verified ? (
+                <View>
+                  <Octicons
+                    name="unverified"
+                    size={20}
+                    color={colors.col.PressedIn3}
+                  />
+                </View>
+              ) : (
+                <View>
+                  <Octicons
+                    name="verified"
+                    size={20}
+                    color={colors.col.PressedIn3}
+                  />
+                </View>
+              )}
             </View>
             <View>
               <Text
@@ -212,7 +235,10 @@ export default function Menu(): React.JSX.Element {
             Summary
           </Text>
           <View style={{ marginTop: 10 }}>
-            <Pressable style={profileMenuStyles.profileOptions}>
+            <Pressable
+              style={profileMenuStyles.profileOptions}
+              onPress={() => router.push("/components/Profile/adminPosts")}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -264,7 +290,10 @@ export default function Menu(): React.JSX.Element {
                 />
               </View>
             </Pressable>
-            <Pressable style={profileMenuStyles.profileOptions}>
+            <Pressable
+              style={profileMenuStyles.profileOptions}
+              onPress={() => router.push("/components/Profile/setPrivacy")}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -277,14 +306,12 @@ export default function Menu(): React.JSX.Element {
                   Privacy
                 </Text>
               </View>
-              <Pressable
-                style={profileMenuStyles.customOnOffToogleBtn}
-                onPress={editProfile}
-              >
-                <Text style={profileMenuStyles.ToogleBtnText}>
-                  {privateAccount ? "ON":"OFF" }
-                </Text>
-              </Pressable>
+              <AntDesign
+                name="right"
+                size={20}
+                color="black"
+                style={profileMenuStyles.right_icon}
+              />
             </Pressable>
           </View>
         </View>
@@ -295,7 +322,7 @@ export default function Menu(): React.JSX.Element {
 
 const profileMenuStyles = StyleSheet.create({
   profileOptions: {
-    height: 60,
+    height: 70,
     borderBottomWidth: 1,
     borderBottomColor: colors.col.PressedIn,
     alignItems: "center",

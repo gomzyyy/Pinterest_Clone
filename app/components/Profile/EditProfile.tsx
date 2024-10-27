@@ -26,12 +26,11 @@ import { USER } from "../../../types";
 import { RootState, AppDispatch } from "@/Store/store";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
+import { requestMediaPermission } from "@/constants/GlobalConstants";
+import * as imagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { updateAdmin } from "../../../Store/Thunk/userThunk";
+import { getAdmin, updateAdmin } from "../../../Store/Thunk/userThunk";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-
-const profleImageSkeleton =
-  "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
 const refreshInterval = 10000;
 const { width, height } = Dimensions.get("window");
 
@@ -39,8 +38,11 @@ const UserNameCheckIcon = (): React.JSX.Element => {
   return <></>;
 };
 
+const profleImageSkeleton =
+  "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
 const EditProfile = () => {
   const { admin } = useSelector((e: RootState) => e.admin);
+  const updatedAdmin = useSelector((u: RootState) => u.updateAdmin);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const checkAdmin = (t: any) => {
@@ -53,8 +55,12 @@ const EditProfile = () => {
   }, []);
   const inputUserNameRef = useRef<TextInput>(null);
   const [a, sa] = useState<USER>();
-  const [avatarUri, setAvatarUri] = useState<string>("");
+  const [mediaPermissionGranted, setMediaPermissionGranted] =
+    useState<boolean>(false);
+  const [currentAvatar, setCurrentAvatar] = useState<string>(profleImageSkeleton);
+  const [avatarUri, setAvatarUri] = useState<string>(currentAvatar);
   const [returnMessage, setReturnMessage] = useState<string>("");
+  const [avatarEditMode, setAvatarEditMode] = useState<boolean>(false)
   const [adminBookmarks, setAdminBookmarks] = useState<string[]>([]);
   const [adminPosts, setAdminPosts] = useState<string[]>([]);
   const [verifiedOk, setVerifiedOk] = useState<boolean>(false);
@@ -68,20 +74,32 @@ const EditProfile = () => {
   const [userName, setUserName] = useState<string>();
   const [userNameEditable, setUserNameEditable] = useState<boolean>(false);
   const [postsLength, setPostsLength] = useState<number | string>();
+  const [saved, setSaved] = useState<boolean>(true)
   const [bookmarksLength, setBookmarksLength] = useState<number | string>();
-  // const [refreshOnInterval, setRefreshOnInterval] = useState<boolean>(false);
+  // const [updatedUserName, setUpdatedUserName] = useState<string>("")
+  
 
-  // const editAvatar = async () => {
-  //   try {
-  //     const token = await AsyncStorage.getItem("token");
-  //     if (!token) {
-  //       return setReturnMessage("Authentication required!");
-  //     }
-  //     const res = dispatch(updateAdmin(data, token));
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const getAvatarUri = async () => {
+    try {
+      await requestMediaPermission(setMediaPermissionGranted);
+      if (mediaPermissionGranted) {
+        const avatar = await imagePicker.launchImageLibraryAsync();
+        if (avatar.canceled) {
+          return null;
+        } else {
+          const newAvatarUri = avatar.assets[0].uri;
+          setAvatarUri(newAvatarUri);
+          setCurrentAvatar(newAvatarUri);
+          setAvatarEditMode(true);
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log("Error picking image:", error);
+    }
+  };
 
   useEffect(() => {
     if (userNameEditable) {
@@ -99,7 +117,7 @@ const EditProfile = () => {
     }
   };
 
-  const handleShowDate = () => setShowDate(true);
+  // const handleShowDate = () => setShowDate(true);
   const handlePostsCount = (): number | string => {
     if (!a?.posts || a?.posts.length === 0) return 0;
     if (a?.posts.length > 99) return 99 + "+";
@@ -117,10 +135,67 @@ const EditProfile = () => {
     setPostsLength(postCount);
     setBookmarksLength(bookmarkCount);
   }, []);
-  // useEffect(()=>{
-  //   setInterval(()=>setRefreshOnInterval(r=>!r),refreshInterval)
-  // },[refreshOnInterval])
-  // console.log("refreshed!")
+
+  const editProfile = async () => {
+    try {
+      setSaved(false)
+      setAvatarUri(currentAvatar);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        return setReturnMessage("Authentication required!");
+      }
+      console.log("clicked");
+      console.log(avatarUri);
+      const data = {
+        avatar: avatarUri,
+        userName,
+        DateOfBirth: dob,
+        token,
+      };
+      const res = await dispatch(updateAdmin(data));
+      if (updateAdmin.fulfilled.match(res)) {
+        const { payload } = res;
+        console.log(payload);
+        if (payload.success) {
+          setSaved(true)
+          await dispatch(getAdmin(token));
+          // setAvatarEditMode(false)
+          // if (
+          //   updatedAdmin.updatedData.avatar !== null &&
+          //   updatedAdmin.updatedData.avatar !== ""
+          // ) {
+          //   setCurrentAvatar(updatedAdmin.updatedData.avatar);
+          // }
+          return null;
+        } else {
+          setSaved(true)
+          console.log("Error: ", payload.error);
+          return setReturnMessage(payload.error);
+        }
+      } else {
+        setSaved(true)
+        return setReturnMessage("Error occured while updating!");
+      }
+    } catch (error) {
+      setSaved(true)
+      console.error("An error occurred:", error);
+      return setReturnMessage(
+        "An unexpected error occurred. Please try again."
+      );
+    }
+  };
+
+  // useEffect(() => {
+  //   const refreshAdmin = async () => {
+  //     const token = await AsyncStorage.getItem("token");
+  //     if (!token) {
+  //       return null;
+  //     }
+  //     await dispatch(getAdmin(token));
+  //   };
+  //   refreshAdmin()
+  // }, []);
+  console.log(a?.avatar, currentAvatar)
 
   return (
     <KeyboardAvoidingView
@@ -128,7 +203,7 @@ const EditProfile = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView style={{ flex: 1, opacity:updatedAdmin.loading?0.6:1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <View
           style={{
             flexDirection: "row",
@@ -141,9 +216,9 @@ const EditProfile = () => {
           }}
         >
           <Pressable
-           style={{ position: "absolute", left: 25, bottom: "26%" }}
-           onPress={()=>router.back()}
-           >
+            style={{ position: "absolute", left: 25, bottom: "26%" }}
+            onPress={() => router.back()}
+          >
             <Ionicons
               name="arrow-back-outline"
               size={28}
@@ -153,8 +228,13 @@ const EditProfile = () => {
           <Text style={{ fontSize: 24, color: colors.col.white }}>
             Account center
           </Text>
-          <View style={{ position: "absolute", right: 25, bottom: 17 }}>
+          <View style={{ position: "absolute", right: 25, bottom: 20 }}>
             {/* <Ionicons name="exit-outline" size={26} color={colors.col.white} /> */}
+            <Pressable onPress={editProfile}>
+              <Text style={{ fontSize: 24, color: colors.col.white, opacity:saved?1:0.5 }}>
+                Save
+              </Text>
+            </Pressable>
           </View>
         </View>
         <ScrollView style={{ flex: 1 }}>
@@ -168,7 +248,7 @@ const EditProfile = () => {
           >
             <Pressable
               style={{ height: 100, width: 100, marginTop: 15 }}
-              // onPress={editAvatar}
+              onPress={getAvatarUri}
             >
               <View
                 style={{
@@ -182,8 +262,7 @@ const EditProfile = () => {
               >
                 <Image
                   source={{
-                    uri:
-                      a?.avatar.trim() !== "" ? a?.avatar : profleImageSkeleton,
+                    uri: avatarEditMode?currentAvatar : a?.avatar,
                   }}
                   style={{ height: "100%" }}
                 />
