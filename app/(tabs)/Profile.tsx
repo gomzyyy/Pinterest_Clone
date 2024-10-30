@@ -110,6 +110,8 @@ export default function Menu(): React.JSX.Element {
     }
   };
 
+  console.log(admin.admin)
+
   return (
     <View style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
       <View
@@ -125,9 +127,6 @@ export default function Menu(): React.JSX.Element {
       >
         <FontAwesome name="user-circle-o" size={24} color={colors.col.white} />
         <Text style={{ fontSize: 24, color: colors.col.white }}>Profile</Text>
-        {/* <View style={{ position: "absolute", right: 25, bottom: 17 }}>
-          <Ionicons name="exit-outline" size={26} color={colors.col.white} />
-        </View> */}
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <View

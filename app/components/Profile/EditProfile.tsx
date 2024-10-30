@@ -57,10 +57,12 @@ const EditProfile = () => {
   const [a, sa] = useState<USER>();
   const [mediaPermissionGranted, setMediaPermissionGranted] =
     useState<boolean>(false);
-  const [currentAvatar, setCurrentAvatar] = useState<string>(profleImageSkeleton);
+  const [currentAvatar, setCurrentAvatar] =
+    useState<string>(profleImageSkeleton);
+    const [inputHeight,setInputHeight] = useState<number>(80)
   const [avatarUri, setAvatarUri] = useState<string>(currentAvatar);
   const [returnMessage, setReturnMessage] = useState<string>("");
-  const [avatarEditMode, setAvatarEditMode] = useState<boolean>(false)
+  const [avatarEditMode, setAvatarEditMode] = useState<boolean>(false);
   const [adminBookmarks, setAdminBookmarks] = useState<string[]>([]);
   const [adminPosts, setAdminPosts] = useState<string[]>([]);
   const [verifiedOk, setVerifiedOk] = useState<boolean>(false);
@@ -74,10 +76,9 @@ const EditProfile = () => {
   const [userName, setUserName] = useState<string>();
   const [userNameEditable, setUserNameEditable] = useState<boolean>(false);
   const [postsLength, setPostsLength] = useState<number | string>();
-  const [saved, setSaved] = useState<boolean>(true)
+  const [saved, setSaved] = useState<boolean>(true);
   const [bookmarksLength, setBookmarksLength] = useState<number | string>();
   // const [updatedUserName, setUpdatedUserName] = useState<string>("")
-  
 
   const getAvatarUri = async () => {
     try {
@@ -138,7 +139,7 @@ const EditProfile = () => {
 
   const editProfile = async () => {
     try {
-      setSaved(false)
+      setSaved(false);
       setAvatarUri(currentAvatar);
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -157,45 +158,27 @@ const EditProfile = () => {
         const { payload } = res;
         console.log(payload);
         if (payload.success) {
-          setSaved(true)
+          setSaved(true);
           await dispatch(getAdmin(token));
-          // setAvatarEditMode(false)
-          // if (
-          //   updatedAdmin.updatedData.avatar !== null &&
-          //   updatedAdmin.updatedData.avatar !== ""
-          // ) {
-          //   setCurrentAvatar(updatedAdmin.updatedData.avatar);
-          // }
           return null;
         } else {
-          setSaved(true)
+          setSaved(true);
           console.log("Error: ", payload.error);
           return setReturnMessage(payload.error);
         }
       } else {
-        setSaved(true)
+        setSaved(true);
         return setReturnMessage("Error occured while updating!");
       }
     } catch (error) {
-      setSaved(true)
+      setSaved(true);
       console.error("An error occurred:", error);
       return setReturnMessage(
         "An unexpected error occurred. Please try again."
       );
     }
   };
-
-  // useEffect(() => {
-  //   const refreshAdmin = async () => {
-  //     const token = await AsyncStorage.getItem("token");
-  //     if (!token) {
-  //       return null;
-  //     }
-  //     await dispatch(getAdmin(token));
-  //   };
-  //   refreshAdmin()
-  // }, []);
-  console.log(a?.avatar, currentAvatar)
+  console.log(a?.avatar, currentAvatar);
 
   return (
     <KeyboardAvoidingView
@@ -203,7 +186,10 @@ const EditProfile = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
-      <ScrollView style={{ flex: 1, opacity:updatedAdmin.loading?0.6:1 }} contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView
+        style={{ flex: 1, opacity: updatedAdmin.loading ? 0.6 : 1 }}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         <View
           style={{
             flexDirection: "row",
@@ -231,7 +217,13 @@ const EditProfile = () => {
           <View style={{ position: "absolute", right: 25, bottom: 20 }}>
             {/* <Ionicons name="exit-outline" size={26} color={colors.col.white} /> */}
             <Pressable onPress={editProfile}>
-              <Text style={{ fontSize: 24, color: colors.col.white, opacity:saved?1:0.5 }}>
+              <Text
+                style={{
+                  fontSize: 24,
+                  color: colors.col.white,
+                  opacity: saved ? 1 : 0.5,
+                }}
+              >
                 Save
               </Text>
             </Pressable>
@@ -262,7 +254,7 @@ const EditProfile = () => {
               >
                 <Image
                   source={{
-                    uri: avatarEditMode?currentAvatar : a?.avatar,
+                    uri: avatarEditMode ? currentAvatar : a?.avatar,
                   }}
                   style={{ height: "100%" }}
                 />
@@ -364,6 +356,34 @@ const EditProfile = () => {
             >
               <Fontisto name="date" size={20} color={colors.col.PressedIn3} />
             </Pressable>
+          </View>
+          <View
+            style={{
+              marginTop: 10,
+              height:200,
+              borderBottomColor:colors.col.PressedIn2,
+              borderBottomWidth:1
+            }}
+          >
+            <TextInput
+              placeholder="Describe yourself here!"
+              style={{
+                padding: 16,
+                fontSize: 14,
+                color: colors.col.PressedIn4,
+                fontFamily: "pop-mid",
+                textAlign:'left',
+                height:inputHeight,
+                width:'100%'
+              }}
+              placeholderTextColor={colors.col.PressedIn}
+              maxLength={300}
+              keyboardType="default"
+              multiline={true}
+              onContentSizeChange={(event) => setInputHeight(event.nativeEvent.contentSize.height)}
+              value={bio}
+              onChangeText={setBio}
+            />
           </View>
         </ScrollView>
       </ScrollView>
