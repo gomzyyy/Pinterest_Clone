@@ -23,18 +23,18 @@ const { width } = Dimensions.get("window");
 export default function GetStartedPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { admin } = useSelector((e: RootState) => e.admin);
+  const adminData = useSelector((e: RootState) => e.admin);
   // console.log(admin)
-
+const admin = adminData.admin;
+const loading = adminData.loading;
   const [pressed, setPressed] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [returnMessage, setReturnMessage] = useState<string>("");
 
   const pressedIn = () => setPressed(true);
   const pressedOut = () => setPressed(false);
 
   const redirectToLoginPageIfNeeded = async () => {
-    setReturnMessage("Authentication required!3");
+    setReturnMessage("Authentication required!");
     const userRes = await redirectToLoginPage();
     if (userRes) {
       router.push("/components/AuthPage/SignIn/SignIn");
@@ -44,44 +44,25 @@ export default function GetStartedPage() {
     }
   };
 
-  const refreshAdminData = async () => {
-    try {
-      const token: string | null = await AsyncStorage.getItem("token");
-      if (!token) {
-        return setReturnMessage("can't update data!");
-      }
-      await dispatch(getAdmin(token));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  // setInterval(() => {
-  //   refreshAdminData();
-  //   console.log("called");
-  // }, 2000);
-
   const handleNextPage = async () => {
     try {
       const token: string | null = await AsyncStorage.getItem("token");
       if (!token) {
         return await redirectToLoginPageIfNeeded();
       }
-      console.log(token);
       const res = await dispatch(getAdmin(token));
       if (getAdmin.fulfilled.match(res)) {
         const { payload } = res;
         if (payload.success) {
-          console.log(payload.success);
           router.push("/(tabs)/Discover");
           return null;
         } else {
-          console.log(payload.message);
           redirectToLoginPageIfNeeded();
-          setReturnMessage("Authentication required!2");
+          setReturnMessage("Authentication required!");
           return null;
         }
       } else {
-        setReturnMessage("Authentication required!1");
+        setReturnMessage("Authentication required!");
         const userRes = await redirectToLoginPage();
         if (userRes) {
           router.push("/components/AuthPage/SignIn/SignIn");

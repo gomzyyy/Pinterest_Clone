@@ -18,12 +18,12 @@ import {
   InitialStateAdmin,
   USER,
   InitialStateUpdatedAdmin,
+  AdminUpdateData,
 } from "../../../types";
 import { useSelector, useDispatch } from "react-redux";
-import { updateAdmin } from "@/Store/Thunk/userThunk";
+import { getAdmin, updateAdmin } from "@/Store/Thunk/userThunk";
 import { RootState, AppDispatch } from "@/Store/store";
-import { getAdmin } from "@/Store/Thunk/userThunk";
-  import { useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 //   import { requestMediaPermission } from "@/constants/GlobalConstants";
 
@@ -35,24 +35,23 @@ export default function Menu(): React.JSX.Element {
   // const [adminData, setAdminData] = useState<USER>();
   // const [postsData, setPostsData] = useState<USER>();
   // const [avatarUri, setAvatarUri] = useState<string>("");
-  const [privacyResponse, setPrivacyResponse] = useState<boolean>(false);
-  const [privateAccount, setPrivateAccount] =
-    useState<boolean>(privacyResponse);
+  const [disabilityResponse, setDisabilityResponse] = useState<boolean>(false);
+  const [disabled, setDisable] = useState<boolean>(disabilityResponse);
   // const [refreshOnUpdate, setRefreshOnUpdate] = useState<boolean>(false);
   // const [postsLength, setPostsLength] = useState<number | string>();
   // const [bookmarksLength, setBookmarksLength] = useState<number | string>();
-  // const admin: InitialStateAdmin = useSelector((s: RootState) => s.admin);
   const updatedAdmin: InitialStateUpdatedAdmin = useSelector(
     (s: RootState) => s.updateAdmin
   );
-
+  const admin: InitialStateAdmin = useSelector((e: RootState) => e.admin);
+  const adminLoading = admin.loading;
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
   // const a: USER | [] = admin.admin;
   // const p: string[] | [] = admin.posts;
   // const b: string[] | [] = admin.bookmarks;
-  const loading: boolean = updatedAdmin.loading;
+  const isUpdating: boolean = updatedAdmin.loading;
 
   // const checkIfArray = (t: any) => {
   //   if (!Array.isArray(t) || t !== undefined || t !== null) return t;
@@ -82,36 +81,6 @@ export default function Menu(): React.JSX.Element {
   const getPrivacyValue = () => {
     //
   };
-
-  const editProfile = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        return setReturnMessage("Authentication required!");
-      }
-      const data = {
-        isPrivate: privateAccount,
-        token,
-      };
-      const res = await dispatch(updateAdmin(data));
-      if (updateAdmin.fulfilled.match(res)) {
-        const { payload } = res;
-        if (payload.success) {
-          setPrivacyResponse(payload.data.isPrivate);
-          setPrivateAccount((p) => !p);
-          return null;
-        } else {
-          return setReturnMessage(payload.error);
-        }
-      } else {
-        return setReturnMessage("Error occured while updating!");
-      }
-    } catch (error) {
-      return setReturnMessage(
-        "An unexpected error occurred. Please try again."
-      );
-    }
-  };
   useEffect(() => {
     const reload = async () => {
       try {
@@ -138,10 +107,45 @@ export default function Menu(): React.JSX.Element {
       }
     };
     reload();
-  }, [privacyResponse]);
+  }, [disabilityResponse]);
+
+  const editProfile = async () => {
+    try {
+      // console.log('1')
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        return setReturnMessage("Authentication required!");
+      }
+      //   console.log('2')
+      const data: AdminUpdateData = {
+        isDisabled: disabled,
+        token,
+      };
+      //   console.log('3')
+      const res = await dispatch(updateAdmin(data));
+      if (updateAdmin.fulfilled.match(res)) {
+        const { payload } = res;
+        if (payload.success) {
+          setDisabilityResponse(payload.data.isDisabled);
+          setDisable((p) => !p);
+          return null;
+        } else {
+          console.log("Error: ", payload.error);
+          return setReturnMessage(payload.error);
+        }
+      } else {
+        return setReturnMessage("Error occured while updating!");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      return setReturnMessage(
+        "An unexpected error occurred. Please try again."
+      );
+    }
+  };
 
   return (
-    <View style={{ flex: 1}}>
+    <View style={{ flex: 1, opacity: isUpdating ? 0.8 : 1 }}>
       <View
         style={{
           flexDirection: "row",
@@ -154,33 +158,33 @@ export default function Menu(): React.JSX.Element {
         }}
       >
         <Pressable
-            style={{ position: "absolute", left: 25, bottom: "26%" }}
-            onPress={() => router.back()}
-            disabled={loading}
-          >
-            <Ionicons
-              name="arrow-back-outline"
-              size={28}
-              color={colors.col.white}
-            />
-          </Pressable>
+          style={{ position: "absolute", left: 25, bottom: "26%" }}
+          onPress={() => router.back()}
+          disabled={isUpdating}
+        >
+          <Ionicons
+            name="arrow-back-outline"
+            size={28}
+            color={colors.col.white}
+          />
+        </Pressable>
         <Text style={{ fontSize: 24, color: colors.col.white }}>Settings</Text>
         {/* <View style={{ position: "absolute", right: 25, bottom: 17 }}>
-            <Ionicons name="exit-outline" size={26} color={colors.col.white} />
-          </View> */}
+              <Ionicons name="exit-outline" size={26} color={colors.col.white} />
+            </View> */}
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={{ marginTop: 30 }}>
           <Text
             style={{ paddingHorizontal: 10, fontFamily: "pop-b", fontSize: 20 }}
           >
-            {!privateAccount ? "You're Private  😶‍🌫️" : "You're Public  😀"}
+            {!disabled ? "Acccount is disabled!" : "Account is enabled!"}
           </Text>
           <View style={{ marginTop: 30 }}>
             <Pressable
               style={profilePrivacyEditStyles.OpacityBtnBroad}
               onPress={editProfile}
-              disabled={loading}
+              disabled={isUpdating}
             >
               <View
                 style={{
@@ -188,15 +192,25 @@ export default function Menu(): React.JSX.Element {
                   justifyContent: "center",
                   gap: 10,
                   alignItems: "center",
-                  backgroundColor:loading?colors.col.PressedIn2:colors.col.PressedIn3,
-                  height:'100%',
-                  width:'90%',
-                  borderRadius:10
+                  backgroundColor: isUpdating
+                    ? colors.col.PressedIn2
+                    : colors.col.PressedIn3,
+                  height: "100%",
+                  width: "90%",
+                  borderRadius: 10,
                 }}
               >
-                <Text style={profilePrivacyEditStyles.profileOptionsTextDark}>
-                  {loading?"Changing":"Change"}
-                </Text>
+                {isUpdating && (
+                  <Text style={profilePrivacyEditStyles.profileOptionsTextDark}>
+                    updating...
+                  </Text>
+                )}
+
+                {!isUpdating && (
+                  <Text style={profilePrivacyEditStyles.profileOptionsTextDark}>
+                    {disabled ? "disabled" : "enable"}
+                  </Text>
+                )}
               </View>
             </Pressable>
           </View>
@@ -208,8 +222,8 @@ export default function Menu(): React.JSX.Element {
 
 const profilePrivacyEditStyles = StyleSheet.create({
   OpacityBtnBroad: {
-    height:50,
-    alignItems:'center'
+    height: 50,
+    alignItems: "center",
   },
   profileOptions: {
     height: 70,

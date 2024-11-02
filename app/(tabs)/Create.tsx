@@ -9,7 +9,7 @@ import {
   ToastAndroid,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { colors } from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -59,7 +59,6 @@ export default function Create(): React.JSX.Element {
         .filter((t) => t);
       const token = await AsyncStorage.getItem("token");
       const formData = new FormData();
-      console.log(tags);
       formData.append("post", {
         uri: imageUri,
         type: "image/jpeg",
@@ -67,7 +66,6 @@ export default function Create(): React.JSX.Element {
       } as any);
       formData.append("title", title);
       formData.append("tags", tagsArray.join(","));
-      console.log(formData);
       const createPostAPI = await fetch(
         `http://192.168.1.64:6600/api/user/upload`,
         {
@@ -102,17 +100,6 @@ export default function Create(): React.JSX.Element {
     }
   };
 
-  const handleLogOut = async () => {
-    const userRes = await logout();
-    setReturnMessage(messages.user.returnMessage);
-    if (userRes) {
-      loginFalse();
-      router.replace("/components/AuthPage/SignIn/SignIn");
-    } else {
-      setReturnMessage("Error occurred while logging out!");
-    }
-  };
-
   const getImageUri = async () => {
     try {
       await requestMediaPermission(setMediaPermissionGranted);
@@ -124,8 +111,8 @@ export default function Create(): React.JSX.Element {
           let imagePath = image.assets[0].uri;
           setImageUri(imagePath);
         }
-      }else{
-        return null
+      } else {
+        return null;
       }
     } catch (error) {
       console.log(error);
@@ -134,108 +121,110 @@ export default function Create(): React.JSX.Element {
 
   return (
     <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-  >
-    <ScrollView
-    contentContainerStyle={{flexGrow:1}}
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 4,
-          paddingTop: 35,
-          backgroundColor: colors.col.PressedIn,
-          height: 100,
-        }}
-      >
-        <Ionicons
-          name="add-circle-outline"
-          size={24}
-          color={colors.col.white}
-        />
-        <Text style={{ fontSize: 24, color: colors.col.white }}>Create</Text>
-        <Pressable
-          onPress={handleLogOut}
-          style={{ position: "absolute", right: 25, bottom: 17 }}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+            paddingTop: 35,
+            backgroundColor: colors.col.PressedIn,
+            height: 100,
+          }}
         >
-          <Ionicons name="exit-outline" size={26} color="white" />
-        </Pressable>
-      </View>
-      <View style={{ padding: 20 }}>
-        <Text style={styles.instructionText}>
-          Choose Image from local file.
-        </Text>
-
-        {imageUri.trim() === "" && (
-          <Pressable style={styles.imagePicker} onPress={getImageUri}>
-            <MaterialIcons name="file-upload" size={36} color="black" />
-            <Text style={{ alignSelf: "center", fontSize: 16 }}>
-              Click to choose image
-            </Text>
-          </Pressable>
-        )}
-        <View style={{ alignItems: "center", marginTop: 10 }}>
-          {imageUri.trim() !== "" ? (
-            <Image
-              source={{ uri: imageUri }}
-              style={{ height: 250, width: 320, borderRadius: 10, opacity:loading?0.4:1 }}
-            />
-          ) : (
-            <Text style={styles.noImageText}>No Image selected yet!</Text>
-          )}
+          <Ionicons
+            name="add-circle-outline"
+            size={24}
+            color={colors.col.white}
+          />
+          <Text style={{ fontSize: 24, color: colors.col.white }}>Create</Text>
         </View>
+        <View style={{ padding: 20 }}>
+          <Text style={styles.instructionText}>
+            Choose Image from local file.
+          </Text>
 
-        {imageUri.trim() !== "" && (
-          <View>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter title"
-              value={title}
-              onChangeText={setTitle}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Tags (don't add spaces b/w tags i.e #image#photo)"
-              value={tags}
-              onChangeText={setTags}
-            />
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              <Pressable
-                style={[styles.uploadButton, { flexDirection: "row" }]}
-                onPress={createPost}
-              >
-                {!loading&&<AntDesign
-                  name="cloudupload"
-                  size={20}
-                  color={colors.col.Black}
-                />}
-                <Text>{loading?'Uploading...':'Upload'}</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.clearButton, { flexDirection: "row" }]}
-                onPress={() => setImageUri("")}
-              >
-                <MaterialCommunityIcons
-                  name="delete"
-                  size={20}
-                  color={colors.col.white}
-                />
-                <Text style={{color:colors.col.white}}>Delete</Text>
-              </Pressable>
-            </View>
+          {imageUri.trim() === "" && (
+            <Pressable style={styles.imagePicker} onPress={getImageUri}>
+              <MaterialIcons name="file-upload" size={36} color="black" />
+              <Text style={{ alignSelf: "center", fontSize: 16 }}>
+                Click to choose image
+              </Text>
+            </Pressable>
+          )}
+          <View style={{ alignItems: "center", marginTop: 10 }}>
+            {imageUri.trim() !== "" ? (
+              <Image
+                source={{ uri: imageUri }}
+                style={{
+                  height: 250,
+                  width: 320,
+                  borderRadius: 10,
+                  opacity: loading ? 0.4 : 1,
+                }}
+              />
+            ) : (
+              <Text style={styles.noImageText}>No Image selected yet!</Text>
+            )}
           </View>
-        )}
 
-        {returnMessage ? (
-          <Text style={styles.errorMessage}>{returnMessage}</Text>
-        ) : null}
-      </View>
+          {imageUri.trim() !== "" && (
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter title"
+                value={title}
+                onChangeText={setTitle}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Tags (don't add spaces b/w tags i.e #image#photo)"
+                value={tags}
+                onChangeText={setTags}
+              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Pressable
+                  style={[styles.uploadButton, { flexDirection: "row" }]}
+                  onPress={createPost}
+                >
+                  {!loading && (
+                    <AntDesign
+                      name="cloudupload"
+                      size={20}
+                      color={colors.col.Black}
+                    />
+                  )}
+                  <Text>{loading ? "Uploading..." : "Upload"}</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.clearButton, { flexDirection: "row" }]}
+                  onPress={() => setImageUri("")}
+                >
+                  <MaterialCommunityIcons
+                    name="delete"
+                    size={20}
+                    color={colors.col.white}
+                  />
+                  <Text style={{ color: colors.col.white }}>Delete</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {returnMessage ? (
+            <Text style={styles.errorMessage}>{returnMessage}</Text>
+          ) : null}
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -271,7 +260,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 40,
     width: "49%",
-    backgroundColor:colors.col.dangerRed,
+    backgroundColor: colors.col.dangerRed,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",

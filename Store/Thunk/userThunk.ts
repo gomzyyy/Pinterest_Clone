@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { AdminUpdateData } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const convertToJson = (t: any) => {
   let f = JSON.stringify(t);
@@ -29,7 +30,15 @@ export const getAdmin = createAsyncThunk(
 );
 export const loginUser = createAsyncThunk("user/login", async () => {});
 export const signupUser = createAsyncThunk("user/signup", async () => {});
-export const logoutInfo = createAsyncThunk("user/logout", async () => {});
+export const logoutInfo = createAsyncThunk("user/logout",
+   async (token:string, {rejectWithValue}) => {
+try {
+  if(!token)throw new Error('Token not found!')
+    await AsyncStorage.removeItem('token')
+} catch (error) {
+  console.log(error)
+}
+   });
 export const deleteInfo = createAsyncThunk("user/delete", async () => {});
 export const updateAdmin = createAsyncThunk(
   "user/update",
@@ -51,9 +60,10 @@ export const updateAdmin = createAsyncThunk(
         formData.append("isPrivate", updatedData.isPrivate.toString());
       if (updatedData.gender) formData.append("gender", updatedData.gender);
       if (updatedData.dateOfBirth) 
-        formData.append("dateOfBirth", updatedData.dateOfBirth.toISOString()); // Use toISOString for proper date format
+        formData.append("dateOfBirth", updatedData.dateOfBirth.toISOString());
       if (updatedData.bio) formData.append("bio", updatedData.bio);
-
+      if(updatedData.isDisabled !== undefined) formData.append("isDisabled", JSON.stringify(updatedData.isDisabled))
+console.log(updatedData.dateOfBirth)
       const updateAdminResponse = await fetch(
         `http://192.168.1.64:6600/api/user/profile/update`,
         {

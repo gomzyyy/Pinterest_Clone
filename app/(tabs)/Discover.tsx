@@ -36,34 +36,6 @@ export default function Discover() {
   const [error, setError] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<boolean>(false);
 
-  const handleLogOut = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        setReturnMessage("unauthorised action!");
-        return null;
-      }
-      const signoutAPI = await fetch(baseUrlUser + "logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!signoutAPI) {
-        throw new Error("Server error!");
-      }
-      const res = await signoutAPI.json();
-
-      if (res.success) {
-        await AsyncStorage.removeItem("token");
-        router.replace("/components/GetStarted/GetStarted");
-      }
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
-  };
-
   useEffect(() => {
     const getPosts = async () => {
       try {
@@ -192,12 +164,6 @@ export default function Discover() {
       >
         <AntDesign name="find" size={28} color={colors.col.white} />
         <Text style={{ fontSize: 24, color: colors.col.white }}>Discover</Text>
-        <Pressable
-          onPress={handleLogOut}
-          style={{ position: "absolute", right: 25, bottom: 17 }}
-        >
-          <Ionicons name="exit-outline" size={26} color={colors.col.white} />
-        </Pressable>
       </View>
       {error ? <ErrorPage /> : <DiscoverPage />}
     </View>

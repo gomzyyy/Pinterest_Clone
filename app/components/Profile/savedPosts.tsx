@@ -153,7 +153,7 @@ import AdminPost from "./components/adminPost";
           />
         </Pressable>
           {/* <AntDesign name="find" size={28} color={colors.col.white} /> */}
-          <Text style={{ fontSize: 24, color: colors.col.white }}>Your Posts</Text>
+          <Text style={{ fontSize: 24, color: colors.col.white }}>Saved Posts</Text>
         </View>
         {error ? <ErrorPage /> : <AdminPostPage />}
       </View>

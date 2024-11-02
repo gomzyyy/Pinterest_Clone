@@ -72,8 +72,8 @@ const EditProfile = () => {
   const [following, setFollowing] = useState<string[]>([]);
   const [dob, setDob] = useState<Date>(new Date());
   const [showDate, setShowDate] = useState<boolean>(false);
-  const [bio, setBio] = useState<string>("");
-  const [userName, setUserName] = useState<string>();
+  const [bio, setBio] = useState<string>('');
+  const [userName, setUserName] = useState<string>("");
   const [userNameEditable, setUserNameEditable] = useState<boolean>(false);
   const [postsLength, setPostsLength] = useState<number | string>();
   const [saved, setSaved] = useState<boolean>(true);
@@ -148,9 +148,10 @@ const EditProfile = () => {
       console.log("clicked");
       console.log(avatarUri);
       const data = {
-        avatar: avatarUri,
-        userName,
-        DateOfBirth: dob,
+        avatar: avatarUri.trim()!==""?avatarUri: undefined,
+        userName:userName.trim()!==""?userName: undefined,
+        DateOfBirth: dob.toISOString,
+        bio:bio.trim()!==""?bio:undefined,
         token,
       };
       const res = await dispatch(updateAdmin(data));
@@ -366,14 +367,14 @@ const EditProfile = () => {
             }}
           >
             <TextInput
-              placeholder="Describe yourself here!"
+              placeholder={a?.bio.trim()!==""?undefined:"Describe yourself here!"}
               style={{
                 padding: 16,
                 fontSize: 14,
                 color: colors.col.PressedIn4,
                 fontFamily: "pop-mid",
                 textAlign:'left',
-                height:inputHeight,
+                height:'100%',
                 width:'100%'
               }}
               placeholderTextColor={colors.col.PressedIn}

@@ -6,10 +6,11 @@ import {
   Pressable,
   ToastAndroid,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { colors } from "@/constants/Colors";
@@ -78,39 +79,21 @@ export default function Menu(): React.JSX.Element {
     //
   };
 
-  const editProfile = async () => {
+  const handleLogOut = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        return setReturnMessage("Authentication required!");
-      }
-      const data = {
-        isPrivate: privateAccount,
-        token,
-      };
-      const res = await dispatch(updateAdmin(data));
-      if (updateAdmin.fulfilled.match(res)) {
-        const { payload } = res;
-        if (payload.success) {
-          setPrivacyResponse(payload.data.isPrivate);
-          setPrivateAccount((p) => !p);
-          return null;
-        } else {
-          console.log("Error: ", payload.error);
-          return setReturnMessage(payload.error);
-        }
+        router.replace("/components/GetStarted/GetStarted");
+        return null;
       } else {
-        return setReturnMessage("Error occured while updating!");
+        await AsyncStorage.removeItem("token");
+        router.replace("/components/GetStarted/GetStarted");
+        return null;
       }
     } catch (error) {
-      console.error("An error occurred:", error);
-      return setReturnMessage(
-        "An unexpected error occurred. Please try again."
-      );
+      console.log(error);
     }
   };
-
-  console.log(admin.admin)
 
   return (
     <View style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
@@ -148,7 +131,9 @@ export default function Menu(): React.JSX.Element {
           >
             <Image
               source={{
-                uri: adminData?.avatar ? adminData?.avatar : profleImageSkeleton,
+                uri: adminData?.avatar
+                  ? adminData?.avatar
+                  : profleImageSkeleton,
               }}
               style={{ height: "100%" }}
             />
@@ -171,15 +156,7 @@ export default function Menu(): React.JSX.Element {
               >
                 {adminData?.userName}
               </Text>
-              {!adminData?.verified ? (
-                <View>
-                  <Octicons
-                    name="unverified"
-                    size={20}
-                    color={colors.col.PressedIn3}
-                  />
-                </View>
-              ) : (
+              {adminData?.verified && (
                 <View>
                   <Octicons
                     name="verified"
@@ -251,7 +228,7 @@ export default function Menu(): React.JSX.Element {
                 </Text>
                 <View style={profileMenuStyles.lengthIcon}>
                   <Text style={{ color: colors.col.white, fontSize: 14 }}>
-                    {postsLength}
+                    {postsLength?postsLength:0}
                   </Text>
                 </View>
               </View>
@@ -263,7 +240,11 @@ export default function Menu(): React.JSX.Element {
                 />
               </View>
             </Pressable>
-            <Pressable style={profileMenuStyles.profileOptions}>
+
+            <Pressable 
+            style={profileMenuStyles.profileOptions}
+            onPress={()=>router.push('/components/Profile/savedPosts')}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -273,11 +254,11 @@ export default function Menu(): React.JSX.Element {
                 }}
               >
                 <Text style={profileMenuStyles.profileOptionsTextDark}>
-                  Saved posts
+                  Saved
                 </Text>
                 <View style={profileMenuStyles.lengthIcon}>
                   <Text style={{ color: colors.col.white, fontSize: 14 }}>
-                    {bookmarksLength}
+                    {bookmarksLength?bookmarksLength:0}
                   </Text>
                 </View>
               </View>
@@ -290,8 +271,72 @@ export default function Menu(): React.JSX.Element {
               </View>
             </Pressable>
             <Pressable
+             style={profileMenuStyles.profileOptions}
+             onPress={()=>router.push('/components/Profile/archivedPosts')}
+             >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={profileMenuStyles.profileOptionsTextDark}>
+                  Archived
+                </Text>
+                <View style={profileMenuStyles.lengthIcon}>
+                  <Text style={{ color: colors.col.white, fontSize: 14 }}>
+                    {bookmarksLength?bookmarksLength:0}
+                  </Text>
+                </View>
+              </View>
+              <View>
+                <AntDesign
+                  name="right"
+                  size={20}
+                  color={colors.col.PressedIn4}
+                />
+              </View>
+            </Pressable>
+            <View style={{ marginTop: 30 }}>
+              <Text
+                style={{
+                  paddingHorizontal: 10,
+                  fontFamily: "pop-b",
+                  fontSize: 20,
+                }}
+              >
+                Settings
+              </Text>
+              <Pressable
+                style={profileMenuStyles.profileOptions}
+                onPress={() => router.push("/components/Profile/setPrivacy")}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    gap: 10,
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={profileMenuStyles.profileOptionsTextDark}>
+                    Privacy
+                  </Text>
+                </View>
+                <AntDesign
+                  name="right"
+                  size={20}
+                  color={colors.col.PressedIn4}
+                  style={profileMenuStyles.right_icon}
+                />
+              </Pressable>
+            </View>
+
+            <Pressable
               style={profileMenuStyles.profileOptions}
-              onPress={() => router.push("/components/Profile/setPrivacy")}
+              onPress={() => router.push("/components/Profile/setDisable")}
             >
               <View
                 style={{
@@ -302,16 +347,45 @@ export default function Menu(): React.JSX.Element {
                 }}
               >
                 <Text style={profileMenuStyles.profileOptionsTextDark}>
-                  Privacy
+                  Disable account
                 </Text>
               </View>
               <AntDesign
                 name="right"
                 size={20}
-                color="black"
+                color={colors.col.PressedIn4}
                 style={profileMenuStyles.right_icon}
               />
             </Pressable>
+            <View style={{ marginTop: 30 }}>
+              <TouchableOpacity
+                style={profileMenuStyles.profileOptionsLogout}
+                activeOpacity={0.8}
+                onPress={handleLogOut}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    gap: 10,
+                    alignItems: "center",
+                    borderRadius: 10,
+                    paddingHorizontal: 14,
+                    paddingVertical: 7,
+                  }}
+                >
+                  <Text style={profileMenuStyles.profileOptionsTextDarkLogout}>
+                    Logout
+                  </Text>
+                </View>
+                <Feather
+                  name="log-out"
+                  size={22}
+                  color={colors.col.white}
+                  style={profileMenuStyles.right_icon}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -330,6 +404,16 @@ const profileMenuStyles = StyleSheet.create({
     justifyContent: "space-between",
     // backgroundColor: "red",
   },
+  profileOptionsLogout: {
+    height: 60,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: colors.col.tabActivePink,
+    margin: 10,
+    borderRadius: 16,
+  },
   profileOptionsText: {
     fontFamily: "pop-mid",
     fontSize: 14,
@@ -344,13 +428,18 @@ const profileMenuStyles = StyleSheet.create({
     marginTop: 5,
     color: colors.col.PressedIn4,
   },
+  profileOptionsTextDarkLogout: {
+    fontFamily: "pop-b",
+    fontSize: 16,
+    marginTop: 5,
+    color: colors.col.white,
+  },
   lengthIcon: {
-    maxHeight: 20,
-    minWidth: 20,
-    height: "auto",
+    minWidth: 18,
+    height: 24,
     width: "auto",
-    padding: 4,
     borderRadius: 8,
+    paddingHorizontal:4,
     backgroundColor: colors.col.PressedIn,
     alignItems: "center",
     justifyContent: "center",

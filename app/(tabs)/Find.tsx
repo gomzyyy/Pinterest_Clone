@@ -25,17 +25,6 @@ export default function Find() {
   const [searchText, setSearchText] = useState<string>("");
   const [searchResult, setSearchResult] = useState<string[]>([]);
 
-  const handleLogOut = async () => {
-    const userRes = await logout();
-    setReturnMessage(messages.user.returnMessage);
-    if (userRes) {
-      loginFalse()
-      router.replace("/components/AuthPage/SignIn/SignIn");
-    } else {
-      setReturnMessage("Error occured while logging out!");
-    }
-  };
-
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
@@ -82,11 +71,6 @@ export default function Find() {
       >
         <Feather name="search" size={28} color={colors.col.white} />
         <Text style={{ fontSize: 24, color: colors.col.white }}>Search</Text>
-        <Pressable 
-        onPress={handleLogOut}
-        style={{ position: "absolute", right: 25, bottom: 17 }}>
-          <Ionicons name="exit-outline" size={26} color="white" />
-        </Pressable>
       </View>
       {/* //search bar */}
       <View>
