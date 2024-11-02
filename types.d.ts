@@ -29,10 +29,11 @@ export interface InitialStateAdmin {
   bookmarks: string[] | [];
 }
 export interface AdminUpdateData {
-  userName?: string;
+  userName?: string | undefined;
   password?: string;
   isPrivate?: boolean;
   avatar?: string;
+  isDisabled?:boolean;
   gender?: "male" | "female" | "";
   dateOfBirth?: Date;
   bio?: string;
@@ -78,6 +79,7 @@ export interface USER {
   following: USER[];
   bookmarks: POST[];
   reportStatus: [];
+  bio:string;
   dateOfBirth: Date;
   isDisabled: boolean;
   isPrivate: boolean;
