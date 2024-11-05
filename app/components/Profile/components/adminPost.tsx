@@ -10,12 +10,13 @@ import { profleImageSkeleton } from "@/constants/data";
 
 interface ImageEl {
   i: POST;
-  a: USER;
-  margin:number;
+  a: USER | undefined;
+  lastPostMargin:number;
 }
 const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
 
-const AdminPost = ({ i, a, margin }: ImageEl) => {
+const AdminPost = ({ i, a, lastPostMargin }: ImageEl) => {
+  // console.log(margin)
   const [liked, setLiked] = useState<boolean>(false);
   const [fullImage, setFullImage] = useState<boolean>(false);
   const [adminView, setAdminView] = useState<boolean>(false);
@@ -43,18 +44,19 @@ const AdminPost = ({ i, a, margin }: ImageEl) => {
 
   return (
     <View
-      style={{
-        height: 405,
-        width: 310,
-        alignItems: "center",
-        paddingHorizontal: 10,
-        marginTop: 20,
-        borderRadius: 20,
-        borderWidth: 0.8,
-        marginBottom:margin,
-        borderColor: colors.col.PressedIn3,
-      }}
-    >
+  style={{
+    height: 405,
+    width: 310,
+    alignItems: "center",
+    paddingHorizontal: 10,
+    marginTop: 20,
+    borderRadius: 20,
+    borderWidth: 0.8,
+    marginBottom: lastPostMargin,
+    borderColor: colors.col.PressedIn3,
+  }}
+>
+
       <Pressable
         style={{
           height: 360,

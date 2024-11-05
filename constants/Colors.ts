@@ -14,6 +14,7 @@ export const colors = {
     PressedIn2:'#cccccc',
     PressedIn3:'#aaaaaa',
     PressedIn4:'#686868',
+    PressedIn5:'#eaeaea',
     PressedOut:'#ffffff',
     link:"#4280ef",
     tabActiveGreen:"#7b9654",

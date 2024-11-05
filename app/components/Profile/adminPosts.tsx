@@ -95,7 +95,7 @@ import AdminPost from "./components/adminPost";
                     <AdminPost
                       i={item}
                       a={item.admin}
-                      margin={index === adminPosts.length - 1 ? 10 : 0}
+                      lastPostMargin={index === adminPosts.length - 1 ? 10 : 0}
                     />
                  )}
                />

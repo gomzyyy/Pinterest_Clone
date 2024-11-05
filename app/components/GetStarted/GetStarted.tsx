@@ -54,7 +54,8 @@ const loading = adminData.loading;
       if (getAdmin.fulfilled.match(res)) {
         const { payload } = res;
         if (payload.success) {
-          router.push("/(tabs)/Discover");
+          console.log(payload.admin)
+          router.push('/(tabs)/Discover');
           return null;
         } else {
           redirectToLoginPageIfNeeded();

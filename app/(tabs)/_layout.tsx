@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { colors } from "@/constants/Colors";
 import React from "react";
 import Feather from "@expo/vector-icons/Feather";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -34,9 +35,9 @@ export default function MyTabs() {
                     : "transparent",
                 }}
               >
-                <AntDesign
-                  name="find"
-                  size={24}
+                <MaterialCommunityIcons
+                  name="home-outline"
+                  size={30}
                   color={focused ? colors.col.white : colors.col.PressedIn}
                 />
               </View>
@@ -70,7 +71,7 @@ export default function MyTabs() {
             ),
             tabBarStyle: iconStyle.tabStyle,
             tabBarShowLabel: false,
-            tabBarHideOnKeyboard: true
+            tabBarHideOnKeyboard: true,
           }}
         />
         <Tabs.Screen
@@ -99,7 +100,7 @@ export default function MyTabs() {
             ),
             tabBarStyle: iconStyle.tabStyle,
             tabBarShowLabel: false,
-            tabBarHideOnKeyboard: true
+            tabBarHideOnKeyboard: true,
           }}
         />
         <Tabs.Screen
@@ -126,7 +127,7 @@ export default function MyTabs() {
             ),
             tabBarStyle: iconStyle.tabStyle,
             tabBarShowLabel: false,
-            tabBarHideOnKeyboard: true
+            tabBarHideOnKeyboard: true,
           }}
         />
       </Tabs>

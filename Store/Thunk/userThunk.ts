@@ -30,15 +30,17 @@ export const getAdmin = createAsyncThunk(
 );
 export const loginUser = createAsyncThunk("user/login", async () => {});
 export const signupUser = createAsyncThunk("user/signup", async () => {});
-export const logoutInfo = createAsyncThunk("user/logout",
-   async (token:string, {rejectWithValue}) => {
-try {
-  if(!token)throw new Error('Token not found!')
-    await AsyncStorage.removeItem('token')
-} catch (error) {
-  console.log(error)
-}
-   });
+export const logoutInfo = createAsyncThunk(
+  "user/logout",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      if (!token) throw new Error("Token not found!");
+      await AsyncStorage.removeItem("token");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 export const deleteInfo = createAsyncThunk("user/delete", async () => {});
 export const updateAdmin = createAsyncThunk(
   "user/update",
@@ -50,20 +52,25 @@ export const updateAdmin = createAsyncThunk(
         formData.append("avatar", {
           uri: updatedData.avatar,
           name: "avatar.jpg",
-          type: "image/jpeg", 
+          type: "image/jpeg",
         } as any);
       }
 
       if (updatedData.userName) formData.append("userName", updatedData.userName);
       if (updatedData.password) formData.append("password", updatedData.password);
-      if (updatedData.isPrivate !== undefined) 
+      if (updatedData.isPrivate !== undefined)
         formData.append("isPrivate", updatedData.isPrivate.toString());
       if (updatedData.gender) formData.append("gender", updatedData.gender);
-      if (updatedData.dateOfBirth) 
-        formData.append("dateOfBirth", updatedData.dateOfBirth.toISOString());
+
+      if (updatedData.dateOfBirth) {
+        const formattedDate = updatedData.dateOfBirth;
+        formData.append("dateOfBirth", formattedDate);
+      }
+
       if (updatedData.bio) formData.append("bio", updatedData.bio);
-      if(updatedData.isDisabled !== undefined) formData.append("isDisabled", JSON.stringify(updatedData.isDisabled))
-console.log(updatedData.dateOfBirth)
+      if (updatedData.isDisabled !== undefined)
+        formData.append("isDisabled", JSON.stringify(updatedData.isDisabled));
+      
       const updateAdminResponse = await fetch(
         `http://192.168.1.64:6600/api/user/profile/update`,
         {
@@ -79,7 +86,9 @@ console.log(updatedData.dateOfBirth)
       return res;
     } catch (error) {
       console.log(error);
-      return rejectWithValue(error instanceof Error ? error.message : "An unknown error occurred");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
     }
   }
 );

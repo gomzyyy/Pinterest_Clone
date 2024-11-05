@@ -33,6 +33,7 @@ export default function Create(): React.JSX.Element {
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [imageUri, setImageUri] = useState<string>("");
   const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [mediaPermissionGranted, setMediaPermissionGranted] =
     useState<boolean>(false);
   const [tags, setTags] = useState<string>();
@@ -183,9 +184,18 @@ export default function Create(): React.JSX.Element {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Tags (don't add spaces b/w tags i.e #image#photo)"
+                placeholder="Tags i.e.#image#tags (Tags help to appear in search results.)"
                 value={tags}
                 onChangeText={setTags}
+              />
+              <TextInput
+                style={styles.inputDescription}
+                placeholder="description"
+                value={description}
+                maxLength={300}
+                onChangeText={setDescription}
+                multiline={true}
+                textAlignVertical='top'
               />
               <View
                 style={{
@@ -220,7 +230,6 @@ export default function Create(): React.JSX.Element {
               </View>
             </View>
           )}
-
           {returnMessage ? (
             <Text style={styles.errorMessage}>{returnMessage}</Text>
           ) : null}
@@ -240,9 +249,17 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
+    padding: 8,
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  inputDescription: {
+    borderWidth: 1,
+    borderColor: "#ccc",
     padding: 10,
     borderRadius: 10,
     marginVertical: 10,
+    height:200,
   },
   imagePicker: {
     padding: 10,

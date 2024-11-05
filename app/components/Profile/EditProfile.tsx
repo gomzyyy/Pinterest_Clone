@@ -9,7 +9,6 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Button,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -28,20 +27,21 @@ import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { requestMediaPermission } from "@/constants/GlobalConstants";
 import * as imagePicker from "expo-image-picker";
+import { useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAdmin, updateAdmin } from "../../../Store/Thunk/userThunk";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 const refreshInterval = 10000;
 const { width, height } = Dimensions.get("window");
 
-const UserNameCheckIcon = (): React.JSX.Element => {
-  return <></>;
-};
+// const UserNameCheckIcon = (): React.JSX.Element => {
+//   return <></>;
+// };
 
 const profleImageSkeleton =
   "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
 const EditProfile = () => {
-  const { admin } = useSelector((e: RootState) => e.admin);
+  const a = useSelector((e: RootState) => e.admin.admin);
   const updatedAdmin = useSelector((u: RootState) => u.updateAdmin);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
@@ -49,36 +49,54 @@ const EditProfile = () => {
     if (!Array.isArray(t) || t !== undefined || t !== null) return t;
   };
 
-  useEffect(() => {
-    const adminData = checkAdmin(admin);
-    sa(adminData);
-  }, []);
+  // useEffect(() => {
+  //   const adminData = checkAdmin(admin);
+  //   sa(adminData);
+  // }, []);
+  // console.log(a?.dateOfBirth);
   const inputUserNameRef = useRef<TextInput>(null);
-  const [a, sa] = useState<USER>();
+  // const [a, sa] = useState<USER>();
   const [mediaPermissionGranted, setMediaPermissionGranted] =
     useState<boolean>(false);
-  const [currentAvatar, setCurrentAvatar] =
-    useState<string>(profleImageSkeleton);
-    const [inputHeight,setInputHeight] = useState<number>(80)
-  const [avatarUri, setAvatarUri] = useState<string>(currentAvatar);
+  const [currentAvatar, setCurrentAvatar] = useState<string | undefined>(
+    a?.avatar
+  );
+  const [inputHeight, setInputHeight] = useState<number>(80);
+  const [avatarUri, setAvatarUri] = useState<string | undefined>(
+    currentAvatar ? currentAvatar : ""
+  );
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [avatarEditMode, setAvatarEditMode] = useState<boolean>(false);
   const [adminBookmarks, setAdminBookmarks] = useState<string[]>([]);
   const [adminPosts, setAdminPosts] = useState<string[]>([]);
   const [verifiedOk, setVerifiedOk] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(
+    new Date(Date.now()).toISOString().split("T")[0]
+  );
   const [premiumUser, setPremiumUser] = useState<boolean>(false);
   const [privateOk, setPrivateOk] = useState<boolean>(false);
   const [followers, setFollowers] = useState<string[]>([]);
   const [following, setFollowing] = useState<string[]>([]);
-  const [dob, setDob] = useState<Date>(new Date());
+  const [dob, setDob] = useState<string | undefined>(
+    a?.dateOfBirth
+      ? a?.dateOfBirth.toISOString()
+      : selectedDate?.trim() !== ""
+      ? selectedDate
+      : new Date().toISOString()
+  );
+  const [bioFieldFocused, setBioFieldFocused] = useState<boolean>(false);
   const [showDate, setShowDate] = useState<boolean>(false);
-  const [bio, setBio] = useState<string>('');
+  const [bio, setBio] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [userNameEditable, setUserNameEditable] = useState<boolean>(false);
   const [postsLength, setPostsLength] = useState<number | string>();
   const [saved, setSaved] = useState<boolean>(true);
   const [bookmarksLength, setBookmarksLength] = useState<number | string>();
   // const [updatedUserName, setUpdatedUserName] = useState<string>("")
+  useFocusEffect(() => {
+    console.log(dob);
+    console.log(selectedDate);
+  });
 
   const getAvatarUri = async () => {
     try {
@@ -111,56 +129,40 @@ const EditProfile = () => {
   const handleDob = (event: DateTimePickerEvent, choosedDate?: Date) => {
     if (event.type === "set") {
       let DOB = choosedDate || dob;
-      setDob(DOB);
+      setDob(DOB?.toLocaleString());
       setShowDate(false);
     } else {
       setShowDate(false);
     }
   };
-
-  // const handleShowDate = () => setShowDate(true);
-  const handlePostsCount = (): number | string => {
-    if (!a?.posts || a?.posts.length === 0) return 0;
-    if (a?.posts.length > 99) return 99 + "+";
-    return a?.posts.length;
-  };
-  const handleBookmarksCount = (): number | string => {
-    if (!a?.bookmarks || a?.bookmarks.length === 0) return 0;
-    if (a?.bookmarks.length > 99) return 99 + "+";
-    return a?.bookmarks.length;
-  };
-
-  useEffect(() => {
-    const postCount = handlePostsCount();
-    const bookmarkCount = handleBookmarksCount();
-    setPostsLength(postCount);
-    setBookmarksLength(bookmarkCount);
-  }, []);
+  // useFocusEffect(() =>setBio(a?.bio || ""));
 
   const editProfile = async () => {
     try {
       setSaved(false);
-      setAvatarUri(currentAvatar);
+      if (bioFieldFocused) setBioFieldFocused(false);
+      if (userNameEditable) setUserNameEditable(false);
+      setAvatarUri(currentAvatar ? currentAvatar : undefined);
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         return setReturnMessage("Authentication required!");
       }
-      console.log("clicked");
-      console.log(avatarUri);
       const data = {
-        avatar: avatarUri.trim()!==""?avatarUri: undefined,
-        userName:userName.trim()!==""?userName: undefined,
-        DateOfBirth: dob.toISOString,
-        bio:bio.trim()!==""?bio:undefined,
+        avatar: avatarUri?.trim() !== "" ? avatarUri : undefined,
+        userName: userName.trim() !== "" ? userName : undefined,
+        DateOfBirth: dob?.split(",")[0],
+        bio: bio.trim() !== "" ? bio : undefined,
         token,
       };
+      console.log(data.DateOfBirth);
       const res = await dispatch(updateAdmin(data));
       if (updateAdmin.fulfilled.match(res)) {
         const { payload } = res;
-        console.log(payload);
+        // console.log(payload);
         if (payload.success) {
           setSaved(true);
           await dispatch(getAdmin(token));
+          // console.log(a?.userName);
           return null;
         } else {
           setSaved(true);
@@ -179,7 +181,7 @@ const EditProfile = () => {
       );
     }
   };
-  console.log(a?.avatar, currentAvatar);
+  // console.log(a?.avatar, currentAvatar);
 
   return (
     <KeyboardAvoidingView
@@ -202,16 +204,18 @@ const EditProfile = () => {
             height: 100,
           }}
         >
-          <Pressable
-            style={{ position: "absolute", left: 25, bottom: "26%" }}
-            onPress={() => router.back()}
-          >
-            <Ionicons
-              name="arrow-back-outline"
-              size={28}
-              color={colors.col.white}
-            />
-          </Pressable>
+          {!updatedAdmin.loading && (
+            <Pressable
+              style={{ position: "absolute", left: 25, bottom: "26%" }}
+              onPress={() => router.back()}
+            >
+              <Ionicons
+                name="arrow-back-outline"
+                size={28}
+                color={colors.col.white}
+              />
+            </Pressable>
+          )}
           <Text style={{ fontSize: 24, color: colors.col.white }}>
             Account center
           </Text>
@@ -340,11 +344,11 @@ const EditProfile = () => {
                 { color: showDate ? colors.col.Black : colors.col.PressedIn3 },
               ]}
             >
-              {dob === new Date() ? "Choose D.O.B" : dob.toLocaleDateString()}
+              {a?.dateOfBirth ? a?.dateOfBirth.toString() : dob?.split(",")[0]}
             </Text>
             {showDate && (
               <DateTimePickerAndroid
-                value={dob}
+                value={selectedDate ? new Date(selectedDate) : new Date(Date.now())}
                 mode={"date"}
                 is24Hour={true}
                 display="default"
@@ -361,27 +365,37 @@ const EditProfile = () => {
           <View
             style={{
               marginTop: 10,
-              height:200,
-              borderBottomColor:colors.col.PressedIn2,
-              borderBottomWidth:1
+              height: 200,
+              alignItems: "center",
             }}
           >
             <TextInput
-              placeholder={a?.bio.trim()!==""?undefined:"Describe yourself here!"}
+              placeholder={
+                a?.bio.trim() !== "" ? a?.bio : "Write about yourself here!"
+              }
               style={{
-                padding: 16,
-                fontSize: 14,
+                padding: 12,
+                fontSize: 12,
                 color: colors.col.PressedIn4,
                 fontFamily: "pop-mid",
-                textAlign:'left',
-                height:'100%',
-                width:'100%'
+                textAlign: "left",
+                height: "100%",
+                width: "96%",
+                backgroundColor: bioFieldFocused
+                  ? colors.col.PressedIn5
+                  : "transparent",
+                borderRadius: 12,
               }}
+              onBlur={() => setBioFieldFocused(false)}
+              onFocus={() => setBioFieldFocused(true)}
               placeholderTextColor={colors.col.PressedIn}
               maxLength={300}
+              textAlignVertical="top"
               keyboardType="default"
               multiline={true}
-              onContentSizeChange={(event) => setInputHeight(event.nativeEvent.contentSize.height)}
+              onContentSizeChange={(event) =>
+                setInputHeight(event.nativeEvent.contentSize.height)
+              }
               value={bio}
               onChangeText={setBio}
             />

@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { InitialStateAdmin, InitialStateUpdatedAdmin } from "../../types";
+import { InitialStateAdmin, InitialStateUpdatedAdmin, USER } from "../../types";
 import { getAdmin,updateAdmin } from "../Thunk/userThunk";
 
 let admin: InitialStateAdmin = {
   response: {
     message: "",
-    admin: [],
+    admin: undefined,
     success: false,
   },
-  admin: [],
+  admin: undefined,
   loading: false,
   error: null,
   posts:[],

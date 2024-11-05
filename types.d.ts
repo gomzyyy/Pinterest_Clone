@@ -21,8 +21,8 @@ export interface InitialStatePost {
   error: SerializedError | null;
 }
 export interface InitialStateAdmin {
-  response: { message: string; admin: USER | []; success: boolean };
-  admin: USER | [];
+  response: { message: string; admin: USER | undefined; success: boolean };
+  admin: USER | undefined;
   loading: boolean;
   error: SerializedError | null;
   posts: POST[] | [];
@@ -35,7 +35,7 @@ export interface AdminUpdateData {
   avatar?: string;
   isDisabled?:boolean;
   gender?: "male" | "female" | "";
-  dateOfBirth?: Date;
+  dateOfBirth?: string;
   bio?: string;
   token: string | null;
 }

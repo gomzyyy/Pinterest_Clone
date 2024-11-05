@@ -13,10 +13,11 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useFocusEffect } from "expo-router";
 import { colors } from "@/constants/Colors";
 import { InitialStateAdmin, USER, InitialStateUpdatedAdmin } from "../../types";
 import { useSelector, useDispatch } from "react-redux";
-import { updateAdmin } from "@/Store/Thunk/userThunk";
+import { getAdmin, updateAdmin } from "@/Store/Thunk/userThunk";
 import { RootState, AppDispatch } from "@/Store/store";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -28,25 +29,26 @@ const profleImageSkeleton =
 
 export default function Menu(): React.JSX.Element {
   const [returnMessage, setReturnMessage] = useState<string>("");
-  const [adminData, setAdminData] = useState<USER>();
+  // const [adminData, setAdminData] = useState<USER>();
   const [postsData, setPostsData] = useState<USER>();
-  const [avatarUri, setAvatarUri] = useState<string>("");
+  // const [avatarUri, setAvatarUri] = useState<string>("");
   const [privacyResponse, setPrivacyResponse] = useState<boolean>(false);
   const [privateAccount, setPrivateAccount] =
     useState<boolean>(privacyResponse);
-  const [refreshOnUpdate, setRefreshOnUpdate] = useState<boolean>(false);
-  const [postsLength, setPostsLength] = useState<number | string>();
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  // const [postsLength, setPostsLength] = useState<number | string>();
   const [bookmarksLength, setBookmarksLength] = useState<number | string>();
   const admin: InitialStateAdmin = useSelector((s: RootState) => s.admin);
   const updatedAdmin: InitialStateUpdatedAdmin = useSelector(
     (s: RootState) => s.updateAdmin
   );
+  // useEffect(()=>{})
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  const a: USER | [] = admin.admin;
-  const p: POST[] | [] = admin.posts;
+  const a: USER | undefined = admin.admin;
+  const p: POST[] | undefined = admin.posts;
   const b: string[] | [] = admin.bookmarks;
   const loading: boolean = updatedAdmin.loading;
 
@@ -60,24 +62,44 @@ export default function Menu(): React.JSX.Element {
     if (returnMessage !== "" || returnMessage !== null)
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
   }, [returnMessage]);
-
-  useEffect(() => {
-    const adm = checkIfArray(a);
-    const pst = checkIfArray(p);
-    const bmk = checkIfArray(b);
-    if (adm) {
-      setAdminData(adm);
+  const refreshAdmin = async () => {
+    try {
+      setRefreshing(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setRefreshing(false);
+        router.replace("/components/GetStarted/GetStarted");
+        return null;
+      }
+      const res = await dispatch(getAdmin(token));
+      if (getAdmin.fulfilled.match(res)) {
+        const { payload } = res;
+        if (payload.success) {
+          setRefreshing(false);
+          // console.log(payload.admin);
+          return null;
+        } else {
+          setRefreshing(false);
+          router.replace("/components/GetStarted/GetStarted");
+          return null;
+        }
+      } else {
+        setRefreshing(false);
+        router.replace("/components/GetStarted/GetStarted");
+        return null;
+      }
+    } catch (error) {
+      setRefreshing(false);
+      console.log(error);
+      return null;
     }
-    if (pst) {
-      setPostsData(pst);
-    }
-    setPostsLength(pst.length);
-    setBookmarksLength(bmk.length);
-  }, []);
-
-  const getPrivacyValue = () => {
-    //
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshAdmin();
+    }, [])
+  );
 
   const handleLogOut = async () => {
     try {
@@ -95,27 +117,15 @@ export default function Menu(): React.JSX.Element {
     }
   };
 
-  return (
-    <View style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 4,
-          paddingTop: 35,
-          backgroundColor: colors.col.PressedIn,
-          height: 100,
-        }}
-      >
-        <FontAwesome name="user-circle-o" size={24} color={colors.col.white} />
-        <Text style={{ fontSize: 24, color: colors.col.white }}>Profile</Text>
-      </View>
+  const MainProfilePage = (): React.JSX.Element => {
+    return (
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
-        <View
+        <Pressable
+          onPress={() => router.push("/components/Profile/adminProfile")}
           style={{
-            height: 90,
+            height: 100,
             paddingHorizontal: 15,
+            paddingVertical: 10,
             alignItems: "flex-end",
             flexDirection: "row",
             gap: 17,
@@ -131,9 +141,7 @@ export default function Menu(): React.JSX.Element {
           >
             <Image
               source={{
-                uri: adminData?.avatar
-                  ? adminData?.avatar
-                  : profleImageSkeleton,
+                uri: a?.avatar ? a?.avatar : profleImageSkeleton,
               }}
               style={{ height: "100%" }}
             />
@@ -154,9 +162,9 @@ export default function Menu(): React.JSX.Element {
                   color: colors.col.PressedIn3,
                 }}
               >
-                {adminData?.userName}
+                {a?.userName}
               </Text>
-              {adminData?.verified && (
+              {a?.verified && (
                 <View>
                   <Octicons
                     name="verified"
@@ -174,11 +182,11 @@ export default function Menu(): React.JSX.Element {
                   color: colors.col.PressedIn,
                 }}
               >
-                @{adminData?.userId}
+                @{a?.userId}
               </Text>
             </View>
           </View>
-        </View>
+        </Pressable>
         <View style={{ marginTop: 30 }}>
           <Text
             style={{ paddingHorizontal: 10, fontFamily: "pop-b", fontSize: 20 }}
@@ -228,7 +236,7 @@ export default function Menu(): React.JSX.Element {
                 </Text>
                 <View style={profileMenuStyles.lengthIcon}>
                   <Text style={{ color: colors.col.white, fontSize: 14 }}>
-                    {postsLength?postsLength:0}
+                    {a?.posts.length}
                   </Text>
                 </View>
               </View>
@@ -241,9 +249,9 @@ export default function Menu(): React.JSX.Element {
               </View>
             </Pressable>
 
-            <Pressable 
-            style={profileMenuStyles.profileOptions}
-            onPress={()=>router.push('/components/Profile/savedPosts')}
+            <Pressable
+              style={profileMenuStyles.profileOptions}
+              onPress={() => router.push("/components/Profile/savedPosts")}
             >
               <View
                 style={{
@@ -258,7 +266,7 @@ export default function Menu(): React.JSX.Element {
                 </Text>
                 <View style={profileMenuStyles.lengthIcon}>
                   <Text style={{ color: colors.col.white, fontSize: 14 }}>
-                    {bookmarksLength?bookmarksLength:0}
+                    {a?.bookmarks.length}
                   </Text>
                 </View>
               </View>
@@ -271,9 +279,9 @@ export default function Menu(): React.JSX.Element {
               </View>
             </Pressable>
             <Pressable
-             style={profileMenuStyles.profileOptions}
-             onPress={()=>router.push('/components/Profile/archivedPosts')}
-             >
+              style={profileMenuStyles.profileOptions}
+              onPress={() => router.push("/components/Profile/archivedPosts")}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -287,7 +295,7 @@ export default function Menu(): React.JSX.Element {
                 </Text>
                 <View style={profileMenuStyles.lengthIcon}>
                   <Text style={{ color: colors.col.white, fontSize: 14 }}>
-                    {bookmarksLength?bookmarksLength:0}
+                    {bookmarksLength ? bookmarksLength : 0}
                   </Text>
                 </View>
               </View>
@@ -389,6 +397,36 @@ export default function Menu(): React.JSX.Element {
           </View>
         </View>
       </ScrollView>
+    );
+  };
+
+  return (
+    <View style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 4,
+          paddingTop: 35,
+          backgroundColor: colors.col.PressedIn,
+          height: 100,
+        }}
+      >
+        <FontAwesome name="user-circle-o" size={24} color={colors.col.white} />
+        <Text style={{ fontSize: 24, color: colors.col.white }}>Profile</Text>
+      </View>
+      {refreshing ? (
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text style={{ fontFamily: "pop-b", marginBottom: 80, fontSize: 16 }}>
+            Loading...
+          </Text>
+        </View>
+      ) : (
+        <MainProfilePage />
+      )}
     </View>
   );
 }
@@ -439,7 +477,7 @@ const profileMenuStyles = StyleSheet.create({
     height: 24,
     width: "auto",
     borderRadius: 8,
-    paddingHorizontal:4,
+    paddingHorizontal: 4,
     backgroundColor: colors.col.PressedIn,
     alignItems: "center",
     justifyContent: "center",

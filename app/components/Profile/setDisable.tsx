@@ -178,7 +178,7 @@ export default function Menu(): React.JSX.Element {
           <Text
             style={{ paddingHorizontal: 10, fontFamily: "pop-b", fontSize: 20 }}
           >
-            {!disabled ? "Acccount is disabled!" : "Account is enabled!"}
+            {!disabled ? "Account is disabled!" : "Account is enabled!"}
           </Text>
           <View style={{ marginTop: 30 }}>
             <Pressable

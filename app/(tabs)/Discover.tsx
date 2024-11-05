@@ -162,8 +162,8 @@ export default function Discover() {
           borderBottomWidth:1.2
         }}
       >
-        <AntDesign name="find" size={28} color={colors.col.white} />
-        <Text style={{ fontSize: 24, color: colors.col.white }}>Discover</Text>
+        {/* <AntDesign name="find" size={28} color={colors.col.white} /> */}
+        <Text style={{ fontSize: 24, color: colors.col.white }}>Home</Text>
       </View>
       {error ? <ErrorPage /> : <DiscoverPage />}
     </View>

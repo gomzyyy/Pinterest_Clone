@@ -9,8 +9,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { profleImageSkeleton } from "@/constants/data";
 
 interface ImageEl {
-  i: POST;
-  a: USER;
+  i: POST | undefined;
+  a: USER | undefined;
   margin:number;
 }
 const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
@@ -64,7 +64,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
       >
         {!adminView ? (
           <Image
-            source={{ uri: i.image }}
+            source={{ uri: i?.image }}
             style={{
               flex: 1,
               marginTop: 15,
@@ -105,10 +105,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
             >
               <View style={{ marginTop: 25 }}>
                 <Image
-                  source={{
-                    uri:
-                      a.avatar.trim() !== ""? a.avatar : profleImageSkeleton,
-                  }}
+                  source={{uri:a?.avatar}}
                   style={{
                     height: 100,
                     width: 100,
@@ -141,7 +138,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                           fontFamily: "pop-b",
                         }}
                       >
-                        {a.userName}
+                        {a?.userName}
                       </Text>
                     </View>
 
@@ -156,7 +153,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                           zIndex: 9999,
                         }}
                       >
-                        @{a.userId}
+                        @{a?.userId}
                       </Text>
                     </Pressable>
                   </View>
@@ -170,7 +167,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                     }}
                     numberOfLines={1}
                   >
-                    "{i.title}"
+                    "{i?.title}"
                   </Text>
                 </View>
                 <View
@@ -187,13 +184,13 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                   <Text style={{ alignSelf: "center", fontSize: 16 }}>
                     Description.
                   </Text>
-                  <View style={{ flex: 1, marginTop: 10 }}>
-                    {i.description.trim() !== "" ? (
+                   <View style={{ flex: 1, marginTop: 10 }}>
+                    {i?.description?.trim() !== "" ? (
                       <Text
                         style={{ alignSelf: "center" }}
                         textBreakStrategy="highQuality"
                       >
-                        {i.description}
+                        {i?.description}
                       </Text>
                     ) : (
                       <Text
@@ -206,7 +203,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                         No description provided by the admin.
                       </Text>
                     )}
-                  </View>
+                  </View> 
                 </View>
               </View>
             </View>
@@ -256,7 +253,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
               color: colors.col.PressedIn,
             }}
           >
-            {i.comments.length}
+            {i?.comments.length}
           </Text>
         </Pressable>
         <Pressable
