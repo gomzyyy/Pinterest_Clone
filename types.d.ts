@@ -14,11 +14,23 @@ type collectionData = {
   images: imageObj[];
 };
 
-export interface InitialStatePost {
-  posts: POST | [];
-  filteredPosts: POST | [];
+export interface getPostByIdType {
   loading: boolean;
   error: SerializedError | null;
+  response: {
+    message: string;
+    requestedPost: POST | undefined;
+    success: boolean;
+    comments: commentType[] | undefined;
+  };
+}
+export interface updatePostByIdType {
+  loading: boolean;
+  error: SerializedError | null;
+  response: {
+    message: string;
+    success: boolean;
+  };
 }
 export interface InitialStateAdmin {
   response: { message: string; admin: USER | undefined; success: boolean };
@@ -28,12 +40,22 @@ export interface InitialStateAdmin {
   posts: POST[] | [];
   bookmarks: string[] | [];
 }
+export interface GetPostType {
+  postId?: string;
+  token: string;
+}
+export interface postActionsType {
+  postId?: string;
+  getComment?: string;
+  token: string;
+  // likes, getcomment, reportPost, dislikes
+}
 export interface AdminUpdateData {
   userName?: string | undefined;
   password?: string;
   isPrivate?: boolean;
   avatar?: string;
-  isDisabled?:boolean;
+  isDisabled?: boolean;
   gender?: "male" | "female" | "";
   dateOfBirth?: string;
   bio?: string;
@@ -46,7 +68,7 @@ export interface InitialStateUpdatedAdmin {
     userName?: string;
     password?: string;
     isPrivate?: boolean;
-    avatar:string;
+    avatar: string;
     gender?: "male" | "female" | "";
     dateOfBirth?: string;
     bio?: string;
@@ -56,13 +78,14 @@ export interface InitialStateUpdatedAdmin {
 export interface POST {
   _id: string;
   admin: USER;
-  comments: string[] | [];
+  comments: commentType[];
   createdAt: string;
   description: string;
   dislikes: [];
   downloadable: boolean;
   image: string;
   likes: [];
+  visits: USER[];
   reportStatus: [];
   tags: string[];
   title: string;
@@ -79,7 +102,7 @@ export interface USER {
   following: USER[];
   bookmarks: POST[];
   reportStatus: [];
-  bio:string;
+  bio: string;
   dateOfBirth: Date;
   isDisabled: boolean;
   isPrivate: boolean;
@@ -94,4 +117,41 @@ export interface AdminResponse {
   message: string;
   admin: USER | [];
   success: boolean;
+}
+export interface commentType {
+  _id?:string;
+  text?: string;
+  admin?: USER | undefined;
+  likes?: USER[] | string[] | undefined;
+  dislikes?: USER[] | string[] | undefined;
+  replies?: {
+    text?: string;
+    likes?: USER[] | string[] | undefined;
+    dislikes?: USER[] | string[] | undefined;
+    admin?: USER | undefined;
+    visible?: boolean;
+    hidden?: boolean;
+    reportStatus?: {
+      reportType?: string;
+      others?: string;
+    };
+    replies: {
+      text?: string;
+      likes?: USER[] | string[] | undefined;
+      dislikes?: USER[] | string[] | undefined;
+      admin?: USER | undefined;
+      visible?: boolean;
+      hidden?: boolean;
+      reportStatus?: {
+        reportType?: string;
+        others?: string;
+      };
+    };
+  };
+  reportStatus?: {
+    reportType?: string;
+    others?: string;
+  };
+  visible?: boolean;
+  hidden?: boolean;
 }

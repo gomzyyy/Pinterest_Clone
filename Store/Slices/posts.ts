@@ -1,28 +1,86 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { InitialStatePost } from "../../types";
-// import {getUserInfo} from '../Thunk/userThunk'
+import { getPostByIdType, updatePostByIdType } from "../../types";
+import { getPostById, postActionsById } from "../Thunk/postThunk";
 
-let i: InitialStatePost = {
-  posts: [],
-  filteredPosts: [],
-  loading:false,
-  error:null
+let initialStateGetPost: getPostByIdType = {
+  loading: false,
+  error: null,
+  response: {
+    message: "",
+    requestedPost: undefined,
+    success: false,
+    comments: undefined,
+  },
 };
 
-const userSlice = createSlice({
-  name: "user",
-  initialState: i,
-  reducers: {
-    createPost: (state, action) => {},
-    deletePost: (state, action) => {},
+const receivePostById = createSlice({
+  name: "getPostById",
+  initialState: initialStateGetPost,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(getPostById.pending, (state) => {
+        if (!state.loading) {
+          state.loading = true;
+        }
+      })
+      .addCase(getPostById.fulfilled, (state, action) => {
+        if (state.loading) {
+          state.loading = false;
+        }
+        if (action.payload) {
+          state.response.message = action.payload.message;
+          state.response.success = action.payload.success;
+          state.response.requestedPost = action.payload.requestedPost;
+          state.response.comments = action.payload.comments;
+        }
+      })
+      .addCase(getPostById.rejected, (state, action) => {
+        if (state.loading) {
+          state.loading = false;
+        }
+        state.error = action.error ? action.error : "Unknown error occured!";
+      });
   },
-  // extraReducers:(builder)=>{
-  //   builder
-  //   .addCase(getUserInfo.pending, (state)=>{})
-  //   .addCase(getUserInfo.fulfilled,(state)=>{})
-  //   .addCase(getUserInfo.rejected,(state)=>{})
-  // }
 });
 
-export default userSlice.reducer;
-export const { createPost, deletePost } = userSlice.actions;
+export const getPostByIdSlice = receivePostById.reducer;
+
+const initialStateUpdatePostById: updatePostByIdType = {
+  loading: false,
+  error: null,
+  response: {
+    message: "",
+    success: false,
+  },
+};
+
+const postActionsByIdSlice = createSlice({
+  name: "postActions",
+  initialState: initialStateUpdatePostById,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(postActionsById.pending, (state) => {
+        if (!state.loading) {
+          state.loading = true;
+        }
+      })
+      .addCase(postActionsById.fulfilled, (state, action) => {
+        if (state.loading) {
+          state.loading = false;
+        }
+        if (action.payload) {
+          state.response.message = "Action performed successfully";
+          state.response.success = true;
+        }
+      })
+      .addCase(postActionsById.rejected, (state, action) => {
+        if (state.loading) {
+          state.loading = false;
+        }
+        state.error = action.error ? action.error : "Unknown error occured!";
+      });
+  },
+});
+export const postActionSlice = postActionsByIdSlice.reducer;

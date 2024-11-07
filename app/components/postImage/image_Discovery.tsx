@@ -7,17 +7,21 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { profleImageSkeleton } from "@/constants/data";
+import { useRouter } from "expo-router";
+import { useDispatch, useSelector } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppDispatch, RootState } from "@/Store/store";
+import { getPostById } from "@/Store/Thunk/postThunk";
 
 interface ImageEl {
   i: POST | undefined;
   a: USER | undefined;
-  margin:number;
+  margin: number;
 }
 const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
 
 const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
   const [liked, setLiked] = useState<boolean>(false);
-  const [fullImage, setFullImage] = useState<boolean>(false);
   const [adminView, setAdminView] = useState<boolean>(false);
 
   const handleLikeBtn = () => {
@@ -38,8 +42,33 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
   //     }
   //   } else setdisliked(false);
   // };
- const handleImageDimentions = () =>setFullImage(i=>!i)
   const toggleImageNprofile = () => setAdminView((a) => !a);
+  const { loading } = useSelector((s: RootState) => s.getPostById);
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+
+  const redirectToPost = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return null;
+      }
+      const data = {
+        postId: i?._id,
+        token,
+      };
+      router.push("/components/Profile/fullPagePost");
+      const res = await dispatch(getPostById(data));
+      if (getPostById.fulfilled.match(res)) {
+        return null;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View
@@ -51,7 +80,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
         marginTop: 20,
         borderRadius: 20,
         borderWidth: 0.8,
-        marginBottom:margin,
+        marginBottom: margin,
         borderColor: colors.col.PressedIn3,
       }}
     >
@@ -60,7 +89,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
           height: 360,
           width: 300,
         }}
-        onPress={handleImageDimentions}
+        onPress={redirectToPost}
       >
         {!adminView ? (
           <Image
@@ -71,7 +100,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
               borderRadius: 20,
               borderWidth: 0.8,
               borderColor: colors.col.PressedIn2,
-              objectFit:fullImage?'contain':'cover'
+              objectFit: "cover",
             }}
           />
         ) : (
@@ -105,7 +134,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
             >
               <View style={{ marginTop: 25 }}>
                 <Image
-                  source={{uri:a?.avatar}}
+                  source={{ uri: a?.avatar }}
                   style={{
                     height: 100,
                     width: 100,
@@ -184,7 +213,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                   <Text style={{ alignSelf: "center", fontSize: 16 }}>
                     Description.
                   </Text>
-                   <View style={{ flex: 1, marginTop: 10 }}>
+                  <View style={{ flex: 1, marginTop: 10 }}>
                     {i?.description?.trim() !== "" ? (
                       <Text
                         style={{ alignSelf: "center" }}
@@ -203,7 +232,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                         No description provided by the admin.
                       </Text>
                     )}
-                  </View> 
+                  </View>
                 </View>
               </View>
             </View>
@@ -238,7 +267,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
             <AntDesign name="hearto" size={24} color={colors.col.PressedIn3} />
           )}
         </Pressable>
-        <Pressable>
+        <Pressable onPress={redirectToPost}>
           <FontAwesome6
             name="comment-alt"
             size={26}

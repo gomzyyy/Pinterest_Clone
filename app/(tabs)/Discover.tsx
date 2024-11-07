@@ -14,13 +14,16 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { userController, messages } from "@/constants/GlobalConstants";
 import { useRouter } from "expo-router";
-import { imageData } from "../../constants/data";
+import { useFocusEffect } from "expo-router";
+// import { imageData } from "../../constants/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { POST } from "@/types";
 import ImageDiscovery from "../components/postImage/image_Discovery";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/Store/store";
 
 const baseUrlGetPosts = `http://192.168.1.64:6600/api/user/get-posts`;
-const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
+// const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
 
 export default function Discover() {
   const router = useRouter();
@@ -35,41 +38,52 @@ export default function Discover() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const postActionLoading = useSelector(
+    (f: RootState) => f.postActions.loading
+  );
 
-  useEffect(() => {
-    const getPosts = async () => {
-      try {
-        setLoading(true);
-        setError(false);
-        const token = await AsyncStorage.getItem("token");
-        if (token !== null) {
-          const getPostsAPI = await fetch(baseUrlGetPosts, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const res = await getPostsAPI.json();
-          setLoading(false);
-          if (res.success) {
-            setReturnMessage(`Welcome!`);
-            setResult(() => [...res.data.reverse()]);
-            if (error) setError(false);
-            return null;
-          } else {
-            setReturnMessage(res.message);
-          }
-        } else {
-          setReturnMessage("No token found!");
-          return null;
-        }
-      } catch (error) {
-        console.log(error);
-        setError(true);
+  const getPosts = async () => {
+    try {
+      console.log("jfbverbi")
+      setLoading(true);
+      setError(false);
+      const token = await AsyncStorage.getItem("token");
+      if (token !== null) {
+        const getPostsAPI = await fetch(baseUrlGetPosts, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const res = await getPostsAPI.json();
         setLoading(false);
+        if (res.success) {
+          setReturnMessage(`Welcome!`);
+          setResult(() => [...res.data.reverse()]);
+          if (error) setError(false);
+          return null;
+        } else {
+          setReturnMessage(res.message);
+        }
+      } else {
+        setReturnMessage("No token found!");
         return null;
       }
-    };
+    } catch (error) {
+      console.log(error);
+      setError(true);
+      setLoading(false);
+      return null;
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getPosts();
+    }, [])
+  );
+
+  useEffect(() => {
     getPosts();
   }, [refresh]);
 
@@ -155,11 +169,11 @@ export default function Discover() {
           justifyContent: "center",
           gap: 4,
           paddingTop: 35,
-          backgroundColor:colors.col.PressedIn,
+          backgroundColor: colors.col.PressedIn,
           height: 100,
           position: "relative",
-          borderBottomColor:colors.col.PressedIn,
-          borderBottomWidth:1.2
+          borderBottomColor: colors.col.PressedIn,
+          borderBottomWidth: 1.2,
         }}
       >
         {/* <AntDesign name="find" size={28} color={colors.col.white} /> */}

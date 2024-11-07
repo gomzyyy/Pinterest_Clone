@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AdminUpdateData } from "@/types";
+import { AdminUpdateData, GetPostType } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const convertToJson = (t: any) => {
@@ -37,7 +37,9 @@ export const logoutInfo = createAsyncThunk(
       if (!token) throw new Error("Token not found!");
       await AsyncStorage.removeItem("token");
     } catch (error) {
-      console.log(error);
+      return rejectWithValue(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
     }
   }
 );
@@ -56,8 +58,10 @@ export const updateAdmin = createAsyncThunk(
         } as any);
       }
 
-      if (updatedData.userName) formData.append("userName", updatedData.userName);
-      if (updatedData.password) formData.append("password", updatedData.password);
+      if (updatedData.userName)
+        formData.append("userName", updatedData.userName);
+      if (updatedData.password)
+        formData.append("password", updatedData.password);
       if (updatedData.isPrivate !== undefined)
         formData.append("isPrivate", updatedData.isPrivate.toString());
       if (updatedData.gender) formData.append("gender", updatedData.gender);
@@ -70,7 +74,7 @@ export const updateAdmin = createAsyncThunk(
       if (updatedData.bio) formData.append("bio", updatedData.bio);
       if (updatedData.isDisabled !== undefined)
         formData.append("isDisabled", JSON.stringify(updatedData.isDisabled));
-      
+
       const updateAdminResponse = await fetch(
         `http://192.168.1.64:6600/api/user/profile/update`,
         {

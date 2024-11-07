@@ -27,11 +27,7 @@ export default function GetStartedPage() {
   // console.log(admin)
 const admin = adminData.admin;
 const loading = adminData.loading;
-  const [pressed, setPressed] = useState<boolean>(false);
   const [returnMessage, setReturnMessage] = useState<string>("");
-
-  const pressedIn = () => setPressed(true);
-  const pressedOut = () => setPressed(false);
 
   const redirectToLoginPageIfNeeded = async () => {
     setReturnMessage("Authentication required!");
@@ -43,6 +39,7 @@ const loading = adminData.loading;
       return setReturnMessage("Please login again!");
     }
   };
+  // console.log("APP REFRESHED!!!!!!!")
 
   const handleNextPage = async () => {
     try {
@@ -54,7 +51,6 @@ const loading = adminData.loading;
       if (getAdmin.fulfilled.match(res)) {
         const { payload } = res;
         if (payload.success) {
-          console.log(payload.admin)
           router.push('/(tabs)/Discover');
           return null;
         } else {
@@ -154,7 +150,7 @@ const loading = adminData.loading;
         <Pressable
           onPress={handleNextPage}
           style={{
-            backgroundColor: pressed ? colors.col.PressedIn2 : colors.col.Black,
+            backgroundColor: colors.col.Black,
             width: 80,
             height: 80,
             borderRadius: 80 / 2,
@@ -163,8 +159,6 @@ const loading = adminData.loading;
             alignSelf: "center",
             marginTop: "2%",
           }}
-          onPressIn={pressedIn}
-          onPressOut={pressedOut}
         >
           {loading ? (
             <Text

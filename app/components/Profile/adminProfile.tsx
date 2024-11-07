@@ -51,7 +51,10 @@ export default function Menu(): React.JSX.Element {
   const updatedAdmin: InitialStateUpdatedAdmin = useSelector(
     (s: RootState) => s.updateAdmin
   );
-  // useEffect(()=>{})
+  const postLoading = useSelector((s: RootState) => s.getPostById.loading);
+  const comments = useSelector((s: RootState) => s.getPostById.response.comments);
+
+  // console.log(comments)
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -98,7 +101,7 @@ export default function Menu(): React.JSX.Element {
       return null;
     }
   };
-
+  // console.log(p);
   useFocusEffect(
     React.useCallback(() => {
       refreshAdmin();
@@ -243,7 +246,7 @@ export default function Menu(): React.JSX.Element {
 
   const AdminUploads = (): React.JSX.Element => {
     return (
-      <View style={{ flex: 1, alignItems: "center" }}>
+      <View style={{ flex: 1 }}>
         {p.length === 0 ? (
           <View style={{ flex: 1, alignItems: "center" }}>
             <View
@@ -254,6 +257,7 @@ export default function Menu(): React.JSX.Element {
                 marginTop: 30,
                 borderRadius: 55,
                 justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <Text
@@ -268,24 +272,29 @@ export default function Menu(): React.JSX.Element {
             </View>
           </View>
         ) : (
-          <View>
-            {p.map((j,i)=>(<AdminPost key={j._id} i={j} a={a} lastPostMargin={i === p.length - 1 ? 10 : 0} />))}
+          <View style={{ flex: 1 }}>
+            <FlatList
+              data={p}
+              numColumns={3}
+              contentContainerStyle={{
+                alignItems: "center",
+              }}
+              style={{ paddingBottom: 10 }}
+              keyExtractor={(i) => i._id}
+              renderItem={({ item, index }) => (
+                <>
+                  <AdminPost key={item._id} i={item} a={a} lastPostMargin={0} />
+                </>
+              )}
+            />
           </View>
-
-          // <FlatList
-          //   data={p}
-          //   keyExtractor={(p) => p._id}
-          //   renderItem={({item, index}) => (
-          //     <AdminPost i={item} a={a} lastPostMargin={index === p.length - 1 ? 10 : 0} />
-          //   )}
-          // />
         )}
       </View>
     );
   };
 
   return (
-    <View style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
+    <View style={{ flex: 1, opacity: loading || postLoading ? 0.6 : 1 }}>
       <View
         style={{
           flexDirection: "row",
@@ -318,10 +327,10 @@ export default function Menu(): React.JSX.Element {
           </Text>
         </View>
       ) : (
-        <ScrollView style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
           <AdminInfo />
           <AdminUploads />
-        </ScrollView>
+        </View>
       )}
     </View>
   );

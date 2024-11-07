@@ -45,15 +45,6 @@ const EditProfile = () => {
   const updatedAdmin = useSelector((u: RootState) => u.updateAdmin);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const checkAdmin = (t: any) => {
-    if (!Array.isArray(t) || t !== undefined || t !== null) return t;
-  };
-
-  // useEffect(() => {
-  //   const adminData = checkAdmin(admin);
-  //   sa(adminData);
-  // }, []);
-  // console.log(a?.dateOfBirth);
   const inputUserNameRef = useRef<TextInput>(null);
   // const [a, sa] = useState<USER>();
   const [mediaPermissionGranted, setMediaPermissionGranted] =
@@ -93,10 +84,10 @@ const EditProfile = () => {
   const [saved, setSaved] = useState<boolean>(true);
   const [bookmarksLength, setBookmarksLength] = useState<number | string>();
   // const [updatedUserName, setUpdatedUserName] = useState<string>("")
-  useFocusEffect(() => {
-    console.log(dob);
-    console.log(selectedDate);
-  });
+  // useFocusEffect(() => {
+  //   console.log(dob);
+  //   console.log(selectedDate);
+  // });
 
   const getAvatarUri = async () => {
     try {
@@ -158,7 +149,6 @@ const EditProfile = () => {
       const res = await dispatch(updateAdmin(data));
       if (updateAdmin.fulfilled.match(res)) {
         const { payload } = res;
-        // console.log(payload);
         if (payload.success) {
           setSaved(true);
           await dispatch(getAdmin(token));
