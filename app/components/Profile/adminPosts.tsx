@@ -20,8 +20,6 @@ import {
   import { POST } from "@/types";
   import { UseDispatch, useSelector } from "react-redux";
 import AdminPost from "./components/adminPost";  
-  const baseUrlGetPosts = `http://192.168.1.64:6600/api/user/get-posts`;
-  const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
   
   export default function AdminPosts() {
     const router = useRouter();

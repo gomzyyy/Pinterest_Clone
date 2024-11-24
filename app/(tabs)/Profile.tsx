@@ -7,9 +7,11 @@ import {
   ToastAndroid,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator
 } from "react-native";
+import Header from "../components/header";
 import React, { useEffect, useState } from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -90,7 +92,7 @@ export default function Menu(): React.JSX.Element {
       }
     } catch (error) {
       setRefreshing(false);
-      console.log(error);
+      // console.log(error);
       return null;
     }
   };
@@ -113,7 +115,8 @@ export default function Menu(): React.JSX.Element {
         return null;
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
+      return;
     }
   };
 
@@ -402,27 +405,12 @@ export default function Menu(): React.JSX.Element {
 
   return (
     <View style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 4,
-          paddingTop: 35,
-          backgroundColor: colors.col.PressedIn,
-          height: 100,
-        }}
-      >
-        <FontAwesome name="user-circle-o" size={24} color={colors.col.white} />
-        <Text style={{ fontSize: 24, color: colors.col.white }}>Profile</Text>
-      </View>
+       <Header headerText="Profile"/>
       {refreshing ? (
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Text style={{ fontFamily: "pop-b", marginBottom: 80, fontSize: 16 }}>
-            Loading...
-          </Text>
+         <ActivityIndicator color={"black"} size={50} />
         </View>
       ) : (
         <MainProfilePage />
@@ -496,39 +484,3 @@ const profileMenuStyles = StyleSheet.create({
     color: colors.col.white,
   },
 });
-
-// const getAdmin = async () => {
-//   try {
-//     setLoading(true);
-//     setError("pending");
-//     const token = await AsyncStorage.getItem("token");
-//     if (!token || token === null) {
-//       return setReturnMessage("Token not found");
-//     }
-//     const getAdmin = await fetch(
-//       `http://192.168.1.64:6600/api/user/profile/get-user`,
-//       {
-//         method: "GET",
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     const response = await getAdmin.json();
-//     console.log(response.admin);
-//     if (response.success) {
-//       setAdminInfo(response.admin);
-//       setLoading(false);
-//       setError("success");
-//     } else {
-//       setLoading(false);
-//       setError("failed");
-//       return setReturnMessage(response.message);
-//     }
-//   } catch (error) {
-//     setLoading(false);
-//     setError("failed");
-//     console.log(error);
-//     return error;
-//   }
-// };

@@ -7,8 +7,9 @@ import {
   ToastAndroid,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
+import Header from "../header";
 import AdminPost from "./components/adminPost";
 import React, { useEffect, useState } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -52,7 +53,9 @@ export default function Menu(): React.JSX.Element {
     (s: RootState) => s.updateAdmin
   );
   const postLoading = useSelector((s: RootState) => s.getPostById.loading);
-  const comments = useSelector((s: RootState) => s.getPostById.response.comments);
+  const comments = useSelector(
+    (s: RootState) => s.getPostById.response.comments
+  );
 
   // console.log(comments)
 
@@ -151,33 +154,33 @@ export default function Menu(): React.JSX.Element {
                 height: "100%",
               }}
             >
-              <View
+                <View
                 style={{
-                  justifyContent: "center",
                   gap: 5,
-                  width: 200,
-                  marginLeft: 10,
+                  flexDirection:'row',
+                  alignItems:'center'
                 }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "pop-b1",
-                    fontSize: 24,
-                    color: colors.col.PressedIn3,
-                    marginLeft: 5,
-                  }}
                 >
-                  {a?.userName}
-                </Text>
-                {a?.verified && (
-                  <View>
-                    <Octicons
-                      name="verified"
-                      size={20}
-                      color={colors.col.PressedIn3}
-                    />
-                  </View>
-                )}
+                  <Text
+                    style={{
+                      fontFamily: "pop-b1",
+                      fontSize: 24,
+                      color: colors.col.PressedIn3,
+                      marginLeft: 5,
+                    }}
+                  >
+                    {a?.userName}
+                  </Text>
+                  {a?.verified && (
+                    <View>
+                      <Octicons
+                        name="verified"
+                        size={20}
+                        color={colors.col.PressedIn3}
+                      />
+                    </View>
+                  )}
+                </View>
                 <View style={{ flexDirection: "row", gap: 5 }}>
                   <Pressable
                     style={{
@@ -189,6 +192,7 @@ export default function Menu(): React.JSX.Element {
                       borderRadius: 4,
                       backgroundColor: colors.col.PressedIn5,
                     }}
+                    onPress={()=>router.push('/components/Profile/followerPage')}
                   >
                     <Text style={{ fontSize: 16 }}>
                       Followers({a?.followers.length})
@@ -204,13 +208,13 @@ export default function Menu(): React.JSX.Element {
                       borderRadius: 4,
                       backgroundColor: colors.col.PressedIn5,
                     }}
+                    onPress={()=>router.push('/components/Profile/followingPage')}
                   >
                     <Text style={{ fontSize: 16 }}>
                       Following({a?.following.length})
                     </Text>
                   </Pressable>
                 </View>
-              </View>
             </View>
           </View>
           <View style={{ marginTop: 5 }}>
@@ -219,6 +223,8 @@ export default function Menu(): React.JSX.Element {
                 fontFamily: "pop-reg",
                 fontSize: 12,
                 color: colors.col.PressedIn,
+                position:'relative',
+                left:5
               }}
             >
               @{a?.userId}
@@ -295,36 +301,19 @@ export default function Menu(): React.JSX.Element {
 
   return (
     <View style={{ flex: 1, opacity: loading || postLoading ? 0.6 : 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 4,
-          paddingTop: 35,
-          backgroundColor: colors.col.PressedIn,
-          height: 100,
-        }}
-      >
-        <Pressable
-          style={{ position: "absolute", left: 25, bottom: "26%" }}
-          onPress={() => router.back()}
-        >
-          <Ionicons
-            name="arrow-back-outline"
-            size={28}
-            color={colors.col.white}
-          />
-        </Pressable>
-        <Text style={{ fontSize: 24, color: colors.col.white }}>Profile</Text>
-      </View>
+      <Header headerText="Profile" backButton>
+        <Ionicons
+          name="arrow-back-outline"
+          size={28}
+          color={colors.col.white}
+          style={{ width: 30 }}
+        />
+      </Header>
       {refreshing ? (
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Text style={{ fontFamily: "pop-b", marginBottom: 80, fontSize: 16 }}>
-            Loading...
-          </Text>
+          <ActivityIndicator size={50} color={colors.col.Black} />
         </View>
       ) : (
         <View style={{ flex: 1 }}>

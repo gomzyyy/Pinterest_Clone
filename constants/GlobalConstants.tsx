@@ -2,6 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import { Alert } from "react-native";
 
+//export const IP_ADDRESS = `192.168.151.12` // my hotspot
+export const IP_ADDRESS = `192.168.1.70` // home
+
 const confirmPopUp = (): Promise<boolean> => {
   return new Promise((resolve) => {
     Alert.alert(
@@ -185,7 +188,8 @@ export const requestMediaPermission = async (state:(value:boolean)=>void) => {
     state(true);
     return;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
+    return;
   }
 };
 
@@ -231,7 +235,7 @@ export const userController = {
 
       const alreadyLoggedin = await AsyncStorage.getItem("face");
 
-      console.log(alreadyLoggedin);
+      // console.log(alreadyLoggedin);
 
       if (
         alreadyLoggedin !== null &&
@@ -262,7 +266,7 @@ export const userController = {
       messages.user.status = "signupOk";
       return true;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       messages.user.status = "signupNot";
       return false;
     }
@@ -311,7 +315,7 @@ export const userController = {
       messages.user.returnMessage = "login success!";
       return true;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       messages.user.status = "loginNot";
       messages.user.returnMessage = "please try again";
       return false;
@@ -342,7 +346,7 @@ export const userController = {
       messages.user.returnMessage = "logout success";
       return true;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       messages.user.status = "logoutNot";
       return false;
     }

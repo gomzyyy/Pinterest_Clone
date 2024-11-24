@@ -13,7 +13,41 @@ type collectionData = {
   collection: string;
   images: imageObj[];
 };
-
+export interface GetUserType {
+  userId: string | undefined;
+  token: string;
+}
+export interface GetAllUserType {
+  token: string;
+}
+export interface GetSuggestionsType {
+  token: string;
+}
+export interface followUnfollowDataType {
+  token: string;
+  isFollowedId?: string;
+  isUnfollowedId?: string;
+}
+export interface removeFollowerDataType {
+  token: string;
+  followerId: string;
+}
+export interface removeFollowerResponseType {
+  loading: boolean;
+  error: SerializedError | null;
+  response: {
+    message: string;
+    success: boolean;
+  };
+}
+export interface followUnfollowResponseType {
+  loading: boolean;
+  error: SerializedError | null;
+  response: {
+    message: string;
+    success: boolean;
+  };
+}
 export interface getPostByIdType {
   loading: boolean;
   error: SerializedError | null;
@@ -22,6 +56,8 @@ export interface getPostByIdType {
     requestedPost: POST | undefined;
     success: boolean;
     comments: commentType[] | undefined;
+    peopleLiked: string[] | undefined;
+    peopleDisliked: string[] | USER[] | undefined;
   };
 }
 export interface updatePostByIdType {
@@ -30,6 +66,19 @@ export interface updatePostByIdType {
   response: {
     message: string;
     success: boolean;
+    comments: commentType[] | string[] | undefined;
+    peopleLiked: string[] | undefined;
+    peopleDisliked: string[] | undefined;
+  };
+}
+
+export interface getAllPostType {
+  loading: boolean;
+  error: SerializedError | null;
+  response: {
+    message: string;
+    success: boolean;
+    posts: string[] | POST[] | undefined;
   };
 }
 export interface InitialStateAdmin {
@@ -44,10 +93,14 @@ export interface GetPostType {
   postId?: string;
   token: string;
 }
+export interface GetAllPostType {
+  token: string;
+}
 export interface postActionsType {
   postId?: string;
   getComment?: string;
   token: string;
+  postLiked?: boolean;
   // likes, getcomment, reportPost, dislikes
 }
 export interface AdminUpdateData {
@@ -75,18 +128,58 @@ export interface InitialStateUpdatedAdmin {
   };
   error: SerializedError | null;
 }
+export interface InitialStateAllUsers {
+  response: {
+    message: string;
+    success: boolean;
+    data: {
+      AllUsersWithoudAdmin: USER[] | undefined;
+      AllUsersIncludingAdmin: USER[] | undefined;
+    };
+  };
+  loading: boolean;
+  error: SerializedError | null;
+}
+export interface InitialStateSuggestions {
+  response: {
+    message: string;
+    success: boolean;
+    data: {
+      suggestedUsers: USER[] | undefined;
+    };
+  };
+  loading: boolean;
+  error: SerializedError | null;
+}
+export interface getSearchResultDataType {
+  token: string;
+  query?: string;
+}
+export interface getSearchResultResponseType {
+  response: {
+    message: string;
+    success: boolean;
+    data: {
+      result: USER[] | POSt[] | undefined;
+      type:string;
+    };
+  };
+  loading: boolean;
+  error: SerializedError | null;
+}
+
 export interface POST {
   _id: string;
   admin: USER;
-  comments: commentType[];
+  comments: commentType[] | string[];
   createdAt: string;
   description: string;
-  dislikes: [];
+  dislikes: USER[] | string[];
   downloadable: boolean;
   image: string;
-  likes: [];
-  visits: USER[];
-  reportStatus: [];
+  likes: string[] | string[];
+  visits: USER[] | string[];
+  reportStatus: string[];
   tags: string[];
   title: string;
   updatedAt: string;
@@ -98,12 +191,12 @@ export interface USER {
   userId: string;
   avatar: string;
   posts: string[];
-  followers: USER[];
-  following: USER[];
-  bookmarks: POST[];
+  followers: USER[] | string[];
+  following: USER[] | string[];
+  bookmarks: POST[] | string[];
   reportStatus: [];
   bio: string;
-  dateOfBirth: Date;
+  dateOfBirth: Date | string;
   isDisabled: boolean;
   isPrivate: boolean;
   premiumUser: boolean;
@@ -119,7 +212,7 @@ export interface AdminResponse {
   success: boolean;
 }
 export interface commentType {
-  _id?:string;
+  _id?: string;
   text?: string;
   admin?: USER | undefined;
   likes?: USER[] | string[] | undefined;
@@ -155,3 +248,7 @@ export interface commentType {
   visible?: boolean;
   hidden?: boolean;
 }
+// declare module 'lodash/debounce' {
+//   import { debounce } from 'lodash';
+//   export default debounce;
+// }

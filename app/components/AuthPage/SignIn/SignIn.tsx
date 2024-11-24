@@ -15,6 +15,7 @@ import { colors } from "@/constants/Colors";
 import { messages } from "@/constants/GlobalConstants";
 import STATE from "@/ContextAPI";
 import { GlobalState } from "@/ContextAPI";
+import { IP_ADDRESS as ip } from "@/constants/GlobalConstants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type pngIcon = PropsWithChildren<{
@@ -38,7 +39,7 @@ const SignIn = () => {
     </GlobalState>
   );
 };
-const baseUrl = `http://192.168.1.64:6600/api/`;
+const baseUrl = `http://${ip}:6600/api/`;
 
 function SignInFun() {
   const router = useRouter();
@@ -120,7 +121,8 @@ function SignInFun() {
       return null;
     } catch (error) {
       setLoading(false);
-      console.log(error);
+      // console.log(error);
+      return;
     }
   };
 

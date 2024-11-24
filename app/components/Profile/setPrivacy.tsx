@@ -117,7 +117,7 @@ export default function Menu(): React.JSX.Element {
       try {
         const token = await AsyncStorage.getItem("token");
         if (!token) {
-          console.log("no token found");
+          // console.log("no token found");
           return null;
         }
         const res = await dispatch(getAdmin(token));
@@ -260,39 +260,3 @@ const profilePrivacyEditStyles = StyleSheet.create({
     color: colors.col.white,
   },
 });
-
-// const getAdmin = async () => {
-//   try {
-//     setLoading(true);
-//     setError("pending");
-//     const token = await AsyncStorage.getItem("token");
-//     if (!token || token === null) {
-//       return setReturnMessage("Token not found");
-//     }
-//     const getAdmin = await fetch(
-//       `http://192.168.1.64:6600/api/user/profile/get-user`,
-//       {
-//         method: "GET",
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     const response = await getAdmin.json();
-//     console.log(response.admin);
-//     if (response.success) {
-//       setAdminInfo(response.admin);
-//       setLoading(false);
-//       setError("success");
-//     } else {
-//       setLoading(false);
-//       setError("failed");
-//       return setReturnMessage(response.message);
-//     }
-//   } catch (error) {
-//     setLoading(false);
-//     setError("failed");
-//     console.log(error);
-//     return error;
-//   }
-// };

@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 interface ImageEl {
   i: POST | undefined;
   a: USER | undefined;
-  lastPostMargin: number;
+  lastPostMargin?: number;
 }
 
 const AdminPost = ({ i, a, lastPostMargin }: ImageEl) => {
@@ -37,7 +37,8 @@ const AdminPost = ({ i, a, lastPostMargin }: ImageEl) => {
         return null;
       }
     } catch (error) {
-      console.log(error)
+      // console.log(error)
+      return;
     }
   };
 

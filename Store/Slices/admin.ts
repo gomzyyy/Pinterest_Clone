@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { InitialStateAdmin, InitialStateUpdatedAdmin, USER } from "../../types";
-import { getAdmin,updateAdmin } from "../Thunk/userThunk";
+import { InitialStateAdmin, InitialStateUpdatedAdmin, removeFollowerResponseType,followUnfollowResponseType,getSearchResultResponseType } from "../../types";
+import { getAdmin,updateAdmin,handleFollowUnfollowThunk,handleRemoveFollowerThunk,getSearchResultThunk} from "../Thunk/userThunk";
 
 let admin: InitialStateAdmin = {
   response: {
@@ -16,7 +16,7 @@ let admin: InitialStateAdmin = {
 };
 
 const adminSlice = createSlice({
-  name: "user",
+  name: "admin",
   initialState: admin,
   reducers: {},
   extraReducers: (builder) => {
@@ -101,3 +101,125 @@ const updateAdminSlice = createSlice({
   }
 })
 export const updateAdminSliceFunction = updateAdminSlice.reducer
+
+const initialStateFollowUnfollowResponse:followUnfollowResponseType={
+  response: {
+    message: "",
+    success: false,
+  },
+  loading: false,
+  error: null,
+}
+const followUnfollowSlice = createSlice({
+  name:'followUnfollow',
+  initialState: initialStateFollowUnfollowResponse,
+  reducers:{},
+  extraReducers:(builder)=>{
+    builder.addCase(handleFollowUnfollowThunk.pending, (state)=>{
+      if(!state.loading)state.loading = true
+    })
+    .addCase(handleFollowUnfollowThunk.fulfilled, (state, action)=>{
+      if(state.loading){
+        state.loading = false
+      }
+      if (action.payload !== null || action.payload !== undefined){
+        state.response.message = action.payload.message
+        state.response.success = action.payload.success
+      }
+    })
+    .addCase(handleFollowUnfollowThunk.rejected, (state, action)=>{
+      if(state.loading){
+        state.loading = false
+      }
+      action.error = state.error
+    })
+  }
+})
+export const followUnfollowSliceFunction = followUnfollowSlice.reducer
+
+const initialStateRemoveFollowerResponse:removeFollowerResponseType={
+  response: {
+    message: "",
+    success: false,
+  },
+  loading: false,
+  error: null,
+}
+
+const removeFollowerSlice = createSlice({
+  name:'removeFollower',
+  initialState:initialStateRemoveFollowerResponse,
+  reducers:{},
+  extraReducers:(builder)=>{
+    builder.addCase(handleRemoveFollowerThunk.pending, (state)=>{
+      if(!state.loading)state.loading = true
+    })
+    .addCase(handleRemoveFollowerThunk.fulfilled, (state, action)=>{
+      if(state.loading){
+        state.loading = false
+      }
+      if (action.payload && action.payload.message){
+        state.response.message = action.payload.message
+        state.response.success = action.payload.success
+      }
+    })
+    .addCase(handleRemoveFollowerThunk.rejected, (state, action)=>{
+      if(state.loading){
+        state.loading = false
+      }
+      action.error = state.error
+    })
+  }
+})
+
+export const removeFollowerSliceFunction = removeFollowerSlice.reducer;
+
+let initialStateGetSearchQuery: getSearchResultResponseType = {
+  response: {
+    message: "",
+    data: {
+      result:[],
+      type:""
+    },
+    success: false,
+  },
+  loading: false,
+  error: null,
+};
+
+
+const getSearchQueryResponseFunction = createSlice({
+  name: "searchQuery",
+  initialState: initialStateGetSearchQuery,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(getSearchResultThunk.pending, (state) => {
+        if (!state.loading) {
+          state.loading = true;
+        }
+        state.error = null;
+      })
+      .addCase(getSearchResultThunk.fulfilled, (state, action) => {
+        if (state.loading) {
+          state.loading = false;
+        }
+        if (action.payload && action.payload.data) {
+          const { result, type } = action.payload.data;
+          if (result !== undefined) {
+            state.response.data.result = result;
+            state.response.data.type = type;
+          }
+          state.response.message = action.payload.message || "";
+          state.response.success = action.payload.success;
+        }
+      })
+      .addCase(getSearchResultThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+      });
+  },
+});
+
+export const getSearchQueryResponse = getSearchQueryResponseFunction.reducer;
+

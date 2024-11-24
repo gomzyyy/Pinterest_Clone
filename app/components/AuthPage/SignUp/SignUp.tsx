@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useNavigation } from "expo-router";
 import { colors } from "@/constants/Colors";
 import { BackIcon } from "@/constants/icon";
+import { IP_ADDRESS as ip } from "@/constants/GlobalConstants";
 import { PropsWithChildren } from "react";
 import { messages, requestMediaPermission } from "@/constants/GlobalConstants";
 import * as ImagePicker from "expo-image-picker";
@@ -35,7 +36,7 @@ type bodyType = {
   confirmPassword: string;
 };
 
-const baseUrl = `http://192.168.1.64:6600/api/`;
+const baseUrl = `http://${ip}:6600/api/`;
 
 export default function SignUp() {
   const router = useRouter();
@@ -89,6 +90,7 @@ export default function SignUp() {
       setLoading(false);
       setReturnMessage("Error occured while creating account.");
       console.log(error);
+      return;
     }
   };
 

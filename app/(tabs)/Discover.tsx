@@ -7,23 +7,25 @@ import {
   Pressable,
   ToastAndroid,
   Button,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { colors } from "@/constants/Colors";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { userController, messages } from "@/constants/GlobalConstants";
+import { userController, IP_ADDRESS as ip } from "@/constants/GlobalConstants";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "expo-router";
 // import { imageData } from "../../constants/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { POST } from "@/types";
+import { getAllPostsThunk } from "@/Store/Thunk/postThunk";
+import { POST, USER } from "@/types";
 import ImageDiscovery from "../components/postImage/image_Discovery";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/Store/store";
-
-const baseUrlGetPosts = `http://192.168.1.64:6600/api/user/get-posts`;
-// const baseUrlUser = `http://192.168.1.64:6600/api/user/`;
+import Header from "../components/header";
+import NoPosts from "../components/RedirectTo/components/noPosts";
+import { getSuggestionsThunk } from "@/Store/Thunk/userThunk";
 
 export default function Discover() {
   const router = useRouter();
@@ -34,63 +36,91 @@ export default function Discover() {
   const [filtercount, setFiltercount] = useState<number>(6);
   const [collectionName, setCollectionName] = useState<string>("");
   const [tags, setTags] = useState<boolean>(false);
-  const [result, setResult] = useState<any>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [result, setResult] = useState<POST[] | []>([]);
   const [error, setError] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [showPosts, setShowPosts] = useState<boolean>()
   const postActionLoading = useSelector(
     (f: RootState) => f.postActions.loading
   );
+  const adminLoading = useSelector((a: RootState) => a.admin.loading);
+  const admin: USER | undefined = useSelector((a: RootState) => a.admin.admin);
+  const loading = useSelector((g: RootState) => g.getAllPosts.loading);
+  const data = useSelector((a: RootState) => a.getAllUsers.response.data);
+  const dispatch = useDispatch<AppDispatch>();
 
   const getPosts = async () => {
     try {
-      console.log("jfbverbi")
-      setLoading(true);
       setError(false);
       const token = await AsyncStorage.getItem("token");
-      if (token !== null) {
-        const getPostsAPI = await fetch(baseUrlGetPosts, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const res = await getPostsAPI.json();
-        setLoading(false);
-        if (res.success) {
-          setReturnMessage(`Welcome!`);
-          setResult(() => [...res.data.reverse()]);
-          if (error) setError(false);
-          return null;
-        } else {
-          setReturnMessage(res.message);
-        }
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const data = {
+        token,
+      };
+      const res = await dispatch(getAllPostsThunk(data)).unwrap();
+      if (res.success) {
+        // console.log(res.posts)
+        setResult(res.posts);
+        return;
       } else {
-        setReturnMessage("No token found!");
-        return null;
+        setReturnMessage(res.message);
+        return;
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       setError(true);
-      setLoading(false);
-      return null;
+      return;
+    }
+  };
+  const getSuggestedUsers = async () => {
+    try {
+      setError(false);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const data = {
+        token,
+      };
+     await dispatch(getSuggestionsThunk(data)).unwrap();
+      return;
+    } catch (error) {
+      setError(true);
+      return;
     }
   };
 
   useFocusEffect(
     React.useCallback(() => {
-      getPosts();
-    }, [])
+      if (!admin) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      if (admin?.following.length !== 0) {
+        getPosts();
+      }
+      if (result.length === 0) {
+        getSuggestedUsers();
+      }
+    }, []
+  )
   );
 
   useEffect(() => {
-    getPosts();
+    if (!admin) {
+      router.replace("/components/GetStarted/GetStarted");
+      return;
+    }
+    if (admin?.following.length !== 0) {
+      getPosts();
+    } else {
+      getSuggestedUsers();
+    }
   }, [refresh]);
-
-  // useEffect(()=>{
-  //   setInterval(()=>setRefreshAtInterval(r=>!r), refreshInterval)
-  //   getPosts();
-  // },[refreshAtInterval])
 
   useEffect(() => {
     if (returnMessage !== "" || returnMessage !== null)
@@ -101,40 +131,21 @@ export default function Discover() {
     return (
       <>
         <View style={{ flex: 1, alignItems: "center" }}>
-          {loading ? (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "pop-b",
-                  fontSize: 20,
-                  position: "relative",
-                  bottom: 80,
-                }}
-              >
-                Loading...
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={result}
-              keyExtractor={(r) => r._id}
-              numColumns={1}
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item, index }) => (
-                <ImageDiscovery
-                  i={item}
-                  a={item.admin}
-                  margin={index === result.length - 1 ? 10 : 0}
-                />
-              )}
-            />
-          )}
+          <FlatList
+            data={result}
+            keyExtractor={(r) => r._id}
+            numColumns={1}
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={10}
+            windowSize={5}
+            renderItem={({ item, index }) => (
+              <ImageDiscovery
+                i={item}
+                a={item.admin}
+                margin={index === result.length - 1 ? 10 : 0}
+              />
+            )}
+          />
         </View>
       </>
     );
@@ -162,24 +173,14 @@ export default function Discover() {
 
   return (
     <View style={{ flex: 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 4,
-          paddingTop: 35,
-          backgroundColor: colors.col.PressedIn,
-          height: 100,
-          position: "relative",
-          borderBottomColor: colors.col.PressedIn,
-          borderBottomWidth: 1.2,
-        }}
-      >
-        {/* <AntDesign name="find" size={28} color={colors.col.white} /> */}
-        <Text style={{ fontSize: 24, color: colors.col.white }}>Home</Text>
-      </View>
-      {error ? <ErrorPage /> : <DiscoverPage />}
+      <Header headerText="Home" showLoading={loading} />
+      {error ? (
+        <ErrorPage />
+      ) : admin?.following.length !== 0 && result.length !== 0 ? (
+        <DiscoverPage />
+      ) : (
+        <NoPosts />
+      )}
     </View>
   );
 }

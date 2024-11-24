@@ -1,17 +1,21 @@
-import { View, Text, Image, Pressable, ScrollView } from "react-native";
-import React, { useState } from "react";
+import { View, Text, Image, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
 import { USER, POST } from "../../../types";
 import { colors } from "@/constants/Colors";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { profleImageSkeleton } from "@/constants/data";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppDispatch, RootState } from "@/Store/store";
-import { getPostById } from "@/Store/Thunk/postThunk";
+import {
+  getAllPostsThunk,
+  getPostById,
+  postActionsById,
+} from "@/Store/Thunk/postThunk";
+import { getAdmin, getUserProfile } from "@/Store/Thunk/userThunk";
 
 interface ImageEl {
   i: POST | undefined;
@@ -20,20 +24,26 @@ interface ImageEl {
 }
 const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
 
-const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
-  const [liked, setLiked] = useState<boolean>(false);
-  const [adminView, setAdminView] = useState<boolean>(false);
+const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
+  const gettingPost = useSelector((s: RootState) => s.getPostById.loading);
+  const peopleLikedThisPost = useSelector(
+    (e: RootState) => e.postActions.response.peopleLiked
+  );
+  // console.log(peopleLikedThisPost)
+  // console.log(a?._id)
+  // const checkIfLiked = React.useMemo(() => Array.isArray(peopleLikedThisPost) && a
+  // ? peopleLikedThisPost.includes(a._id)
+  // : false, [peopleLikedThisPost, a])
 
-  const handleLikeBtn = () => {
-    if (!liked) {
-      setLiked(true);
-      // if (disliked) {
-      //   setdisliked(false);
-      // }
-    } else {
-      setLiked(false);
-    }
-  };
+  // const alreadyLikedByAdmin = checkIfLiked;
+  // console.log(alreadyLikedByAdmin)
+
+  const [adminView, setAdminView] = useState<boolean>(false);
+  const [reaction, setReaction] = useState<{ liked: boolean; disliked: boolean }>({
+    liked: false,
+    disliked: false,
+  });  const [disliked, setdisliked] = useState<boolean>(false);
+
   // const handleDislikeBtn = () => {
   //   if (!disliked) {
   //     setdisliked(true);
@@ -43,7 +53,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
   //   } else setdisliked(false);
   // };
   const toggleImageNprofile = () => setAdminView((a) => !a);
-  const { loading } = useSelector((s: RootState) => s.getPostById);
+
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
@@ -68,6 +78,77 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
     } catch (error) {
       console.log(error);
     }
+  };
+  const redirectToUserProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const userId = i?.admin._id.trim();
+      const data = {
+        token,
+        userId,
+      };
+      const res = await dispatch(getUserProfile(data)).unwrap();
+      if (res.success) {
+        router.push("/components/Profile/userProfile");
+        return;
+      } else {
+        return;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // const handleUserActionOnPost = React.useCallback(async () => {
+  //   try {
+  //     console.log("triggered");
+  //     const token = await AsyncStorage.getItem("token");
+  //     if (!token) {
+  //       router.replace("/components/GetStarted/GetStarted");
+  //       console.log("no token");
+  //       return;
+  //     }
+  //     const data = {
+  //       token,
+  //       postId: i?._id,
+  //       postLiked: !alreadyLikedByAdmin,
+  //     };
+  //     console.log(data.postLiked);
+  //     const res = await dispatch(postActionsById(data)).unwrap();
+  //     if (res.success) {
+  //       const data0 = {
+  //         token,
+  //       };
+  //       await Promise.all([
+  //         dispatch(getAdmin(token)),
+  //         dispatch(getAllPostsThunk(data0)),
+  //       ]);
+  
+  //       return;
+  //     } else {
+  //       const data2 = {
+  //         token,
+  //         postId: i?._id,
+  //       };
+  //       await dispatch(getPostById(data2));
+  //       return;
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }, [alreadyLikedByAdmin, dispatch, i?._id, router]);
+
+  const handleLikeBtn = async () => {
+    setReaction((prevState) => ({
+      ...prevState,
+      liked: !prevState.liked,
+      disliked: prevState.liked ? false : prevState.disliked, // reset dislike if liked
+    }));
+    // await handleUserActionOnPost();
   };
 
   return (
@@ -109,8 +190,6 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
               flex: 1,
               marginTop: 15,
               borderRadius: 20,
-              // borderWidth: 0.8,
-              // borderColor: colors.col.PressedIn2,
               overflow: "hidden",
             }}
           >
@@ -167,11 +246,11 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                           fontFamily: "pop-b",
                         }}
                       >
-                        {a?.userName}
+                        {a?.userName || "Anonymous"}
                       </Text>
                     </View>
 
-                    <Pressable>
+                    <Pressable onPress={redirectToUserProfile}>
                       <Text
                         style={{
                           color: colors.col.PressedIn,
@@ -182,7 +261,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
                           zIndex: 9999,
                         }}
                       >
-                        @{a?.userId}
+                        @{a?.userId || "anonymous"}
                       </Text>
                     </Pressable>
                   </View>
@@ -257,7 +336,7 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
           }}
           onPress={handleLikeBtn}
         >
-          {liked ? (
+          {reaction.liked ? (
             <AntDesign
               name="heart"
               size={24}
@@ -302,5 +381,5 @@ const ImageDiscovery = ({ i, a, margin }: ImageEl) => {
       </View>
     </View>
   );
-};
+});
 export default ImageDiscovery;

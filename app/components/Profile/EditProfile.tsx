@@ -70,7 +70,7 @@ const EditProfile = () => {
   const [following, setFollowing] = useState<string[]>([]);
   const [dob, setDob] = useState<string | undefined>(
     a?.dateOfBirth
-      ? a?.dateOfBirth.toISOString()
+      ? a?.dateOfBirth.toString()
       : selectedDate?.trim() !== ""
       ? selectedDate
       : new Date().toISOString()
@@ -305,14 +305,14 @@ const EditProfile = () => {
                 maxLength={100}
                 editable={userNameEditable}
                 ref={inputUserNameRef}
-                onBlur={() => setUserNameEditable((u) => !u)}
+                onBlur={() => setUserNameEditable((u) => false)}
               />
             </View>
-            <TouchableOpacity
+            <Pressable
               style={profileEditStyles.editIcon}
               onPress={() => setUserNameEditable((u) => !u)}
             >
-              {userNameEditable && userName?.trim() !== "" ? (
+              {userNameEditable ? (
                 <FontAwesome6
                   name="check"
                   size={22}
@@ -325,7 +325,7 @@ const EditProfile = () => {
                   color={colors.col.PressedIn3}
                 />
               )}
-            </TouchableOpacity>
+            </Pressable>
           </View>
           <View style={profileEditStyles.profileOptions}>
             <Text

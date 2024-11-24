@@ -29,16 +29,12 @@ export default function MyTabs() {
                   width: "100%",
                   height: "100%",
                   alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: focused
-                    ? colors.col.PressedIn3
-                    : "transparent",
-                }}
+                  justifyContent: "center"}}
               >
                 <MaterialCommunityIcons
                   name="home-outline"
-                  size={30}
-                  color={focused ? colors.col.white : colors.col.PressedIn}
+                  size={focused?34:32}
+                  color={focused ? colors.col.Black : colors.col.PressedIn}
                 />
               </View>
             ),
@@ -56,16 +52,13 @@ export default function MyTabs() {
                   width: "100%",
                   height: "100%",
                   alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: focused
-                    ? colors.col.PressedIn3
-                    : "transparent",
+                  justifyContent: "center"
                 }}
               >
                 <Feather
                   name="search"
-                  size={24}
-                  color={focused ? colors.col.white : colors.col.PressedIn}
+                  size={focused?28:26}
+                  color={focused ? colors.col.Black : colors.col.PressedIn}
                 />
               </View>
             ),
@@ -85,16 +78,13 @@ export default function MyTabs() {
                   width: "100%",
                   height: "100%",
                   alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: focused
-                    ? colors.col.PressedIn3
-                    : "transparent",
+                  justifyContent: "center"
                 }}
               >
                 <Ionicons
                   name="add-circle-outline"
-                  size={26}
-                  color={focused ? colors.col.white : colors.col.PressedIn}
+                  size={focused?28:26}
+                  color={focused ? colors.col.Black : colors.col.PressedIn}
                 />
               </View>
             ),
@@ -112,16 +102,13 @@ export default function MyTabs() {
                   width: "100%",
                   height: "100%",
                   alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: focused
-                    ? colors.col.PressedIn3
-                    : "transparent",
+                  justifyContent: "center"
                 }}
               >
                 <FontAwesome
                   name="user-circle-o"
-                  size={24}
-                  color={focused ? colors.col.white : colors.col.PressedIn}
+                  size={focused?26:24}
+                  color={focused ? colors.col.Black : colors.col.PressedIn}
                 />
               </View>
             ),

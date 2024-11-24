@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from "react-native";
 import { colors } from "@/constants/Colors";
+import { IP_ADDRESS as ip } from "@/constants/GlobalConstants";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { userController, messages } from "@/constants/GlobalConstants";
 import { useRouter } from "expo-router";
@@ -22,8 +23,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Header from "../components/header";
 
-const baseUrl = "http://192.168.1.64:6600/api/user/";
 
 export default function Create(): React.JSX.Element {
   const logout = userController.logoutUser;
@@ -68,7 +69,7 @@ export default function Create(): React.JSX.Element {
       formData.append("title", title);
       formData.append("tags", tagsArray.join(","));
       const createPostAPI = await fetch(
-        `http://192.168.1.64:6600/api/user/upload`,
+        `http://${ip}:6600/api/user/upload`,
         {
           method: "POST",
           headers: {
@@ -92,7 +93,7 @@ export default function Create(): React.JSX.Element {
         ToastAndroid.show(res.message, ToastAndroid.SHORT);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       setLoading(false);
       ToastAndroid.show(
         "An error occurred while creating post.",
@@ -116,7 +117,8 @@ export default function Create(): React.JSX.Element {
         return null;
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
+      return;
     }
   };
 
@@ -127,24 +129,7 @@ export default function Create(): React.JSX.Element {
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 4,
-            paddingTop: 35,
-            backgroundColor: colors.col.PressedIn,
-            height: 100,
-          }}
-        >
-          <Ionicons
-            name="add-circle-outline"
-            size={24}
-            color={colors.col.white}
-          />
-          <Text style={{ fontSize: 24, color: colors.col.white }}>Create</Text>
-        </View>
+        <Header headerText="Create"/>
         <View style={{ padding: 20 }}>
           <Text style={styles.instructionText}>
             Choose Image from local file.

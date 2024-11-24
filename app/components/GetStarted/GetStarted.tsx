@@ -6,6 +6,7 @@ import {
   Pressable,
   ToastAndroid,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
@@ -25,16 +26,17 @@ export default function GetStartedPage() {
   const dispatch = useDispatch<AppDispatch>();
   const adminData = useSelector((e: RootState) => e.admin);
   // console.log(admin)
-const admin = adminData.admin;
-const loading = adminData.loading;
+  const admin = adminData.admin;
+  const loading = adminData.loading;
   const [returnMessage, setReturnMessage] = useState<string>("");
+  const [serverUnreachbale, setServerUnreachbale] = useState<boolean>(false);
 
   const redirectToLoginPageIfNeeded = async () => {
     setReturnMessage("Authentication required!");
     const userRes = await redirectToLoginPage();
     if (userRes) {
       router.push("/components/AuthPage/SignIn/SignIn");
-      return null;
+      return;
     } else {
       return setReturnMessage("Please login again!");
     }
@@ -43,38 +45,63 @@ const loading = adminData.loading;
 
   const handleNextPage = async () => {
     try {
+      const slowNetworkMessage = setTimeout(() => {
+        setReturnMessage("Request timeout");
+        return;
+      }, 10000);
+      const networkError = setTimeout(() => {
+        setServerUnreachbale(true);
+        router.push("/components/ErrorPages/serverUnreachable");
+        return;
+      }, 14000);
       const token: string | null = await AsyncStorage.getItem("token");
       if (!token) {
-        return await redirectToLoginPageIfNeeded();
+        setServerUnreachbale(false)
+        clearTimeout(slowNetworkMessage);
+        clearTimeout(networkError);
+        router.replace('/components/ErrorPages/sessionExpired')
+        return;
       }
       const res = await dispatch(getAdmin(token));
+
       if (getAdmin.fulfilled.match(res)) {
         const { payload } = res;
         if (payload.success) {
-          router.push('/(tabs)/Discover');
-          return null;
+          if (serverUnreachbale) {
+            setServerUnreachbale(false);
+          }
+          clearTimeout(slowNetworkMessage);
+          clearTimeout(networkError);
+          router.push("/(tabs)/Discover");
+          return;
         } else {
-          redirectToLoginPageIfNeeded();
-          setReturnMessage("Authentication required!");
-          return null;
+          if (!serverUnreachbale) {
+            redirectToLoginPageIfNeeded();
+            setReturnMessage("Authentication required!");
+            return;
+          }
+          return;
         }
       } else {
-        setReturnMessage("Authentication required!");
-        const userRes = await redirectToLoginPage();
-        if (userRes) {
-          router.push("/components/AuthPage/SignIn/SignIn");
-          return null;
-        } else {
-          return setReturnMessage("Please login again!");
+        if (!serverUnreachbale) {
+          setReturnMessage("Authentication required!");
+          const userRes = await redirectToLoginPage();
+          if (userRes) {
+            router.push("/components/AuthPage/SignIn/SignIn");
+            return;
+          } else {
+            return setReturnMessage("Please login again!");
+          }
         }
       }
     } catch (error) {
       if (error) {
         const userRes = await redirectToLoginPage();
-        if (userRes) {
+        if (userRes && !serverUnreachbale) {
           router.push("/components/AuthPage/SignIn/SignIn");
-          return null;
+          return;
         } else {
+          router.push('/components/ErrorPages/serverUnreachable');
           return setReturnMessage("Authentication Required");
         }
       }
@@ -82,7 +109,7 @@ const loading = adminData.loading;
   };
 
   useEffect(() => {
-    if (returnMessage !== "") {
+    if (returnMessage && returnMessage.trim().length !==0) {
       ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
     }
   }, [returnMessage]);
@@ -147,67 +174,28 @@ const loading = adminData.loading;
             Get Started!
           </Text>
         </View>
-        <Pressable
-          onPress={handleNextPage}
-          style={{
-            backgroundColor: colors.col.Black,
-            width: 80,
-            height: 80,
-            borderRadius: 80 / 2,
-            alignItems: "center",
-            justifyContent: "center",
-            alignSelf: "center",
-            marginTop: "2%",
-          }}
-        >
-          {loading ? (
-            <Text
-              style={{
-                color: "#ffffff",
-                fontSize: 30,
-              }}
-            >
-              . . .
-            </Text>
-          ) : (
+        {loading ? (
+          <View style={{ marginTop: 30 }}>
+            <ActivityIndicator color={"black"} size={50} />
+          </View>
+        ) : (
+          <Pressable
+            onPress={handleNextPage}
+            style={{
+              backgroundColor: colors.col.Black,
+              width: 80,
+              height: 80,
+              borderRadius: 80 / 2,
+              alignItems: "center",
+              justifyContent: "center",
+              alignSelf: "center",
+              marginTop: "2%",
+            }}
+          >
             <ArrowForward d="24" />
-          )}
-        </Pressable>
+          </Pressable>
+        )}
       </View>
     </View>
   );
 }
-
-// try {
-//   setLoading(true);
-//   const token = await AsyncStorage.getItem("token");
-//   if (token === null) {
-//     return;
-//   }
-//   const checkUser = await fetch(baseUrl + "check-user", {
-//     method: "GET",
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-//   const res = await checkUser.json();
-//   if (!res.success) {
-//     setReturnMessage(res.message);
-//     setLoading(false);
-//     const userRes = await redirectToLoginPage();
-//     if (userRes) {
-//       return router.push("/components/AuthPage/SignIn/SignIn");
-//     } else {
-//       setReturnMessage('Please login first to get in.')
-//       return null;
-//     }
-//   }
-//   setLoading(false);
-//   setReturnMessage(res.message);
-//   router.replace("/(tabs)/Discover");
-//   return res.user;
-// } catch (error) {
-//   setLoading(false);
-//   console.log(error);
-//   return null;
-// }

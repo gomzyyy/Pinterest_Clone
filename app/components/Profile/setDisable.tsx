@@ -86,7 +86,7 @@ export default function Menu(): React.JSX.Element {
       try {
         const token = await AsyncStorage.getItem("token");
         if (!token) {
-          console.log("no token found");
+          // console.log("no token found");
           return null;
         }
         const res = await dispatch(getAdmin(token));
@@ -104,6 +104,7 @@ export default function Menu(): React.JSX.Element {
         }
       } catch (error) {
         console.log("error: ", error);
+        return;
       }
     };
     reload();
@@ -130,7 +131,7 @@ export default function Menu(): React.JSX.Element {
           setDisable((p) => !p);
           return null;
         } else {
-          console.log("Error: ", payload.error);
+          // console.log("Error: ", payload.error);
           return setReturnMessage(payload.error);
         }
       } else {
