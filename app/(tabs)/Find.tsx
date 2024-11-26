@@ -78,7 +78,7 @@ export default function Find() {
   //   setSearchResult(result);
   // };
 
-  const handleSearchQuery = async (query: string) => {
+  const handleSearchQuery = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -87,11 +87,13 @@ export default function Find() {
       }
       const data = {
         token,
-        query,
+        query: searchText,
       };
       const res = await dispatch(getSearchResultThunk(data)).unwrap();
       if (res.success) {
         setSearchResult(searchQueryRes);
+        // console.log(res.data);
+        return;
       }
     } catch (error) {
       console.log(error);
@@ -99,13 +101,13 @@ export default function Find() {
     }
   };
 
-  // useEffect(() => {
-  //   if (searchText !== "") {
-  //     getSearchResult(searchText);
-  //   } else {
-  //     setSearchResult([]);
-  //   }
-  // }, [searchText]);
+  useEffect(() => {
+    if (searchText !== "") {
+      handleSearchQuery();
+    } else {
+      setSearchResult([]);
+    }
+  }, [searchText]);
 
   const clearBtn = () => setSearchText("");
   return (
@@ -146,7 +148,7 @@ export default function Find() {
           </Pressable>
         )}
       </View>
-      <View style={{ paddingHorizontal: 10, flex: 1 }}>
+      <View style={{ flex: 1 }}>
         {searchResult?.length === 0 ? (
           <Text
             style={{
@@ -161,18 +163,22 @@ export default function Find() {
               : "Results will appear here!"}
           </Text>
         ) : userData.length !== 0 ? (
-          <FlatList
-            data={userData}
-            keyExtractor={(i) => i._id}
-            numColumns={2}
-            renderItem={({ item }) => (
-              <>
-                <Pressable>
-                  <FriendListItemFollowing item={item} />
-                </Pressable>
-              </>
-            )}
-          />
+          <View
+          style={{flex:1}}
+          >
+            <FlatList
+              data={userData}
+              keyExtractor={(i) => i._id}
+              // numColumns={2}
+              renderItem={({ item }) => (
+                <>
+                  <Pressable>
+                    <FriendListItemFollowing item={item} />
+                  </Pressable>
+                </>
+              )}
+            />
+          </View>
         ) : (
           <FlatList
             data={postData}

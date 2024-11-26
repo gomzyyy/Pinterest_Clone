@@ -4,20 +4,20 @@ import {
   InitialStateUpdatedAdmin,
   InitialStateAllUsers,
   InitialStateSuggestions,
+  InitialStateUser
 } from "../../types";
 import { getUserProfile, getAllUsersThunk, getSuggestionsThunk } from "../Thunk/userThunk";
 
-let userState: InitialStateAdmin = {
+let userState: InitialStateUser = {
   response: {
     message: "",
-    admin: undefined,
     success: false,
+    data:{
+      user:undefined
+    }
   },
-  admin: undefined,
   loading: false,
   error: null,
-  posts: [],
-  bookmarks: [],
 };
 
 const userSliceFunction = createSlice({
@@ -37,10 +37,8 @@ const userSliceFunction = createSlice({
           state.loading = false;
         }
         if (action.payload !== null || action.payload !== undefined) {
-          state.admin = action.payload.admin;
-          state.response.admin = action.payload.admin;
-          state.posts = action.payload.admin.posts;
-          state.bookmarks = action.payload.admin.bookmarks;
+          const {user} = action.payload.data;
+         state.response.data.user = user;
           state.response.message = action.payload.message;
           state.response.success = action.payload.success;
         }

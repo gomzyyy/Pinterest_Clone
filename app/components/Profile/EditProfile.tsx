@@ -108,6 +108,7 @@ const EditProfile = () => {
       }
     } catch (error) {
       console.log("Error picking image:", error);
+      return;
     }
   };
 

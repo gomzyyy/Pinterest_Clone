@@ -126,7 +126,6 @@ export const handleFollowUnfollowThunk = createAsyncThunk(
         formData.append("isUnfollowedId", String(data.isUnfollowedId));
       if (data.isFollowedId)
         formData.append("isFollowedId", String(data.isFollowedId));
-      console.log(data)
       const fetchRes = await fetch(
         `http://${ip}:6600/api/user/connections/follow/change`,
         {

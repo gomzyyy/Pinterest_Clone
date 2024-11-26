@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import { Alert } from "react-native";
 
-//export const IP_ADDRESS = `192.168.151.12` // my hotspot
+// export const IP_ADDRESS = `192.168.151.12` // my hotspot
 export const IP_ADDRESS = `192.168.1.70` // home
 
 const confirmPopUp = (): Promise<boolean> => {

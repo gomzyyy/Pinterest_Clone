@@ -20,7 +20,7 @@ const Store = configureStore({
     getAllPosts: getAllPostsSlice,
     getPostById: getPostByIdSlice,
     postActions: postActionSlice,
-    getUser: getUserSliceFunction,
+    user: getUserSliceFunction,
     getAllUsers: getAllUserSlice,
     followUnfollow: followUnfollowSliceFunction,
     removeFollower: removeFollowerSliceFunction,

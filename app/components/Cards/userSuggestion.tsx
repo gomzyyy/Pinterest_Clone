@@ -9,6 +9,7 @@ import {
   getAdmin,
   handleFollowUnfollowThunk,
   getSuggestionsThunk,
+  getUserProfile,
 } from "@/Store/Thunk/userThunk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -53,15 +54,35 @@ const UserSuggestionCard = ({ user }: userSuggestionCard) => {
       return;
     }
   };
+  const geUserById = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const data = {
+        token,
+        userId: s?._id,
+      };
+      const res = await dispatch(getUserProfile(data)).unwrap();
+      if(res.success){
+ router.push('/components/User/userProfile')
+      }
+      return;
+    } catch (error) {
+      // console.log(error);
+      return;
+    }
+  };
 
   const handleFollowedByAdmin = (): boolean => {
-    if(!a) return false;
-    if(!s) return false;
+    if (!a) return false;
+    if (!s) return false;
     if (Array.isArray(s.followers)) {
-      return (s.followers as string[])
-      .some((f)=>{
-        return f === a._id
-      })
+      return (s.followers as string[]).some((f) => {
+        return f === a._id;
+      });
     }
 
     return false;
@@ -101,7 +122,6 @@ const UserSuggestionCard = ({ user }: userSuggestionCard) => {
       };
       // console.log(data)
       const res = await dispatch(handleFollowUnfollowThunk(data)).unwrap();
-      console.log(res)
       if (res.success) {
         getSuggestedUsers();
         await dispatch(getAdmin(token));
@@ -152,6 +172,7 @@ const UserSuggestionCard = ({ user }: userSuggestionCard) => {
           width: imageDimentions,
           marginTop: 10,
         }}
+        onPress={geUserById}
       >
         <Image
           source={{ uri: s?.avatar }}
@@ -210,7 +231,9 @@ const UserSuggestionCard = ({ user }: userSuggestionCard) => {
         style={{
           borderRadius: 4,
           paddingHorizontal: 6,
-          backgroundColor: handleFollowedByAdmin() ? colors.col.Black : colors.col.link,
+          backgroundColor: handleFollowedByAdmin()
+            ? colors.col.Black
+            : colors.col.link,
           alignItems: "center",
           justifyContent: "center",
           marginTop: 5,

@@ -77,6 +77,7 @@ const FriendListItemFollowing = ({ item }: friendsListItem) => {
         paddingHorizontal: 16,
         borderBottomWidth: 0.2,
         marginTop: 20,
+        // width:"50%",
         gap: 4,
       }}
     >

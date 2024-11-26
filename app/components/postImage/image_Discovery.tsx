@@ -77,6 +77,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
       }
     } catch (error) {
       console.log(error);
+      return;
     }
   };
   const redirectToUserProfile = async () => {
@@ -100,6 +101,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
       }
     } catch (error) {
       console.log(error);
+      return;
     }
   };
 

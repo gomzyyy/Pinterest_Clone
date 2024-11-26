@@ -19,10 +19,9 @@ import {
   import AsyncStorage from "@react-native-async-storage/async-storage";
   import { POST } from "@/types";
   import { UseDispatch, useSelector } from "react-redux";
-import AdminPost from "./components/adminPost";  
-import Header from "../header";
+import UserPost from "./components/userPost"; 
   
-  export default function AdminPosts() {
+  export default function UserPosts() {
     const router = useRouter();
     const logout = userController.logoutUser;
     const state = useSelector((s:RootState)=>s.admin)
@@ -60,7 +59,7 @@ import Header from "../header";
         return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
     }, [returnMessage]);
   
-    const AdminPostPage = (): React.JSX.Element => {
+    const UserPostPage = (): React.JSX.Element => {
       return (
         <>
           <View style={{ flex: 1, alignItems: "center" }}>
@@ -88,11 +87,10 @@ import Header from "../header";
                  data={posts}
                  keyExtractor={(r) => r._id}
                  numColumns={1}
-                 contentContainerStyle={{alignItems:"flex-start"}}
-                style={{width:'100%', paddingHorizontal:5}}
                  showsVerticalScrollIndicator={false}
                  renderItem={({ item, index }) => (
-                    <AdminPost
+              
+                    <UserPost
                       i={item}
                       a={item.admin}
                       lastPostMargin={index === adminPosts.length - 1 ? 10 : 0}
@@ -127,14 +125,35 @@ import Header from "../header";
   
     return (
       <View style={{ flex: 1 }}>
-       <Header headerText="Your Posts" backButton>
-        <Ionicons
-          name="arrow-back-outline"
-          size={28}
-          color={colors.col.white}
-        />
-      </Header>
-        {error ? <ErrorPage /> : <AdminPostPage />}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+            paddingTop: 35,
+            backgroundColor:colors.col.PressedIn,
+            height: 100,
+            position: "relative",
+            borderBottomColor:colors.col.PressedIn,
+            borderBottomWidth:1.2
+          }}
+        >
+            <Pressable
+          style={{ position: "absolute", left: 25, bottom: "26%" }}
+          onPress={() => router.back()}
+          // disabled={isUpdating}
+        >
+          <Ionicons
+            name="arrow-back-outline"
+            size={28}
+            color={colors.col.white}
+          />
+        </Pressable>
+          {/* <AntDesign name="find" size={28} color={colors.col.white} /> */}
+          <Text style={{ fontSize: 24, color: colors.col.white }}>Your Posts</Text>
+        </View>
+        {error ? <ErrorPage /> : <UserPostPage />}
       </View>
     );
   }

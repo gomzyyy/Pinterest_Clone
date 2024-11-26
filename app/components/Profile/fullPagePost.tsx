@@ -275,8 +275,8 @@ const FullPagePostImage = () => {
                     </ScrollView>
                   )
                 ) : (
-                  <View style={{ flex: 1, width: "97%" }}>
-                    <Comment c={c ? c[0] : undefined} />
+                 c&&c.length>0 && <View style={{ flex: 1, width: "97%" }}>
+                    <Comment c={c[0]} />
                   </View>
                 )}
                 <View

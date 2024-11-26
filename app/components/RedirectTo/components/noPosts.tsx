@@ -105,7 +105,7 @@ const NoPosts = () => {
                 flex: 1,
                 width: "100%",
                 paddingVertical: 20,
-                paddingHorizontal: 35,
+                paddingHorizontal: suggestedUsers?.length===1?48:35,
                 height: 300,
                 marginTop: 30,
               }}

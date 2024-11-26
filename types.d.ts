@@ -87,7 +87,18 @@ export interface InitialStateAdmin {
   loading: boolean;
   error: SerializedError | null;
   posts: POST[] | [];
-  bookmarks: string[] | [];
+  bookmarks: string[] | POST[];
+}
+export interface InitialStateUser {
+  response: {
+    message: string;
+    data: {
+      user: USER | undefined;
+    };
+    success: boolean;
+  };
+  loading: boolean;
+  error: SerializedError | null;
 }
 export interface GetPostType {
   postId?: string;
@@ -161,7 +172,7 @@ export interface getSearchResultResponseType {
     success: boolean;
     data: {
       result: USER[] | POSt[] | undefined;
-      type:string;
+      type: string;
     };
   };
   loading: boolean;
@@ -190,7 +201,7 @@ export interface USER {
   userName: string;
   userId: string;
   avatar: string;
-  posts: string[];
+  posts: string[] | POST[];
   followers: USER[] | string[];
   following: USER[] | string[];
   bookmarks: POST[] | string[];

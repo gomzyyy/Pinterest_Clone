@@ -135,6 +135,7 @@ export default function Menu(): React.JSX.Element {
         }
       } catch (error) {
         console.log("error: ", error);
+        return;
       }
     };
     reload();
