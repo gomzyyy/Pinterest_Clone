@@ -142,7 +142,7 @@ export default function Discover() {
               <ImageDiscovery
                 i={item}
                 a={item.admin}
-                margin={index === result.length - 1 ? 10 : 0}
+                margin={index === result.length - 1 ? 0 : 0}
               />
             )}
           />

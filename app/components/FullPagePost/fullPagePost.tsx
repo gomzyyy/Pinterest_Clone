@@ -162,11 +162,11 @@ const FullPagePostImage = () => {
         <View style={{ gap: 5, marginTop: 2 }}>
           <Pressable>
             <Text style={{ color: colors.col.PressedIn3 }}>
-              @{c?.admin?.userId}
+              @{c?.admin?.userId || "loading..."}
             </Text>
           </Pressable>
           <View style={{ width: "100%" }}>
-            <Text>{c?.text}</Text>
+            <Text>{c?.text || "loading..."}</Text>
           </View>
         </View>
       </View>
@@ -189,13 +189,13 @@ const FullPagePostImage = () => {
           />
         </Header>
 
-        {gettingPost ? (
+        {/* {gettingPost ? (
           <View
             style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
           >
             <ActivityIndicator size={50} color={"black"} />
           </View>
-        ) : (
+        ) : ( */}
           <View
             style={{
               paddingTop: 10,
@@ -332,7 +332,7 @@ const FullPagePostImage = () => {
               </View>
             </Pressable>
           </View>
-        )}
+        {/* )} */}
       </ScrollView>
     </KeyboardAvoidingView>
   );

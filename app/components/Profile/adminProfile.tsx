@@ -12,11 +12,9 @@ import {
 import Header from "../header";
 import AdminPost from "./components/adminPost";
 import React, { useEffect, useState } from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from '@expo/vector-icons/Feather';
 import { useFocusEffect } from "expo-router";
 import { colors } from "@/constants/Colors";
 import {
@@ -32,7 +30,6 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // import { requestMediaPermission } from "@/constants/GlobalConstants";
 import { POST } from "../../../types";
-import AdminPosts from "./archivedPosts";
 
 const profleImageSkeleton =
   "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
@@ -64,7 +61,7 @@ export default function Menu(): React.JSX.Element {
 
   const a: USER | undefined = admin.admin;
   const p: POST[] | undefined = admin.posts;
-  const b: string[] | [] = admin.bookmarks;
+  const b: string[] | POST[] = admin.bookmarks;
   const loading: boolean = updatedAdmin.loading;
 
   useEffect(() => {
@@ -215,6 +212,21 @@ export default function Menu(): React.JSX.Element {
                     <Text style={{ fontSize: 16 }}>
                     {a?.following.length}{" "}{a&&a.following.length>1?"Followings":"Following"}
                     </Text>
+                  </Pressable>
+                  <Pressable
+                    style={{
+                      height: 30,
+                      // width: 80,
+                      flexGrow: 1,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 4,
+                      backgroundColor: colors.col.PressedIn5,
+                      paddingHorizontal:8
+                    }}
+                    onPress={()=>router.push("/components/Profile/EditProfile")}
+                  >
+                  <Feather name="edit" size={16} color="black" />
                   </Pressable>
                 </View>
             </View>

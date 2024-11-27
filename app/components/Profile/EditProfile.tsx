@@ -28,6 +28,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { requestMediaPermission } from "@/constants/GlobalConstants";
 import * as imagePicker from "expo-image-picker";
 import { useFocusEffect } from "expo-router";
+import Header from "../header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAdmin, updateAdmin } from "../../../Store/Thunk/userThunk";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -146,7 +147,7 @@ const EditProfile = () => {
         bio: bio.trim() !== "" ? bio : undefined,
         token,
       };
-      console.log(data.DateOfBirth);
+      // console.log(data.DateOfBirth);
       const res = await dispatch(updateAdmin(data));
       if (updateAdmin.fulfilled.match(res)) {
         const { payload } = res;
@@ -157,7 +158,7 @@ const EditProfile = () => {
           return null;
         } else {
           setSaved(true);
-          console.log("Error: ", payload.error);
+          // console.log("Error: ", payload.error);
           return setReturnMessage(payload.error);
         }
       } else {
@@ -181,50 +182,20 @@ const EditProfile = () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
       <ScrollView
-        style={{ flex: 1, opacity: updatedAdmin.loading ? 0.6 : 1 }}
+        style={{ flex: 1}}
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 4,
-            paddingTop: 35,
-            backgroundColor: colors.col.PressedIn,
-            height: 100,
-          }}
+        <Header
+          headerText="Acount center"
+          backButton={!updatedAdmin.loading}
+          showLoading={updatedAdmin.loading}
         >
-          {!updatedAdmin.loading && (
-            <Pressable
-              style={{ position: "absolute", left: 25, bottom: "26%" }}
-              onPress={() => router.back()}
-            >
-              <Ionicons
+           <Ionicons
                 name="arrow-back-outline"
                 size={28}
                 color={colors.col.white}
               />
-            </Pressable>
-          )}
-          <Text style={{ fontSize: 24, color: colors.col.white }}>
-            Account center
-          </Text>
-          <View style={{ position: "absolute", right: 25, bottom: 20 }}>
-            {/* <Ionicons name="exit-outline" size={26} color={colors.col.white} /> */}
-            <Pressable onPress={editProfile}>
-              <Text
-                style={{
-                  fontSize: 24,
-                  color: colors.col.white,
-                  opacity: saved ? 1 : 0.5,
-                }}
-              >
-                Save
-              </Text>
-            </Pressable>
-          </View>
-        </View>
+        </Header>
         <ScrollView style={{ flex: 1 }}>
           <View
             style={{
@@ -234,6 +205,19 @@ const EditProfile = () => {
               // backgroundColor:'red'
             }}
           >
+            <View style={{ position: "absolute", right: 25, top: 20 }}>
+            <Pressable onPress={editProfile}>
+              <Text
+                style={{
+                  fontSize: 24,
+                  color: colors.col.PressedIn4,
+                  opacity: saved ? 1 : 0.5,
+                }}
+              >
+                Save
+              </Text>
+            </Pressable>
+          </View>
             <Pressable
               style={{ height: 100, width: 100, marginTop: 15 }}
               onPress={getAvatarUri}
@@ -339,7 +323,9 @@ const EditProfile = () => {
             </Text>
             {showDate && (
               <DateTimePickerAndroid
-                value={selectedDate ? new Date(selectedDate) : new Date(Date.now())}
+                value={
+                  selectedDate ? new Date(selectedDate) : new Date(Date.now())
+                }
                 mode={"date"}
                 is24Hour={true}
                 display="default"

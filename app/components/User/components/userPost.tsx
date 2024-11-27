@@ -31,7 +31,7 @@ const UserPost = ({ i, a, lastPostMargin }: ImageEl) => {
       };
       const res = await dispatch(getPostById(data));
       if (getPostById.fulfilled.match(res)) {
-        router.push('/components/Profile/fullPagePost')
+        router.push('/components/FullPagePost/fullPagePost')
         return null;
       } else {
         return null;

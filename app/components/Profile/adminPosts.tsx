@@ -89,8 +89,9 @@ import Header from "../header";
                  keyExtractor={(r) => r._id}
                  numColumns={1}
                  contentContainerStyle={{alignItems:"flex-start"}}
-                style={{width:'100%', paddingHorizontal:5}}
+                style={{width:'100%', paddingHorizontal:3}}
                  showsVerticalScrollIndicator={false}
+                 horizontal
                  renderItem={({ item, index }) => (
                     <AdminPost
                       i={item}

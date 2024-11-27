@@ -102,7 +102,7 @@ export default function Find() {
   };
 
   useEffect(() => {
-    if (searchText !== "") {
+    if (searchText.trim() !== "") {
       handleSearchQuery();
     } else {
       setSearchResult([]);

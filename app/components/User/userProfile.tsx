@@ -35,15 +35,11 @@ const profleImageSkeleton =
   "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
 
 export default function Menu(): React.JSX.Element {
-  const [returnMessage, setReturnMessage] = useState<string>("");
-  const [p, setp] = useState<POST[] | []>([]);
-  const [privacyResponse, setPrivacyResponse] = useState<boolean>(false);
-  const [privateAccount, setPrivateAccount] =
-    useState<boolean>(privacyResponse);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [postsLength, setPostsLength] = useState<number | string>();
   const u: USER | undefined = useSelector(
     (s: RootState) => s.user.response.data.user
+  );
+  const postsByUser = useSelector(
+    (s: RootState) => s.user.response.data.user?.posts
   );
   const a: USER | undefined = useSelector((s: RootState) => s.admin.admin);
   const fUfLoading = useSelector((s: RootState) => s.followUnfollow.loading);
@@ -57,7 +53,25 @@ export default function Menu(): React.JSX.Element {
   const comments = useSelector(
     (s: RootState) => s.getPostById.response.comments
   );
-
+  const handleUserPosts = ():POST[] => {
+    let allPosts:POST[] = [];
+    if (!u) return allPosts;
+    if (
+      Array.isArray(postsByUser) &&
+      postsByUser.every((i) => typeof i === "object")
+    ) {
+      allPosts = postsByUser;
+      return allPosts;
+    }
+    return allPosts;
+  };
+  const [p, setp] = useState<POST[]>(handleUserPosts());
+  const [returnMessage, setReturnMessage] = useState<string>("");
+  const [privacyResponse, setPrivacyResponse] = useState<boolean>(false);
+  const [privateAccount, setPrivateAccount] =
+    useState<boolean>(privacyResponse);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [postsLength, setPostsLength] = useState<number | string>();
   // console.log(comments)
 
   const router = useRouter();
@@ -154,11 +168,14 @@ export default function Menu(): React.JSX.Element {
       };
       const res = await dispatch(handleFollowUnfollowThunk(data)).unwrap();
       if (res.success) {
-        const data ={
+        const data = {
           token,
-          userId:u?._id
-        }
-       await Promise.all([ dispatch(getAdmin(token)),dispatch(getUserProfile(data))])
+          userId: u?._id,
+        };
+        await Promise.all([
+          dispatch(getAdmin(token)),
+          dispatch(getUserProfile(data)),
+        ]);
       }
       return;
     } catch (error) {
@@ -208,6 +225,7 @@ export default function Menu(): React.JSX.Element {
               style={{
                 paddingTop: 14,
                 height: "100%",
+                justifyContent:"space-between"
               }}
             >
               <View
@@ -226,7 +244,7 @@ export default function Menu(): React.JSX.Element {
                     marginLeft: 5,
                   }}
                 >
-                  {u?.userName}
+                  {u?.userName || "TestName"}
                 </Text>
                 {u?.verified && (
                   <View>
@@ -250,7 +268,7 @@ export default function Menu(): React.JSX.Element {
                     marginLeft: 9,
                     height: 25,
                     marginBottom: 8,
-                    width:80
+                    width: 80,
                   }}
                 >
                   <Pressable onPress={handleFollowUnfollowbtn}>
@@ -284,10 +302,12 @@ export default function Menu(): React.JSX.Element {
                     backgroundColor: colors.col.PressedIn5,
                     paddingHorizontal: 8,
                   }}
-                    onPress={() =>router.push("/components/User/components/userFollowers")}
+                  onPress={() =>
+                    router.push("/components/User/components/userFollowers")
+                  }
                 >
                   <Text style={{ fontSize: 16 }}>
-                    {u?.followers.length}{" "}
+                    {u?.followers.length || 0}{" "}
                     {u && u.followers.length !== 1 ? "Followers" : "Follower"}
                   </Text>
                 </Pressable>
@@ -302,10 +322,12 @@ export default function Menu(): React.JSX.Element {
                     backgroundColor: colors.col.PressedIn5,
                     paddingHorizontal: 8,
                   }}
-                    onPress={() =>router.push("/components/User/components/userFollowing")}
+                  onPress={() =>
+                    router.push("/components/User/components/userFollowing")
+                  }
                 >
                   <Text style={{ fontSize: 16 }}>
-                    {u?.following.length}{" "}
+                    {u?.following.length || 0}{" "}
                     {u && u.following.length > 1 ? "Followings" : "Following"}
                   </Text>
                 </Pressable>
@@ -323,7 +345,7 @@ export default function Menu(): React.JSX.Element {
                 left: 5,
               }}
             >
-              @{u?.userId}
+              @{u?.userId || "testName"}
             </Text>
           </View>
           {u?.bio.trim() !== "" && (
@@ -337,7 +359,7 @@ export default function Menu(): React.JSX.Element {
               }}
             >
               <Text style={{ fontSize: 16, color: colors.col.PressedIn4 }}>
-                {u?.bio}
+                {u?.bio || "This is a test bio."}
               </Text>
             </View>
           )}

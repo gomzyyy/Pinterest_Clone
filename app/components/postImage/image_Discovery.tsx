@@ -5,6 +5,8 @@ import { colors } from "@/constants/Colors";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Octicons from "@expo/vector-icons/Octicons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,10 +27,10 @@ interface ImageEl {
 const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
 
 const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
-  const gettingPost = useSelector((s: RootState) => s.getPostById.loading);
-  const peopleLikedThisPost = useSelector(
-    (e: RootState) => e.postActions.response.peopleLiked
-  );
+  // const gettingPost = useSelector((s: RootState) => s.getPostById.loading);
+  // const peopleLikedThisPost = useSelector(
+  //   (e: RootState) => e.postActions.response.peopleLiked
+  // );
   // console.log(peopleLikedThisPost)
   // console.log(a?._id)
   // const checkIfLiked = React.useMemo(() => Array.isArray(peopleLikedThisPost) && a
@@ -37,12 +39,19 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
 
   // const alreadyLikedByAdmin = checkIfLiked;
   // console.log(alreadyLikedByAdmin)
+  const po = useSelector(
+    (s: RootState) => s.getPostById.response.requestedPost?.admin
+  );
 
   const [adminView, setAdminView] = useState<boolean>(false);
-  const [reaction, setReaction] = useState<{ liked: boolean; disliked: boolean }>({
+  const [reaction, setReaction] = useState<{
+    liked: boolean;
+    disliked: boolean;
+  }>({
     liked: false,
     disliked: false,
-  });  const [disliked, setdisliked] = useState<boolean>(false);
+  });
+  const [disliked, setdisliked] = useState<boolean>(false);
 
   // const handleDislikeBtn = () => {
   //   if (!disliked) {
@@ -68,7 +77,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         postId: i?._id,
         token,
       };
-      router.push("/components/Profile/fullPagePost");
+      router.push("/components/FullPagePost/fullPagePost");
       const res = await dispatch(getPostById(data));
       if (getPostById.fulfilled.match(res)) {
         return null;
@@ -88,13 +97,14 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         return;
       }
       const userId = i?.admin._id.trim();
+      console.log(userId);
       const data = {
         token,
         userId,
       };
       const res = await dispatch(getUserProfile(data)).unwrap();
       if (res.success) {
-        router.push("/components/Profile/userProfile");
+        router.push("/components/User/userProfile");
         return;
       } else {
         return;
@@ -105,50 +115,11 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
     }
   };
 
-  // const handleUserActionOnPost = React.useCallback(async () => {
-  //   try {
-  //     console.log("triggered");
-  //     const token = await AsyncStorage.getItem("token");
-  //     if (!token) {
-  //       router.replace("/components/GetStarted/GetStarted");
-  //       console.log("no token");
-  //       return;
-  //     }
-  //     const data = {
-  //       token,
-  //       postId: i?._id,
-  //       postLiked: !alreadyLikedByAdmin,
-  //     };
-  //     console.log(data.postLiked);
-  //     const res = await dispatch(postActionsById(data)).unwrap();
-  //     if (res.success) {
-  //       const data0 = {
-  //         token,
-  //       };
-  //       await Promise.all([
-  //         dispatch(getAdmin(token)),
-  //         dispatch(getAllPostsThunk(data0)),
-  //       ]);
-  
-  //       return;
-  //     } else {
-  //       const data2 = {
-  //         token,
-  //         postId: i?._id,
-  //       };
-  //       await dispatch(getPostById(data2));
-  //       return;
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }, [alreadyLikedByAdmin, dispatch, i?._id, router]);
-
   const handleLikeBtn = async () => {
     setReaction((prevState) => ({
       ...prevState,
       liked: !prevState.liked,
-      disliked: prevState.liked ? false : prevState.disliked, // reset dislike if liked
+      disliked: prevState.liked ? false : prevState.disliked,
     }));
     // await handleUserActionOnPost();
   };
@@ -156,21 +127,90 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
   return (
     <View
       style={{
-        height: 405,
-        width: 310,
         alignItems: "center",
-        paddingHorizontal: 10,
-        marginTop: 20,
-        borderRadius: 20,
-        borderWidth: 0.8,
+        paddingTop: 8,
+        borderBottomWidth: 0.8,
         marginBottom: margin,
         borderColor: colors.col.PressedIn3,
       }}
     >
+      <View style={{ width: "100%", paddingHorizontal: 8, gap: 8 }}>
+        <View style={{ flexDirection: "row", gap: 14, width: "100%" }}>
+          <Pressable 
+          style={{ height: 40, width: 40 }}
+          onPress={redirectToUserProfile}
+          >
+            <Image
+              style={{ height: 48, width: 48, borderRadius: 24 }}
+              source={{ uri: a?.avatar }}
+            />
+          </Pressable>
+          <View>
+            <View
+              style={{
+                gap: 3,
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 8,
+              }}
+            >
+              <Pressable
+              onPress={redirectToUserProfile}
+              >
+              <Text style={{ color: colors.col.PressedIn3, fontSize: 20 }}>
+                {a?.userName || "loading..."}
+              </Text>
+              </Pressable>
+              
+              {a?.verified && (
+                <View>
+                  <Octicons
+                    name="verified"
+                    size={14}
+                    color={colors.col.PressedIn3}
+                  />
+                </View>
+              )}
+              <View style={{ paddingLeft: 4 }}>
+                <Pressable
+                onPress={redirectToUserProfile}
+                >
+                <Text
+                  style={{
+                    color: colors.col.PressedIn2,
+                    textDecorationLine: "underline",
+                    fontSize: 16,
+                  }}
+                >
+                  {"@"}
+                  {a?.userId || "loading..."}
+                </Text>
+                </Pressable>
+                
+              </View>
+            </View>
+          </View>
+        </View>
+        <Pressable 
+        style={{ paddingHorizontal: 12, marginTop: 6 }}
+        onPress={redirectToPost}
+        >
+          <Text
+            style={{
+              fontFamily: "pop-red",
+              fontSize: 17,
+            }}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {i?.title}
+          </Text>
+        </Pressable>
+      </View>
       <Pressable
         style={{
           height: 360,
-          width: 300,
+          width: "100%",
         }}
         onPress={redirectToPost}
       >
@@ -180,7 +220,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
             style={{
               flex: 1,
               marginTop: 15,
-              borderRadius: 20,
+              // borderRadius: 20,
               borderWidth: 0.8,
               borderColor: colors.col.PressedIn2,
               objectFit: "cover",
@@ -213,7 +253,10 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
                 alignItems: "center",
               }}
             >
-              <View style={{ marginTop: 25 }}>
+              <Pressable
+                style={{ marginTop: 25 }}
+                onPress={redirectToUserProfile}
+              >
                 <Image
                   source={{ uri: a?.avatar }}
                   style={{
@@ -223,7 +266,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
                     backgroundColor: colors.col.white,
                   }}
                 />
-              </View>
+              </Pressable>
               <View>
                 <View
                   style={{
@@ -322,9 +365,9 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
       </Pressable>
       <View
         style={{
-          height: 45,
+          height: 60,
           width: "100%",
-          paddingHorizontal: 20,
+          paddingHorizontal: 30,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
@@ -332,9 +375,8 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
       >
         <Pressable
           style={{
-            flexDirection: "row",
+            // flexDirection: "row",
             alignItems: "center",
-            gap: 4,
           }}
           onPress={handleLikeBtn}
         >
@@ -347,19 +389,24 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
           ) : (
             <AntDesign name="hearto" size={24} color={colors.col.PressedIn3} />
           )}
+          <Text
+            style={{
+              textAlign: "center",
+              color: colors.col.PressedIn,
+            }}
+          >
+            {i?.likes.length}
+          </Text>
         </Pressable>
         <Pressable onPress={redirectToPost}>
           <FontAwesome6
             name="comment-alt"
-            size={26}
+            size={24}
             color={colors.col.PressedIn3}
           />
           <Text
             style={{
-              fontSize: 13,
-              position: "absolute",
-              alignSelf: "center",
-              top: 5,
+              textAlign: "center",
               color: colors.col.PressedIn,
             }}
           >
@@ -371,17 +418,71 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
           style={{ alignItems: "center", justifyContent: "center" }}
         >
           {adminView ? (
-            <Ionicons name="close" size={26} color={colors.col.PressedIn3} />
+            <Ionicons name="close" size={28} color={colors.col.PressedIn3} />
           ) : (
-            <MaterialIcons
-              name="more-horiz"
-              size={26}
+            <Ionicons
+              name="options-outline"
+              size={28}
               color={colors.col.PressedIn3}
             />
           )}
+        </Pressable>
+        <Pressable>
+          <MaterialCommunityIcons
+            name="google-analytics"
+            size={22}
+            color={colors.col.PressedIn3}
+          />
+          <Text
+            style={{
+              textAlign: "center",
+              color: colors.col.PressedIn3,
+            }}
+          >
+            {i?.visits.length}
+          </Text>
         </Pressable>
       </View>
     </View>
   );
 });
 export default ImageDiscovery;
+
+// const handleUserActionOnPost = React.useCallback(async () => {
+//   try {
+//     console.log("triggered");
+//     const token = await AsyncStorage.getItem("token");
+//     if (!token) {
+//       router.replace("/components/GetStarted/GetStarted");
+//       console.log("no token");
+//       return;
+//     }
+//     const data = {
+//       token,
+//       postId: i?._id,
+//       postLiked: !alreadyLikedByAdmin,
+//     };
+//     console.log(data.postLiked);
+//     const res = await dispatch(postActionsById(data)).unwrap();
+//     if (res.success) {
+//       const data0 = {
+//         token,
+//       };
+//       await Promise.all([
+//         dispatch(getAdmin(token)),
+//         dispatch(getAllPostsThunk(data0)),
+//       ]);
+
+//       return;
+//     } else {
+//       const data2 = {
+//         token,
+//         postId: i?._id,
+//       };
+//       await dispatch(getPostById(data2));
+//       return;
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }, [alreadyLikedByAdmin, dispatch, i?._id, router]);
