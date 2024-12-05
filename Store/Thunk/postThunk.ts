@@ -37,10 +37,13 @@ export const postActionsById = createAsyncThunk(
           postAction.getComment && postAction.getComment.trim() !== ""
             ? postAction.getComment
             : undefined,
-        liked:
+        postLiked:
           postAction.postLiked !== undefined ? postAction.postLiked : undefined,
+        postUnLiked:
+          postAction.postUnLiked !== undefined
+            ? postAction.postUnLiked
+            : undefined,
       };
-      // console.log(contentBody);
       const performingPostAction = await fetch(
         `http://${ip}:6600/api/user/post/actions/${postAction.postId}`,
         {
@@ -53,9 +56,11 @@ export const postActionsById = createAsyncThunk(
         }
       );
       // if (!performingPostAction.ok) {
-      //   throw new Error("Failed to perform post action");
+      //   const res = await performingPostAction.json();
+      //   return 
       // }
       const res = await performingPostAction.json();
+      // console.log(res)
       return res;
     } catch (error) {
       return rejectWithValue(

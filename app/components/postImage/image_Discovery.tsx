@@ -18,6 +18,8 @@ import {
   postActionsById,
 } from "@/Store/Thunk/postThunk";
 import { getAdmin, getUserProfile } from "@/Store/Thunk/userThunk";
+import LikeBtn from "./components/likeBtn";
+import { postById } from "@/Store/Slices/state";
 
 interface ImageEl {
   i: POST | undefined;
@@ -27,44 +29,62 @@ interface ImageEl {
 const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
 
 const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
-  // const gettingPost = useSelector((s: RootState) => s.getPostById.loading);
-  // const peopleLikedThisPost = useSelector(
-  //   (e: RootState) => e.postActions.response.peopleLiked
-  // );
-  // console.log(peopleLikedThisPost)
-  // console.log(a?._id)
-  // const checkIfLiked = React.useMemo(() => Array.isArray(peopleLikedThisPost) && a
-  // ? peopleLikedThisPost.includes(a._id)
-  // : false, [peopleLikedThisPost, a])
-
-  // const alreadyLikedByAdmin = checkIfLiked;
-  // console.log(alreadyLikedByAdmin)
+  const peopleLikedThisPost = useSelector(
+    (e: RootState) => e.postActions.response.peopleLiked
+  );
+  const admn: USER | undefined = useSelector((s: RootState) => s.admin.admin);
   const po = useSelector(
     (s: RootState) => s.getPostById.response.requestedPost?.admin
   );
+  const [commentsCount, setCommentsCount] = useState<number>(
+    i?.comments ? i.comments.length : 0
+  );
 
+  const [likedBy, setLikedBy] = useState<USER[]>(i?.likes || []);
+
+  const checkIfLiked = (): boolean => {
+    if (!admn || !i) return false;
+    return likedBy.some(
+      (like) => like.toString().trim() === admn._id.toString().trim()
+    );
+  };
+  const [likesCount, setLikesCount] = useState<number>(i ? i.likes.length : 0);
+
+  const [visitsCount, setVisitsCount] = useState<number>(
+    i ? i.visits.length : 0
+  );
   const [adminView, setAdminView] = useState<boolean>(false);
-  const [reaction, setReaction] = useState<{
-    liked: boolean;
-    disliked: boolean;
-  }>({
-    liked: false,
-    disliked: false,
-  });
+  const [likedOk, setLikedOk] = useState<boolean>(false);
+  useEffect(() => {
+    setLikedOk(checkIfLiked());
+  }, [likedBy, admn]);
   const [disliked, setdisliked] = useState<boolean>(false);
 
-  // const handleDislikeBtn = () => {
-  //   if (!disliked) {
-  //     setdisliked(true);
-  //     if (liked) {
-  //       setLiked(false);
-  //     }
-  //   } else setdisliked(false);
-  // };
   const toggleImageNprofile = () => setAdminView((a) => !a);
 
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+
+  const getPosts = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const data = {
+        token,
+      };
+      const res = await dispatch(getAllPostsThunk(data)).unwrap();
+      if (res.success) {
+        return;
+      } else {
+        return;
+      }
+    } catch (error) {
+      return;
+    }
+  };
 
   const redirectToPost = async () => {
     try {
@@ -78,8 +98,9 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         token,
       };
       router.push("/components/FullPagePost/fullPagePost");
-      const res = await dispatch(getPostById(data));
-      if (getPostById.fulfilled.match(res)) {
+      const res = await dispatch(getPostById(data)).unwrap();
+      if (res.success) {
+        dispatch(postById(res.data.post));
         return null;
       } else {
         return null;
@@ -97,7 +118,6 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         return;
       }
       const userId = i?.admin._id.trim();
-      console.log(userId);
       const data = {
         token,
         userId,
@@ -115,13 +135,32 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
     }
   };
 
-  const handleLikeBtn = async () => {
-    setReaction((prevState) => ({
-      ...prevState,
-      liked: !prevState.liked,
-      disliked: prevState.liked ? false : prevState.disliked,
-    }));
-    // await handleUserActionOnPost();
+  const handleLikeBtn = async (): Promise<boolean | void> => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      console.log("bhrvr")
+      const userId = admn?._id.trim();
+      console.log(likedOk)
+      const data = {
+        postLiked: !likedOk ? userId : undefined,
+        postUnLiked: likedOk ? userId : undefined,
+        postId: i?._id,
+        token,
+      };
+      const res = await dispatch(postActionsById(data)).unwrap();
+      if (res.success) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   };
 
   return (
@@ -136,9 +175,9 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
     >
       <View style={{ width: "100%", paddingHorizontal: 8, gap: 8 }}>
         <View style={{ flexDirection: "row", gap: 14, width: "100%" }}>
-          <Pressable 
-          style={{ height: 40, width: 40 }}
-          onPress={redirectToUserProfile}
+          <Pressable
+            style={{ height: 40, width: 40 }}
+            onPress={redirectToUserProfile}
           >
             <Image
               style={{ height: 48, width: 48, borderRadius: 24 }}
@@ -154,14 +193,12 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
                 marginTop: 8,
               }}
             >
-              <Pressable
-              onPress={redirectToUserProfile}
-              >
-              <Text style={{ color: colors.col.PressedIn3, fontSize: 20 }}>
-                {a?.userName || "loading..."}
-              </Text>
+              <Pressable onPress={redirectToUserProfile}>
+                <Text style={{ color: colors.col.PressedIn3, fontSize: 20 }}>
+                  {a?.userName || "loading..."}
+                </Text>
               </Pressable>
-              
+
               {a?.verified && (
                 <View>
                   <Octicons
@@ -172,28 +209,25 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
                 </View>
               )}
               <View style={{ paddingLeft: 4 }}>
-                <Pressable
-                onPress={redirectToUserProfile}
-                >
-                <Text
-                  style={{
-                    color: colors.col.PressedIn2,
-                    textDecorationLine: "underline",
-                    fontSize: 16,
-                  }}
-                >
-                  {"@"}
-                  {a?.userId || "loading..."}
-                </Text>
+                <Pressable onPress={redirectToUserProfile}>
+                  <Text
+                    style={{
+                      color: colors.col.PressedIn2,
+                      textDecorationLine: "underline",
+                      fontSize: 16,
+                    }}
+                  >
+                    {"@"}
+                    {a?.userId || "loading..."}
+                  </Text>
                 </Pressable>
-                
               </View>
             </View>
           </View>
         </View>
-        <Pressable 
-        style={{ paddingHorizontal: 12, marginTop: 6 }}
-        onPress={redirectToPost}
+        <Pressable
+          style={{ paddingHorizontal: 12, marginTop: 6 }}
+          onPress={redirectToPost}
         >
           <Text
             style={{
@@ -371,32 +405,16 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
+          paddingTop: 10,
         }}
       >
         <Pressable
           style={{
-            // flexDirection: "row",
             alignItems: "center",
           }}
-          onPress={handleLikeBtn}
+          // onPress={likeUnlikeLogic}s
         >
-          {reaction.liked ? (
-            <AntDesign
-              name="heart"
-              size={24}
-              color={colors.col.tabActivePink}
-            />
-          ) : (
-            <AntDesign name="hearto" size={24} color={colors.col.PressedIn3} />
-          )}
-          <Text
-            style={{
-              textAlign: "center",
-              color: colors.col.PressedIn,
-            }}
-          >
-            {i?.likes.length}
-          </Text>
+          <LikeBtn i={i} />
         </Pressable>
         <Pressable onPress={redirectToPost}>
           <FontAwesome6
@@ -410,7 +428,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
               color: colors.col.PressedIn,
             }}
           >
-            {i?.comments.length}
+            {commentsCount}
           </Text>
         </Pressable>
         <Pressable
@@ -426,6 +444,14 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
               color={colors.col.PressedIn3}
             />
           )}
+          {/* <Text
+            style={{
+              textAlign: "center",
+              color: colors.col.PressedIn,
+            }}
+          >
+            {"Info"}
+          </Text> */}
         </Pressable>
         <Pressable>
           <MaterialCommunityIcons
@@ -439,7 +465,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
               color: colors.col.PressedIn3,
             }}
           >
-            {i?.visits.length}
+            {visitsCount}
           </Text>
         </Pressable>
       </View>
@@ -486,3 +512,23 @@ export default ImageDiscovery;
 //     console.log(error);
 //   }
 // }, [alreadyLikedByAdmin, dispatch, i?._id, router]);
+
+{
+  /* {likedOk ? (
+            <AntDesign
+              name="heart"
+              size={24}
+              color={colors.col.tabActivePink}
+            />
+          ) : (
+            <AntDesign name="hearto" size={24} color={colors.col.PressedIn3} />
+          )}
+          <Text
+            style={{
+              textAlign: "center",
+              color: colors.col.PressedIn,
+            }}
+          >
+            {likesCount}
+          </Text> */
+}

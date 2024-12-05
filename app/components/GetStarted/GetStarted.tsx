@@ -17,6 +17,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { redirectToLoginPage } from "@/constants/GlobalConstants";
 import { AppDispatch, RootState } from "@/Store/store";
 import { InitialStateAdmin } from "@/types";
+import {
+  postsAvailabilityState,
+  feedPostState,
+  setToken,
+  setAdmin,
+} from "@/Store/Slices/state";
+import { getAllPostsThunk } from "@/Store/Thunk/postThunk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
@@ -25,11 +32,12 @@ export default function GetStartedPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const adminData = useSelector((e: RootState) => e.admin);
-  // console.log(admin)
   const admin = adminData.admin;
-  const loading = adminData.loading;
+  const postsLoading = useSelector((s: RootState) => s.getAllPosts.loading);
+  const allPosts = useSelector((s: RootState) => s.getAllPosts.response.posts);
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [serverUnreachbale, setServerUnreachbale] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const redirectToLoginPageIfNeeded = async () => {
     setReturnMessage("Authentication required!");
@@ -41,10 +49,9 @@ export default function GetStartedPage() {
       return setReturnMessage("Please login again!");
     }
   };
-  // console.log("APP REFRESHED!!!!!!!")
-
   const handleNextPage = async () => {
     try {
+      setLoading(true);
       const slowNetworkMessage = setTimeout(() => {
         setReturnMessage("Request timeout");
         return;
@@ -56,12 +63,13 @@ export default function GetStartedPage() {
       }, 14000);
       const token: string | null = await AsyncStorage.getItem("token");
       if (!token) {
-        setServerUnreachbale(false)
+        setServerUnreachbale(false);
         clearTimeout(slowNetworkMessage);
         clearTimeout(networkError);
-        router.replace('/components/ErrorPages/sessionExpired')
+        router.replace("/components/ErrorPages/sessionExpired");
         return;
       }
+      dispatch(setToken(token));
       const res = await dispatch(getAdmin(token));
 
       if (getAdmin.fulfilled.match(res)) {
@@ -70,9 +78,33 @@ export default function GetStartedPage() {
           if (serverUnreachbale) {
             setServerUnreachbale(false);
           }
+          dispatch(setAdmin(payload.admin));
           clearTimeout(slowNetworkMessage);
           clearTimeout(networkError);
-          router.push("/(tabs)/Discover");
+          if (admin?.followers.length !== 0 && admin?.followers.length !== 0) {
+            const postRes = await dispatch(
+              getAllPostsThunk({ token })
+            ).unwrap();
+            // console.log(postRes);
+            if (postRes.success) {
+              // console.log("bvibvri");
+              if (allPosts?.length !== 0) {
+                dispatch(postsAvailabilityState(false));
+                dispatch(feedPostState(postRes.posts));
+              } else {
+                // dispatch(feedPostState(postRes.posts));
+                dispatch(postsAvailabilityState(true));
+              }
+            } else {
+              // console.log("vibrviu");
+              return;
+            }
+            if (!postsLoading) {
+              router.push("/(tabs)/Discover");
+            }
+          } else {
+            return;
+          }
           return;
         } else {
           if (!serverUnreachbale) {
@@ -101,15 +133,17 @@ export default function GetStartedPage() {
           router.push("/components/AuthPage/SignIn/SignIn");
           return;
         } else {
-          router.push('/components/ErrorPages/serverUnreachable');
+          router.push("/components/ErrorPages/serverUnreachable");
           return setReturnMessage("Authentication Required");
         }
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (returnMessage && returnMessage.trim().length !==0) {
+    if (returnMessage && returnMessage.trim().length !== 0) {
       ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
     }
   }, [returnMessage]);

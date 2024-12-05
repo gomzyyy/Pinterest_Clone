@@ -12,6 +12,7 @@ import {
   postActionSlice,
   getAllPostsSlice,
 } from "./Slices/posts";
+import { stateFunctions } from "./Slices/state";
 
 const Store = configureStore({
   reducer: {
@@ -25,7 +26,8 @@ const Store = configureStore({
     followUnfollow: followUnfollowSliceFunction,
     removeFollower: removeFollowerSliceFunction,
     getSuggestions:getSuggestionsSlice,
-    searchQuery:getSearchQueryResponse
+    searchQuery:getSearchQueryResponse,
+    state:stateFunctions
   },
 });
 

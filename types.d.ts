@@ -111,7 +111,8 @@ export interface postActionsType {
   postId?: string;
   getComment?: string;
   token: string;
-  postLiked?: boolean;
+  postLiked?: string;
+  postUnLiked?: string;
   // likes, getcomment, reportPost, dislikes
 }
 export interface AdminUpdateData {
@@ -182,14 +183,14 @@ export interface getSearchResultResponseType {
 export interface POST {
   _id: string;
   admin: USER;
-  comments: commentType[] | string[];
+  comments: commentType[] | undefined;
   createdAt: string;
   description: string;
-  dislikes: USER[] | string[];
+  dislikes: USER[];
   downloadable: boolean;
   image: string;
-  likes: string[] | string[];
-  visits: USER[] | string[];
+  likes: USER[];
+  visits: USER[];
   reportStatus: string[];
   tags: string[];
   title: string;
@@ -259,7 +260,15 @@ export interface commentType {
   visible?: boolean;
   hidden?: boolean;
 }
-// declare module 'lodash/debounce' {
-//   import { debounce } from 'lodash';
-//   export default debounce;
-// }
+export interface initialGlobalStateType {
+  post: {
+    postsAvailable: boolean;
+    feedPosts: POST[];
+    postById: POST | undefined;
+  };
+  user: {
+    suggestedUsers: USER[];
+  };
+  admin: USER | undefined;
+  token: string | null;
+}

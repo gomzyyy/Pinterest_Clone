@@ -25,6 +25,7 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { requestMediaPermission } from "@/constants/GlobalConstants";
 import { POST } from "../../types";
+import { feedPostState, postsAvailabilityState, setToken } from "@/Store/Slices/state";
 
 const profleImageSkeleton =
   "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg";
@@ -50,8 +51,6 @@ export default function Menu(): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
 
   const a: USER | undefined = admin.admin;
-  const p: POST[] | undefined = admin.posts;
-  const b: string[] | [] = admin.bookmarks;
   const loading: boolean = updatedAdmin.loading;
 
   const checkIfArray = (t: any) => {
@@ -110,6 +109,8 @@ export default function Menu(): React.JSX.Element {
         router.replace("/components/GetStarted/GetStarted");
         return null;
       } else {
+        dispatch(feedPostState([]))
+        dispatch(setToken(null))
         await AsyncStorage.removeItem("token");
         router.replace("/components/GetStarted/GetStarted");
         return null;
