@@ -134,35 +134,6 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
       return;
     }
   };
-
-  const handleLikeBtn = async (): Promise<boolean | void> => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        router.replace("/components/GetStarted/GetStarted");
-        return;
-      }
-      console.log("bhrvr")
-      const userId = admn?._id.trim();
-      console.log(likedOk)
-      const data = {
-        postLiked: !likedOk ? userId : undefined,
-        postUnLiked: likedOk ? userId : undefined,
-        postId: i?._id,
-        token,
-      };
-      const res = await dispatch(postActionsById(data)).unwrap();
-      if (res.success) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  };
-
   return (
     <View
       style={{
@@ -227,7 +198,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         </View>
         <Pressable
           style={{ paddingHorizontal: 12, marginTop: 6 }}
-          onPress={redirectToPost}
+          // onPress={redirectToPost}
         >
           <Text
             style={{

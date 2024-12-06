@@ -32,6 +32,7 @@ const stateSlice = createSlice({
       }
     },
     postById: (state, action: PayloadAction<POST>) => {
+      console.log(action.payload)
       state.post.postById = action.payload;
     },
     setAdmin: (state, action: PayloadAction<USER>) => {

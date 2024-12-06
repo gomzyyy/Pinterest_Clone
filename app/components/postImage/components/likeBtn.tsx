@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { colors } from "@/constants/Colors";
-import React, { useEffect } from "react";
+import React, { useRef } from "react";
 import { POST } from "@/types";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/Store/store";
@@ -12,7 +12,6 @@ import { feedPostState } from "@/Store/Slices/state";
 
 type likeBtnType = {
   i: POST | undefined;
-  // likeBtnHandler: () => Promise<boolean | void>;
 };
 
 const LikeBtn = ({ i }: likeBtnType) => {
@@ -34,7 +33,7 @@ const LikeBtn = ({ i }: likeBtnType) => {
     const r = allLikedIds.some((i) => i === adminId.toString());
     return r;
   };
-  
+
   const handleLikeBtnAsync = async (): Promise<boolean | void> => {
     try {
       if (!token) {
@@ -49,16 +48,18 @@ const LikeBtn = ({ i }: likeBtnType) => {
         token,
       };
       const res = await dispatch(postActionsById(data)).unwrap();
-      // console.log(res.post);
       if (res.success) {
-        const myFeed = [...feedPosts];
-        const updatedPostIndex = myFeed.findIndex(
-          (s) => s._id.toString() === i?._id.toString()
+        // Update only the post that changed, not the entire feed
+        const updatedPost = res.post;
+        const updatedFeedPosts = feedPosts.map((post) =>
+          post._id.toString() === updatedPost._id.toString()
+            ? updatedPost
+            : post
         );
-        if (updatedPostIndex !== -1) {
-          myFeed[updatedPostIndex] = res.post;
-          dispatch(feedPostState(myFeed));
-        }
+
+        // Dispatch only the updated post (not the whole feed)
+        dispatch(feedPostState(updatedFeedPosts));
+
         return true;
       } else {
         return false;
@@ -85,7 +86,6 @@ const LikeBtn = ({ i }: likeBtnType) => {
   return (
     <Pressable
       style={{
-        // flexDirection: "row",
         alignItems: "center",
       }}
       onPress={handleLikeBtn}

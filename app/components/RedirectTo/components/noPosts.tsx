@@ -31,6 +31,7 @@ const NoPosts = () => {
 
   const getSuggestedUsers = async () => {
     try {
+      console.log(" hfvrivriuv");
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         router.replace("/components/GetStarted/GetStarted");
@@ -40,16 +41,17 @@ const NoPosts = () => {
         token,
       };
       const res = await dispatch(getSuggestionsThunk(data)).unwrap();
+      console.log(res);
       return res;
     } catch (error) {
       // console.log(error);
       return;
     }
   };
-
   useFocusEffect(
     React.useCallback(() => {
       async () => {
+        console.log("kjvrbrui");
         await getSuggestedUsers();
       };
     }, [])
@@ -105,7 +107,7 @@ const NoPosts = () => {
                 flex: 1,
                 width: "100%",
                 paddingVertical: 20,
-                paddingHorizontal: suggestedUsers?.length===1?48:35,
+                paddingHorizontal: suggestedUsers?.length === 1 ? 48 : 35,
                 height: 300,
                 marginTop: 30,
               }}
@@ -139,6 +141,12 @@ const NoPosts = () => {
                       ? "Find new friends to see their posts."
                       : "No suggestions found, you can find new friends by searching them."}
                   </Text>
+                  <Pressable
+                    style={{ backgroundColor: "red", width: 120, height: 40 }}
+                    onPress={getSuggestedUsers}
+                  >
+                    <Text>Get Suggestions</Text>
+                  </Pressable>
                   <Pressable
                     style={{ marginBottom: 110 }}
                     onPress={() => router.push("/(tabs)/Find")}

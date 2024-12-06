@@ -6,6 +6,7 @@ import { getPostById } from "@/Store/Thunk/postThunk";
 import { AppDispatch, RootState } from "@/Store/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { postById } from "@/Store/Slices/state";
 
 interface ImageEl {
   i: POST | undefined;
@@ -29,9 +30,10 @@ const AdminPost = ({ i, a, lastPostMargin }: ImageEl) => {
         postId: i?._id,
         token,
       };
-      const res = await dispatch(getPostById(data));
-      if (getPostById.fulfilled.match(res)) {
-        router.push('/components/FullPagePost/fullPagePost')
+      const res = await dispatch(getPostById(data)).unwrap();
+      if (res.success) {
+        dispatch(postById(res.data.post));
+        router.push("/components/FullPagePost/fullPagePost");
         return null;
       } else {
         return null;

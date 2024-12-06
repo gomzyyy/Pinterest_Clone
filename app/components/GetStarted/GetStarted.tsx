@@ -71,8 +71,8 @@ export default function GetStartedPage() {
       }
       dispatch(setToken(token));
       const res = await dispatch(getAdmin(token));
-
       if (getAdmin.fulfilled.match(res)) {
+        router.push("/(tabs)/Discover");
         const { payload } = res;
         if (payload.success) {
           if (serverUnreachbale) {
@@ -85,14 +85,11 @@ export default function GetStartedPage() {
             const postRes = await dispatch(
               getAllPostsThunk({ token })
             ).unwrap();
-            // console.log(postRes);
             if (postRes.success) {
-              // console.log("bvibvri");
               if (allPosts?.length !== 0) {
                 dispatch(postsAvailabilityState(false));
                 dispatch(feedPostState(postRes.posts));
               } else {
-                // dispatch(feedPostState(postRes.posts));
                 dispatch(postsAvailabilityState(true));
               }
             } else {
@@ -103,6 +100,7 @@ export default function GetStartedPage() {
               router.push("/(tabs)/Discover");
             }
           } else {
+            router.push("/(tabs)/Discover");
             return;
           }
           return;
