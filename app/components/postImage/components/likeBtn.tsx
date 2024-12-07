@@ -50,15 +50,15 @@ const LikeBtn = ({ i }: likeBtnType) => {
       const res = await dispatch(postActionsById(data)).unwrap();
       if (res.success) {
         // Update only the post that changed, not the entire feed
-        const updatedPost = res.post;
-        const updatedFeedPosts = feedPosts.map((post) =>
-          post._id.toString() === updatedPost._id.toString()
-            ? updatedPost
-            : post
-        );
+        // const updatedPost = res.post;
+        // const updatedFeedPosts = feedPosts.map((post) =>
+        //   post._id.toString() === updatedPost._id.toString()
+        //     ? updatedPost
+        //     : post
+        // );
 
-        // Dispatch only the updated post (not the whole feed)
-        dispatch(feedPostState(updatedFeedPosts));
+        // // Dispatch only the updated post (not the whole feed)
+        // dispatch(feedPostState(updatedFeedPosts));
 
         return true;
       } else {

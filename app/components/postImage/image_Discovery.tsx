@@ -1,4 +1,12 @@
-import { View, Text, Image, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  ScrollView,
+  TextInput,
+  Keyboard,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { USER, POST } from "../../../types";
 import { colors } from "@/constants/Colors";
@@ -17,9 +25,11 @@ import {
   getPostById,
   postActionsById,
 } from "@/Store/Thunk/postThunk";
+import debounce from "lodash/debounce";
 import { getAdmin, getUserProfile } from "@/Store/Thunk/userThunk";
 import LikeBtn from "./components/likeBtn";
-import { postById } from "@/Store/Slices/state";
+import { allCommentsByPost, postById } from "@/Store/Slices/state";
+import  CommentSection  from "./components/commentSection";
 
 interface ImageEl {
   i: POST | undefined;
@@ -29,6 +39,12 @@ interface ImageEl {
 const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
 
 const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
+  const checkIfLiked = (): boolean => {
+    if (!admn || !i) return false;
+    return likedBy.some(
+      (like) => like.toString().trim() === admn._id.toString().trim()
+    );
+  };
   const peopleLikedThisPost = useSelector(
     (e: RootState) => e.postActions.response.peopleLiked
   );
@@ -36,20 +52,12 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
   const po = useSelector(
     (s: RootState) => s.getPostById.response.requestedPost?.admin
   );
+  const token = useSelector((s: RootState) => s.state.token);
   const [commentsCount, setCommentsCount] = useState<number>(
     i?.comments ? i.comments.length : 0
   );
-
   const [likedBy, setLikedBy] = useState<USER[]>(i?.likes || []);
-
-  const checkIfLiked = (): boolean => {
-    if (!admn || !i) return false;
-    return likedBy.some(
-      (like) => like.toString().trim() === admn._id.toString().trim()
-    );
-  };
   const [likesCount, setLikesCount] = useState<number>(i ? i.likes.length : 0);
-
   const [visitsCount, setVisitsCount] = useState<number>(
     i ? i.visits.length : 0
   );
@@ -59,7 +67,6 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
     setLikedOk(checkIfLiked());
   }, [likedBy, admn]);
   const [disliked, setdisliked] = useState<boolean>(false);
-
   const toggleImageNprofile = () => setAdminView((a) => !a);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -67,7 +74,6 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
 
   const getPosts = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
       if (!token) {
         router.replace("/components/GetStarted/GetStarted");
         return;
@@ -86,33 +92,17 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
     }
   };
 
-  const redirectToPost = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        router.replace("/components/GetStarted/GetStarted");
-        return null;
-      }
-      const data = {
-        postId: i?._id,
-        token,
-      };
-      router.push("/components/FullPagePost/fullPagePost");
-      const res = await dispatch(getPostById(data)).unwrap();
-      if (res.success) {
-        dispatch(postById(res.data.post));
-        return null;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.log(error);
+  const redirectToCommentsPage = () => {
+    if (!token) {
+      router.replace("/components/GetStarted/GetStarted");
       return;
     }
+    dispatch(allCommentsByPost(i?.comments));
+    router.push("/components/fullPageComments/fullPageComments")
+    return;
   };
   const redirectToUserProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
       if (!token) {
         router.replace("/components/GetStarted/GetStarted");
         return;
@@ -130,10 +120,10 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         return;
       }
     } catch (error) {
-      console.log(error);
       return;
     }
   };
+
   return (
     <View
       style={{
@@ -217,7 +207,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
           height: 360,
           width: "100%",
         }}
-        onPress={redirectToPost}
+        // onPress={redirectToPost}
       >
         {!adminView ? (
           <Image
@@ -387,7 +377,9 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         >
           <LikeBtn i={i} />
         </Pressable>
-        <Pressable onPress={redirectToPost}>
+        <Pressable
+         onPress={redirectToCommentsPage}
+        >
           <FontAwesome6
             name="comment-alt"
             size={24}
@@ -415,14 +407,6 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
               color={colors.col.PressedIn3}
             />
           )}
-          {/* <Text
-            style={{
-              textAlign: "center",
-              color: colors.col.PressedIn,
-            }}
-          >
-            {"Info"}
-          </Text> */}
         </Pressable>
         <Pressable>
           <MaterialCommunityIcons
@@ -440,10 +424,35 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
           </Text>
         </Pressable>
       </View>
+      <CommentSection i={i} />
     </View>
   );
 });
 export default ImageDiscovery;
+
+// const redirectToPost = async () => {
+//   try {
+//     const token = await AsyncStorage.getItem("token");
+//     if (!token) {
+//       router.replace("/components/GetStarted/GetStarted");
+//       return null;
+//     }
+//     const data = {
+//       postId: i?._id,
+//       token,
+//     };
+//     router.push("/components/FullPagePost/fullPagePost");
+//     const res = await dispatch(getPostById(data)).unwrap();
+//     if (res.success) {
+//       dispatch(postById(res.data.post));
+//       return null;
+//     } else {
+//       return null;
+//     }
+//   } catch (error) {
+//     return;
+//   }
+// };
 
 // const handleUserActionOnPost = React.useCallback(async () => {
 //   try {

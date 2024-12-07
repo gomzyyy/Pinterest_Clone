@@ -43,16 +43,18 @@ const FullPagePostImage = () => {
   const a: USER | undefined = useSelector((e: RootState) => e.state.admin);
   const c = useSelector((e: RootState) => e.state.post.postById?.comments);
   const token = useSelector((s: RootState) => s.state.token);
-  const checkIfLiked = (): boolean => {
-    if (!a) return false;
+  const alreadyLiked = (): boolean => {
+    const adminId = a?._id;
+    if (!adminId) return false;
     if (!i) return false;
-    let s = i.likes.some((s) => s._id.toString() === a._id.toString());
-    return s;
+    const allLikedIds = i.likes.map((a) => a._id.toString());
+    const r = allLikedIds.some((i) => i === adminId.toString());
+    return r;
   };
   const feedPosts = useSelector((s: RootState) => s.state.post.feedPosts);
 
-  const alreadyLikedByAdmin = checkIfLiked();
-  const [likedOk, setLikedOk] = useState<boolean>(checkIfLiked());
+  const alreadyLikedByAdmin = alreadyLiked();
+  const [likedOk, setLikedOk] = useState<boolean>(alreadyLiked());
   const [liked, setLiked] = useState<boolean>(false);
   const [comment, setComment] = useState<string>("");
   const [refresh, setRefresh] = useState<boolean>(false);
@@ -122,22 +124,12 @@ const FullPagePostImage = () => {
         token,
       };
       const res = await dispatch(postActionsById(data)).unwrap();
-      // console.log(res);
       if (res.success) {
         await Promise.all([
           dispatch(getPostById({ token })),
           dispatch(getAdmin(token)),
         ]);
-        const updatedFeedPosts = [...feedPosts];
-        const feedPostIndex = updatedFeedPosts.findIndex(
-          (s) => s._id.toString() === i?._id.toString()
-        );
 
-        if (feedPostIndex !== -1) {
-          updatedFeedPosts[feedPostIndex] = res.post;
-
-          dispatch(feedPostState(updatedFeedPosts));
-        }
         setComment("");
 
         setRefresh((r) => !r);
@@ -239,7 +231,7 @@ const FullPagePostImage = () => {
             }}
           >
             <View style={{ alignItems: "center" }}>
-              {checkIfLiked() ? (
+              {alreadyLiked() ? (
                 <AntDesign
                   name="heart"
                   size={22}

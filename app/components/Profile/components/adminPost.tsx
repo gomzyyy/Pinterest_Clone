@@ -39,7 +39,7 @@ const AdminPost = ({ i, a, lastPostMargin }: ImageEl) => {
         return null;
       }
     } catch (error) {
-      // console.log(error)
+      router.back();
       return;
     }
   };

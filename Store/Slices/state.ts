@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { initialGlobalStateType, POST, USER } from "@/types";
+import { commentType, initialGlobalStateType, POST, USER } from "@/types";
 
 const i: initialGlobalStateType = {
   post: {
     postsAvailable: false,
     feedPosts: [],
     postById: undefined,
+    allComments: [],
   },
   user: {
     suggestedUsers: [],
@@ -31,8 +32,15 @@ const stateSlice = createSlice({
         state.post.feedPosts = [];
       }
     },
+    allCommentsByPost: (state, action:PayloadAction<commentType[] | undefined>) => {
+      if (action.payload !== undefined) {
+        state.post.allComments = action.payload;
+      } else {
+        state.post.allComments = [];
+      }
+    },
     postById: (state, action: PayloadAction<POST>) => {
-      console.log(action.payload)
+      console.log(action.payload);
       state.post.postById = action.payload;
     },
     setAdmin: (state, action: PayloadAction<USER>) => {
@@ -48,6 +56,7 @@ export const {
   postsAvailabilityState,
   feedPostState,
   postById,
+  allCommentsByPost,
   setAdmin,
   suggestedUsersState,
   setToken,

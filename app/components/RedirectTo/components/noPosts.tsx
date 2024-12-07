@@ -7,7 +7,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/Store/store";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -28,10 +28,10 @@ const NoPosts = () => {
   const suggestionsLoading = useSelector(
     (a: RootState) => a.getAllUsers.loading
   );
+  const [suggestionsFound, setSuggestionsFound] = useState<boolean>(false);
 
   const getSuggestedUsers = async () => {
     try {
-      console.log(" hfvrivriuv");
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         router.replace("/components/GetStarted/GetStarted");
@@ -41,21 +41,25 @@ const NoPosts = () => {
         token,
       };
       const res = await dispatch(getSuggestionsThunk(data)).unwrap();
-      console.log(res);
-      return res;
+      // console.log(res);
+      if (res.success) {
+        if (res.data.suggestedUsers.length === 0) {
+          setSuggestionsFound(false);
+        }
+        setSuggestionsFound(true);
+        return res;
+      } else {
+        setSuggestionsFound(false);
+        return res;
+      }
     } catch (error) {
-      // console.log(error);
+      setSuggestionsFound(false);
       return;
     }
   };
-  useFocusEffect(
-    React.useCallback(() => {
-      async () => {
-        console.log("kjvrbrui");
-        await getSuggestedUsers();
-      };
-    }, [])
-  );
+  React.useEffect(() => {
+    getSuggestedUsers();
+  }, []);
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -141,12 +145,6 @@ const NoPosts = () => {
                       ? "Find new friends to see their posts."
                       : "No suggestions found, you can find new friends by searching them."}
                   </Text>
-                  <Pressable
-                    style={{ backgroundColor: "red", width: 120, height: 40 }}
-                    onPress={getSuggestedUsers}
-                  >
-                    <Text>Get Suggestions</Text>
-                  </Pressable>
                   <Pressable
                     style={{ marginBottom: 110 }}
                     onPress={() => router.push("/(tabs)/Find")}

@@ -77,7 +77,6 @@ export default function Menu(): React.JSX.Element {
         const { payload } = res;
         if (payload.success) {
           setRefreshing(false);
-          // console.log(payload.admin);
           return null;
         } else {
           setRefreshing(false);

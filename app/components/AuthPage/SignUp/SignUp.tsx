@@ -89,7 +89,6 @@ export default function SignUp() {
     } catch (error) {
       setLoading(false);
       setReturnMessage("Error occured while creating account.");
-      console.log(error);
       return;
     }
   };

@@ -7,6 +7,7 @@ import { POST, USER } from "@/types";
 import Header from "../components/header";
 import ImageDiscovery from "../components/postImage/image_Discovery";
 import NoPosts from "../components/RedirectTo/components/noPosts";
+import { KeyboardAvoidingView } from "react-native";
 
 export default function Discover() {
   const dispatch = useDispatch<AppDispatch>();
@@ -16,6 +17,7 @@ export default function Discover() {
   const admin: USER | undefined = useSelector((a: RootState) => a.state.admin);
   const loading = useSelector((g: RootState) => g.getAllPosts.loading);
   const posts = useSelector((s: RootState) => s.state.post.feedPosts);
+  const postsCopy = [...posts]
 
   // useEffect(() => {
   //   // Fetch posts only when the component first loads, not on refresh
@@ -41,16 +43,18 @@ export default function Discover() {
     return (
       <View style={{ flex: 1, alignItems: "center" }}>
         <FlatList
-          data={posts}
+          data={postsCopy}
           keyExtractor={(r) => r._id}
           numColumns={1}
           showsVerticalScrollIndicator={false}
           initialNumToRender={10}
           windowSize={5}
-          renderItem={({ item }) => <ImageDiscovery i={item} a={item.admin} margin={0} />}
-          extraData={posts}  // Ensures FlatList updates properly when posts change
-          onRefresh={handleRefresh}  // Handles refresh gesture but doesn't trigger data fetch
-          refreshing={refreshing}    // Shows loading spinner on refresh without triggering a fetch
+          renderItem={({ item }) => (
+            <ImageDiscovery i={item} a={item.admin} margin={0} />
+          )}
+          extraData={posts}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
         />
       </View>
     );
@@ -58,7 +62,14 @@ export default function Discover() {
 
   const ErrorPage = () => {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 10 }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+        }}
+      >
         <Text style={{ fontFamily: "pop-b", fontSize: 16 }}>
           Error occurred while fetching data.
         </Text>
@@ -68,15 +79,17 @@ export default function Discover() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <Header headerText="Home" showLoading={loading} />
-      {error ? (
-        <ErrorPage />
-      ) : posts && admin?.following.length !== 0 && posts.length !== 0 ? (
-        <DiscoverPage />
-      ) : (
-        <NoPosts />
-      )}
-    </View>
+    // <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <Header headerText="Home" showLoading={loading} />
+        {error ? (
+          <ErrorPage />
+        ) : posts && admin?.following.length !== 0 && posts.length !== 0 ? (
+          <DiscoverPage />
+        ) : (
+          <NoPosts />
+        )}
+      </View>
+    //  </KeyboardAvoidingView> 
   );
 }
