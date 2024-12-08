@@ -12,17 +12,25 @@ import { debounce } from "lodash";
 import React, { useState } from "react";
 import { colors } from "@/constants/Colors";
 import { commentType, POST } from "@/types";
-import Comment from "./comment";
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "@/Store/store";
+import { useRouter } from "expo-router";
+import { postActionsById, getPostById } from "@/Store/Thunk/postThunk";
+import { getAdmin } from "@/Store/Thunk/userThunk";
 
 type commentSectionType = {
   i: POST | undefined;
 };
 
 const CommentSection = ({ i }: commentSectionType) => {
-  const c = i?.comments;
+
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const c = i?.comments || [];
   const [commentsCount, setCommentsCount] = useState<number>(
     i?.comments ? i.comments.length : 0
   );
+  const token = useSelector((s: RootState) => s.state.token);
   const [comment, setComment] = useState<string>("");
   const [commentSectionOpened, setCommmentSectionOpened] =
     useState<boolean>(false);
@@ -41,6 +49,44 @@ const CommentSection = ({ i }: commentSectionType) => {
     debounce(() => handleCommentLength(), 300),
     [comment]
   );
+  const handlePostActions = async () => {
+    try {
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      if (!comment.trim()) {
+        alert("Comment can't be empty!");
+        return;
+      }
+      const data = {
+        getComment: comment,
+        postId: i?._id,
+        token,
+      };
+
+      const res = await dispatch(postActionsById(data)).unwrap();
+      if (res.success) {
+        await Promise.all([
+          dispatch(getPostById({ token })),
+          dispatch(getAdmin(token)),
+        ]);
+    
+        setComment("");
+        return;
+      } else {
+        setComment("");
+        await dispatch(getAdmin(token));
+        // setRefresh((r) => !r);
+        return;
+      }
+    } catch (error) {
+      setComment("");
+      console.error("An error occurred while posting the comment:", error);
+      return;
+    }
+  };
+
   return (
     <Pressable style={{ width: "100%", marginBottom: 2 }}>
       <View
@@ -94,7 +140,7 @@ const CommentSection = ({ i }: commentSectionType) => {
               height: 28,
               borderRadius: 6,
             }}
-            // onPress={handlePostActions}
+            onPress={handlePostActions}
             // disabled={postActionLoading}
           >
             <Text style={{}}>Post</Text>

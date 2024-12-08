@@ -29,14 +29,14 @@ import debounce from "lodash/debounce";
 import { getAdmin, getUserProfile } from "@/Store/Thunk/userThunk";
 import LikeBtn from "./components/likeBtn";
 import { allCommentsByPost, postById } from "@/Store/Slices/state";
-import  CommentSection  from "./components/commentSection";
+import CommentSection from "./components/commentSection";
 
 interface ImageEl {
   i: POST | undefined;
   a: USER | undefined;
   margin: number;
 }
-const Description = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos molestias dolor dolores saepe dolorum quisquam vitae blanditiis perferendis amet, quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum.quis sequi atque officiis fuga, eos, porro adipisci! Suscipit, voluptas laborum`;
+export let commentsCount:number
 
 const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
   const checkIfLiked = (): boolean => {
@@ -97,8 +97,8 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
       router.replace("/components/GetStarted/GetStarted");
       return;
     }
-    dispatch(allCommentsByPost(i?.comments));
-    router.push("/components/fullPageComments/fullPageComments")
+    dispatch(allCommentsByPost({ comments: i?.comments, post: i }));
+    router.push("/components/fullPageComments/fullPageCommentSection");
     return;
   };
   const redirectToUserProfile = async () => {
@@ -377,9 +377,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
         >
           <LikeBtn i={i} />
         </Pressable>
-        <Pressable
-         onPress={redirectToCommentsPage}
-        >
+        <Pressable onPress={redirectToCommentsPage}>
           <FontAwesome6
             name="comment-alt"
             size={24}
@@ -424,7 +422,7 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
           </Text>
         </Pressable>
       </View>
-      <CommentSection i={i} />
+      {/* <CommentSection i={i} /> */}
     </View>
   );
 });

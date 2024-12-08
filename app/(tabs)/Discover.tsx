@@ -7,7 +7,8 @@ import { POST, USER } from "@/types";
 import Header from "../components/header";
 import ImageDiscovery from "../components/postImage/image_Discovery";
 import NoPosts from "../components/RedirectTo/components/noPosts";
-import { KeyboardAvoidingView } from "react-native";
+
+export let feedPostsCopy:any = []
 
 export default function Discover() {
   const dispatch = useDispatch<AppDispatch>();
@@ -16,8 +17,7 @@ export default function Discover() {
 
   const admin: USER | undefined = useSelector((a: RootState) => a.state.admin);
   const loading = useSelector((g: RootState) => g.getAllPosts.loading);
-  const posts = useSelector((s: RootState) => s.state.post.feedPosts);
-  const postsCopy = [...posts]
+  feedPostsCopy = [...useSelector((s: RootState) => s.state.post.feedPosts)]
 
   // useEffect(() => {
   //   // Fetch posts only when the component first loads, not on refresh
@@ -43,7 +43,7 @@ export default function Discover() {
     return (
       <View style={{ flex: 1, alignItems: "center" }}>
         <FlatList
-          data={postsCopy}
+          data={feedPostsCopy}
           keyExtractor={(r) => r._id}
           numColumns={1}
           showsVerticalScrollIndicator={false}
@@ -52,7 +52,7 @@ export default function Discover() {
           renderItem={({ item }) => (
             <ImageDiscovery i={item} a={item.admin} margin={0} />
           )}
-          extraData={posts}
+          extraData={feedPostsCopy}
           onRefresh={handleRefresh}
           refreshing={refreshing}
         />
@@ -84,7 +84,7 @@ export default function Discover() {
         <Header headerText="Home" showLoading={loading} />
         {error ? (
           <ErrorPage />
-        ) : posts && admin?.following.length !== 0 && posts.length !== 0 ? (
+        ) : feedPostsCopy && admin?.following.length !== 0 && feedPostsCopy.length !== 0 ? (
           <DiscoverPage />
         ) : (
           <NoPosts />

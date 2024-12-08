@@ -59,7 +59,6 @@ const LikeBtn = ({ i }: likeBtnType) => {
 
         // // Dispatch only the updated post (not the whole feed)
         // dispatch(feedPostState(updatedFeedPosts));
-
         return true;
       } else {
         return false;

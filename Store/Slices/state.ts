@@ -6,7 +6,10 @@ const i: initialGlobalStateType = {
     postsAvailable: false,
     feedPosts: [],
     postById: undefined,
-    allComments: [],
+    allCommentsOfPost: {
+      comments: [],
+      post: undefined,
+    },
   },
   user: {
     suggestedUsers: [],
@@ -32,12 +35,15 @@ const stateSlice = createSlice({
         state.post.feedPosts = [];
       }
     },
-    allCommentsByPost: (state, action:PayloadAction<commentType[] | undefined>) => {
-      if (action.payload !== undefined) {
-        state.post.allComments = action.payload;
-      } else {
-        state.post.allComments = [];
-      }
+    allCommentsByPost: (
+      state,
+      action: PayloadAction<{
+        comments: commentType[] | undefined;
+        post: POST | undefined;
+      }>
+    ) => {
+      state.post.allCommentsOfPost.comments = action.payload.comments;
+      state.post.allCommentsOfPost.post = action.payload.post;
     },
     postById: (state, action: PayloadAction<POST>) => {
       console.log(action.payload);

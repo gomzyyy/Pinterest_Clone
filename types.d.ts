@@ -231,8 +231,8 @@ export interface commentType {
   dislikes?: USER[] | string[] | undefined;
   replies?: {
     text?: string;
-    likes?: USER[] | string[] | undefined;
-    dislikes?: USER[] | string[] | undefined;
+    likes?: USER[] | undefined;
+    dislikes?: USER[] | undefined;
     admin?: USER | undefined;
     visible?: boolean;
     hidden?: boolean;
@@ -265,7 +265,10 @@ export interface initialGlobalStateType {
     postsAvailable: boolean;
     feedPosts: POST[];
     postById: POST | undefined;
-    allComments:commentType[]|undefined;
+    allCommentsOfPost: {
+      comments: commentType[] | undefined;
+      post: POST|undefined;
+    };
   };
   user: {
     suggestedUsers: USER[];

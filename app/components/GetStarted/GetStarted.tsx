@@ -97,10 +97,10 @@ export default function GetStartedPage() {
               return;
             }
             if (!postsLoading) {
-              router.push("/(tabs)/Discover");
+              router.replace("/(tabs)/Discover");
             }
           } else {
-            router.push("/(tabs)/Discover");
+            router.replace("/(tabs)/Discover");
             return;
           }
           return;
