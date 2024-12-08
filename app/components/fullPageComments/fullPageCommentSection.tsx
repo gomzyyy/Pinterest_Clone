@@ -16,10 +16,8 @@ import { commentType,POST } from "@/types";
 import FullPageComment from "./components/fullPageComment";
 
 const FullPageCommentSection = () => {
-  const c: commentType[] | undefined = useSelector(
-    (s: RootState) => s.state.post.allCommentsOfPost.comments
-  );
-  const p:POST|undefined=useSelector((p:RootState)=>p.state.post.allCommentsOfPost.post)
+const p:POST|undefined=useSelector((s:RootState)=>s.state.post.postById)
+const c:commentType[]|undefined=p?.comments
   // console.log(p)
   return (
     <View style={{ flex: 1 }}>

@@ -265,10 +265,6 @@ export interface initialGlobalStateType {
     postsAvailable: boolean;
     feedPosts: POST[];
     postById: POST | undefined;
-    allCommentsOfPost: {
-      comments: commentType[] | undefined;
-      post: POST|undefined;
-    };
   };
   user: {
     suggestedUsers: USER[];

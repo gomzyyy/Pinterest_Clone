@@ -28,7 +28,7 @@ import {
 import debounce from "lodash/debounce";
 import { getAdmin, getUserProfile } from "@/Store/Thunk/userThunk";
 import LikeBtn from "./components/likeBtn";
-import { allCommentsByPost, postById } from "@/Store/Slices/state";
+import { postById } from "@/Store/Slices/state";
 import CommentSection from "./components/commentSection";
 
 interface ImageEl {
@@ -36,7 +36,7 @@ interface ImageEl {
   a: USER | undefined;
   margin: number;
 }
-export let commentsCount:number
+export let commentsCount: number;
 
 const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
   const checkIfLiked = (): boolean => {
@@ -92,14 +92,18 @@ const ImageDiscovery = React.memo(({ i, a, margin }: ImageEl) => {
     }
   };
 
-  const redirectToCommentsPage = () => {
+  const redirectToCommentsPage = async () => {
     if (!token) {
       router.replace("/components/GetStarted/GetStarted");
       return;
     }
-    dispatch(allCommentsByPost({ comments: i?.comments, post: i }));
-    router.push("/components/fullPageComments/fullPageCommentSection");
-    return;
+    const res = await dispatch(getPostById({ token, postId: i?._id })).unwrap();
+    if (res.success) {
+      dispatch(postById(res.data.post));
+      router.push("/components/fullPageComments/fullPageCommentSection");
+      return;
+    } else {
+    }
   };
   const redirectToUserProfile = async () => {
     try {
