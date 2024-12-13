@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { colors } from "@/constants/Colors";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { userController, messages } from "@/constants/GlobalConstants";
 import { useRouter } from "expo-router";

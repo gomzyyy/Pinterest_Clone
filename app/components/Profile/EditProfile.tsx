@@ -268,7 +268,7 @@ const EditProfile = () => {
                     color: colors.col.PressedIn3,
                   }}
                 >
-                  @{a?.userId}
+                  {a?.userId}
                 </Text>
               </Pressable>
             </View>

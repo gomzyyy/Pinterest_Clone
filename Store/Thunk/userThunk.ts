@@ -61,6 +61,28 @@ export const getUserProfile = createAsyncThunk(
     }
   }
 );
+export const getUserProfileAndSetThunk = createAsyncThunk(
+  "user/get",
+  async (data: GetUserType, { rejectWithValue }) => {
+    try {
+      const getUser = await fetch(
+        `http://${ip}:6600/api/user/get/set/${data.userId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        }
+      );
+      const response = await getUser.json();
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    }
+  }
+);
 
 export const getAllUsersThunk = createAsyncThunk(
   "user/get/all",
@@ -154,15 +176,15 @@ export const handleRemoveFollowerThunk = createAsyncThunk(
   async (data: removeFollowerDataType, { rejectWithValue }) => {
     try {
       const apiData = {
-        followerId:data.followerId
-      }
+        followerId: data.followerId,
+      };
       const fetchRes = await fetch(
         `http://${ip}:6600/api/user/connections/follower/remove`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${data.token}`,
-            "Content-Type":"application/json"
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(apiData),
         }
@@ -269,6 +291,52 @@ export const getSearchResultThunk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    }
+  }
+);
+export const getAdminHistoryThunk = createAsyncThunk(
+  "user/history",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      if (!token) return;
+      const historyRes = await fetch(`http://${ip}:6600/api/user/history`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const res = await historyRes.json();
+      return res;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Unknown error occured."
+      );
+    }
+  }
+);
+
+export const removeSpecificHistoryThunk = createAsyncThunk(
+  "user/history/remove",
+  async (data:{token:string;userHistoryId?:string;tagHistoryId?:string;}, { rejectWithValue }) => {
+    try {
+      if (!data.token) return;
+      const historyRes = await fetch(`http://${ip}:6600/api/user/history/remove`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          userHistoryId:data.userHistoryId?data.userHistoryId:undefined,
+          tagHistoryId:data.tagHistoryId?data.tagHistoryId:undefined
+        })
+      });
+      const res = await historyRes.json();
+      return res;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Unknown error occured."
       );
     }
   }

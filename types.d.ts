@@ -257,17 +257,31 @@ export interface commentType {
     reportType?: string;
     others?: string;
   };
+  createdAt: Date;
+  updatedAt: Date;
   visible?: boolean;
   hidden?: boolean;
+}
+export interface UserHistory{
+  __v:number;
+  _id:string;
+  createdAt:Date;
+  updatedAt:Date;
+  user:USER;
 }
 export interface initialGlobalStateType {
   post: {
     postsAvailable: boolean;
     feedPosts: POST[];
     postById: POST | undefined;
+    trendingPosts: POST[]
   };
   user: {
     suggestedUsers: USER[];
+    history:{
+      users:UserHistory[];
+      tags:string[];
+    }
   };
   admin: USER | undefined;
   token: string | null;

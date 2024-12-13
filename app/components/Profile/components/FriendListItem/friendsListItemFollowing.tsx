@@ -137,15 +137,6 @@ const FriendListItemFollowing = ({ item }: friendsListItem) => {
                 fontFamily: "pop-reg",
                 fontSize: 11,
                 color: colors.col.PressedIn3,
-              }}
-            >
-              {"@"}
-            </Text>
-            <Text
-              style={{
-                fontFamily: "pop-reg",
-                fontSize: 11,
-                color: colors.col.PressedIn3,
                 textDecorationLine: "underline",
               }}
             >

@@ -18,11 +18,11 @@ const Page = () => {
   if (!context) {
     throw new Error("Error");
   } else {
-    const { login } = context;
+    // const { login } = context;
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        {login ? <Redirect href={"/(tabs)/Discover"} /> : <GetStarted />}
+       <GetStarted />
       </SafeAreaView>
     );
   }

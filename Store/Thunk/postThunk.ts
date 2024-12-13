@@ -89,3 +89,22 @@ export const getAllPostsThunk = createAsyncThunk(
     }
   }
 );
+export const getTrendingPostsThunk = createAsyncThunk(
+  "user/posts/get",
+  async (data:{token:string}, { rejectWithValue }) => {
+    try {
+      const getTrendingPostsAPI = await fetch(`http://${ip}:6600/api/user/get/trending/posts`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+      const res = await getTrendingPostsAPI.json();
+      return res;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "An unknown error occured"
+      );
+    }
+  }
+);

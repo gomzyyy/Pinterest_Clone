@@ -8,62 +8,61 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import Header from "../../../header";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/constants/Colors";
 import { useSelector, useDispatch } from "react-redux";
-import { USER } from "@/types";
+import { USER, UserHistory } from "@/types";
 import { AppDispatch, RootState } from "@/Store/store";
-import { handleFollowUnfollowThunk, getAdmin, getUserProfile } from "@/Store/Thunk/userThunk";
+import {
+  handleFollowUnfollowThunk,
+  getAdmin,
+  getUserProfile,
+  getUserProfileAndSetThunk,
+  removeSpecificHistoryThunk,
+  getAdminHistoryThunk,
+} from "@/Store/Thunk/userThunk";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { getHistorystate } from "@/Store/Slices/state";
+import { ceil } from "lodash";
 
-type friendsListItem = {
-  item: USER;
+type searchResultListItem = {
+  item: UserHistory;
+  bottom: boolean;
 };
 
-const UserFollowingListItem = ({ item }: friendsListItem) => {
+const HistoryListItem = ({ item, bottom }: searchResultListItem) => {
+  const token = useSelector((s: RootState) => s.state.token);
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const admin = useSelector((a: RootState) => a.admin.admin);
   const [removeLoading, setRemoveLoading] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
+  const [removalLoading, setRemovalLoading] = useState<boolean>(false);
 
-  const checkIfFollowed = (): boolean => {
-    if (!admin) return false;
-    if (!item) return false;
-    const adminFollowingIds = admin.following.map((f: any) => String(f._id));
-
-    const isAlreadyFollowed = adminFollowingIds.includes(item._id);
-    return isAlreadyFollowed;
-  };
-
-  const handlefollowbtn = async () => {
+  const handleRemoveHistory = async () => {
     try {
-      setActionLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      setRemovalLoading(true);
       if (!token) {
-        setActionLoading(false);
-        router.replace("/components/ErrorPages/sessionExpired");
+        router.replace("/components/GetStarted/GetStarted");
         return;
       }
-      // console.log(item?._id);
-      const data = {
-        token,
-        isUnfollowedId: checkIfFollowed() ? item._id : undefined,
-        isFollowedId: !checkIfFollowed() ? item._id : undefined,
-      };
-      const res = await dispatch(handleFollowUnfollowThunk(data)).unwrap();
+      const res = await dispatch(
+        removeSpecificHistoryThunk({ token, userHistoryId: item._id })
+      ).unwrap();
       if (res.success) {
-        setActionLoading(false);
-        await dispatch(getAdmin(token));
+        const res1 = await dispatch(getAdminHistoryThunk(token)).unwrap();
+        if (res1.success) {
+          dispatch(getHistorystate({ users: res1.history.users }));
+        }
+      } else {
+        return;
       }
-      setActionLoading(false);
-      return;
     } catch (error) {
-      setActionLoading(false);
-      // console.log(error);
+      console.log(error);
       return;
+    } finally {
+      setRemovalLoading(false);
     }
   };
 
@@ -74,21 +73,21 @@ const UserFollowingListItem = ({ item }: friendsListItem) => {
         router.replace("/components/GetStarted/GetStarted");
         return;
       }
-      const userId = item?._id.trim();
+      const userId = item.user?._id.trim();
       const data = {
         token,
         userId,
       };
-      if(item?._id===admin?._id){
+      if (item.user?._id === admin?._id) {
         const res = await dispatch(getAdmin(token)).unwrap();
         if (res.success) {
-          router.push("/components/Profile/adminProfile")
+          router.push("/components/Profile/adminProfile");
           return;
         } else {
           return;
         }
-      }else{
-        const res = await dispatch(getUserProfile(data)).unwrap();
+      } else {
+        const res = await dispatch(getUserProfileAndSetThunk(data)).unwrap();
         if (res.success) {
           router.push("/components/User/userProfile");
           return;
@@ -109,10 +108,10 @@ const UserFollowingListItem = ({ item }: friendsListItem) => {
         alignItems: "center",
         justifyContent: "space-between",
         flexDirection: "row",
-        paddingHorizontal: 16,
-        borderBottomWidth: 0.2,
-        marginTop: 20,
-        // width:"50%",
+        paddingHorizontal: 12,
+        borderBottomWidth: bottom ? 0 : 0.2,
+        borderColor: colors.col.PressedIn3,
+        marginTop: 10,
         gap: 4,
       }}
       onPress={redirectToUserProfile}
@@ -131,13 +130,12 @@ const UserFollowingListItem = ({ item }: friendsListItem) => {
           }}
         >
           <Image
-            source={{ uri: item.avatar }}
+            source={{ uri: item.user.avatar }}
             style={{ height: "100%", width: "100%", borderRadius: 30 }}
           />
         </View>
         <View style={{ height: "100%", justifyContent: "center" }}>
           <View style={{ flexDirection: "row" }}>
-           
             <Text
               style={{
                 fontFamily: "pop-reg",
@@ -146,7 +144,7 @@ const UserFollowingListItem = ({ item }: friendsListItem) => {
                 textDecorationLine: "underline",
               }}
             >
-              {item.userId}
+              {item.user.userId}
             </Text>
           </View>
           <View style={{ paddingLeft: 10 }}>
@@ -156,12 +154,12 @@ const UserFollowingListItem = ({ item }: friendsListItem) => {
                 fontSize: 18,
               }}
             >
-              {item.userName}
+              {item.user.userName}
             </Text>
           </View>
         </View>
       </View>
-      {item?._id === admin?._id ? (
+      {item.user?._id === admin?._id ? (
         <View
           style={{
             borderRadius: 4,
@@ -189,34 +187,23 @@ const UserFollowingListItem = ({ item }: friendsListItem) => {
       ) : (
         <View
           style={{
-            borderRadius: 4,
-            paddingHorizontal: 6,
-            backgroundColor: checkIfFollowed()
-              ? colors.col.Black
-              : colors.col.tabActiveBlue,
             alignItems: "center",
             justifyContent: "center",
-            marginTop: 5,
+            marginRight: 12,
             height: 30,
-            width: 90,
+            width: 80,
+            borderWidth: 0.8,
+            borderColor: colors.col.PressedIn3,
+            borderRadius: 6,
+            // backgroundColor: colors.col.Black,
           }}
         >
-          <Pressable onPress={handlefollowbtn}>
-            {actionLoading ? (
-              <View>
-                <ActivityIndicator color={colors.col.white} />
-              </View>
+          <Pressable onPress={handleRemoveHistory}>
+            {removalLoading ? (
+              <ActivityIndicator size={18} />
             ) : (
-              <Text
-                style={{
-                  color: colors.col.white,
-                  fontSize: 12,
-                  fontFamily: "pop-b",
-                  textAlign: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {checkIfFollowed() ? "unfollow" : "follow"}
+              <Text style={{ fontSize: 14, color: colors.col.Black }}>
+                remove
               </Text>
             )}
           </Pressable>
@@ -226,4 +213,4 @@ const UserFollowingListItem = ({ item }: friendsListItem) => {
   );
 };
 
-export default UserFollowingListItem;
+export default HistoryListItem;

@@ -28,8 +28,7 @@ const LikeBtn = ({ i }: likeBtnType) => {
   const alreadyLiked = (): boolean => {
     if (!adminId) return false;
     if (!i) return false;
-    // console.log(i)
-    const allLikedIds = i.likes.map((a) => a._id.toString());
+    const allLikedIds = i.likes.map((a) => a?._id);
     const r = allLikedIds.some((i) => i === adminId.toString());
     return r;
   };

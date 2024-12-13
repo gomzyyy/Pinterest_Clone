@@ -45,7 +45,7 @@ export default function Menu(): React.JSX.Element {
   const updatedAdmin: InitialStateUpdatedAdmin = useSelector(
     (s: RootState) => s.updateAdmin
   );
-  // useEffect(()=>{})
+  const token = useSelector((s:RootState)=>s.state.token)
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -59,21 +59,21 @@ export default function Menu(): React.JSX.Element {
       return null;
     }
   };
-  useEffect(() => {
-    if (returnMessage !== "" || returnMessage !== null)
-      return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
-  }, [returnMessage]);
+  // useEffect(() => {
+  //   if (returnMessage !== "" || returnMessage !== null)
+  //     return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
+  // }, [returnMessage]);
   const refreshAdmin = async () => {
     try {
       setRefreshing(true);
-      const token = await AsyncStorage.getItem("token");
+      // const token = await AsyncStorage.getItem("token");
       if (!token) {
         setRefreshing(false);
         router.replace("/components/GetStarted/GetStarted");
         return null;
       }
-      const res = await dispatch(getAdmin(token));
-      if (getAdmin.fulfilled.match(res)) {
+      const res = await dispatch(getAdmin(token)).unwrap();
+      if (res.success) {
         const { payload } = res;
         if (payload.success) {
           setRefreshing(false);
@@ -90,7 +90,7 @@ export default function Menu(): React.JSX.Element {
       }
     } catch (error) {
       setRefreshing(false);
-      // console.log(error);
+      // console.log(error);/
       return null;
     }
   };
@@ -185,7 +185,7 @@ export default function Menu(): React.JSX.Element {
                   color: colors.col.PressedIn,
                 }}
               >
-                @{a?.userId}
+                {a?.userId}
               </Text>
             </View>
           </View>

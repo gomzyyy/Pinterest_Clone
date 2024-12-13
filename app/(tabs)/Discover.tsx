@@ -18,6 +18,7 @@ export default function Discover() {
   const admin: USER | undefined = useSelector((a: RootState) => a.state.admin);
   const loading = useSelector((g: RootState) => g.getAllPosts.loading);
   feedPostsCopy = [...useSelector((s: RootState) => s.state.post.feedPosts)]
+  // console.log(feedPostsCopy)
 
   // useEffect(() => {
   //   // Fetch posts only when the component first loads, not on refresh

@@ -160,8 +160,8 @@ export default function Menu(): React.JSX.Element {
                 >
                   <Text
                     style={{
-                      fontFamily: "pop-b1",
-                      fontSize: 24,
+                      fontFamily: "pop-b",
+                    fontSize: 18,
                       color: colors.col.PressedIn3,
                       marginLeft: 5,
                     }}
@@ -241,7 +241,7 @@ export default function Menu(): React.JSX.Element {
                 left:5
               }}
             >
-              @{a?.userId}
+              {a?.userId}
             </Text>
           </View>
           {a?.bio.trim() !== "" && (

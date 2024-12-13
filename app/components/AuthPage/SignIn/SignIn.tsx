@@ -48,7 +48,6 @@ function SignInFun() {
   if (!context) {
     throw new Error("error");
   }
-  const { login, loginTrue } = context;
   const [errMsgId, setErrMsgId] = useState<string>("");
   const [errMsgPass, setErrMsgPass] = useState<string>("");
   const [hidePass, setHidePass] = useState(true);
@@ -114,7 +113,6 @@ function SignInFun() {
         await AsyncStorage.removeItem('token');
       }
       await AsyncStorage.setItem("token", res.token);
-      loginTrue();
       setLoading(false);
       setReturnMessage(res.message);
       router.replace("/(tabs)/Discover");
@@ -203,7 +201,7 @@ function SignInFun() {
         <View>
           <TextInput
             style={loginStyles.getLoginData}
-            placeholder="user ID"
+            placeholder="user ID (i.e:@muffins)"
             value={idtext}
             onChangeText={setidtext}
           />
@@ -310,62 +308,3 @@ const loginStyles = StyleSheet.create({
 });
 
 export default SignIn;
-
-// const alreadyLoggedIn = userController.alreadyLoggedIn;
-// const handleLoggedin = async () => {
-//   const res = await alreadyLoggedIn();
-//   const user = await AsyncStorage.getItem("userName");
-//   if (res && user !== null ) {
-//     if(user.trim()!==""){
-//     const userRes = await userFound(user);
-//      if(userRes){
-//       router.replace("/(tabs)/Discover");
-//       ToastAndroid.show(`Welcome ${user}`, ToastAndroid.SHORT);
-//      }
-//     }
-//     setReturnMessage("unable to login!")
-//     return;
-//   }
-//   return null;
-// };
-
-// useEffect(() => {
-//   handleLoggedin();
-// }, []);
-
-// const handleSignInUser = async () => {
-//   const user = {
-//     userID: idtext,
-//     password: passText,
-//   };
-//   const loginRes = await loginUser(user);
-//   setReturnMessage(messages.user.returnMessage);
-//   if (loginRes) {
-//     loginTrue();
-//     router.replace("/(tabs)/Discover");
-//   }
-//   return;
-// };
-
-
-
- // useEffect(() => {
-  //   const checkLoggedIn = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const token = await AsyncStorage.getItem("token");
-  //       if (token === null) {
-  //         setLoading(false);
-  //         return null;
-  //       }
-  //       setReturnMessage("Login success!");
-  //       loginTrue();
-  //       setLoading(false);
-  //       router.replace("/(tabs)/Discover");
-  //     } catch (error) {
-  //       console.log(error);
-  //       setLoading(false);
-  //     }
-  //   };
-  //   checkLoggedIn();
-  // }, []);

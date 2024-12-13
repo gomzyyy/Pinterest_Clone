@@ -21,7 +21,7 @@ import {
 } from "@/Store/Thunk/userThunk";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { removeFollowerSliceFunction } from "@/Store/Slices/admin";
+import { getUserProfile } from "@/Store/Thunk/userThunk";
 
 type friendsListItem = {
   item: USER;
@@ -125,6 +125,31 @@ const FriendListItemFollowers = ({ item }: friendsListItem) => {
     }
   };
 
+  const redirectToUserProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const userId = item?._id.trim();
+      const data = {
+        token,
+        userId,
+      };
+      const res = await dispatch(getUserProfile(data)).unwrap();
+      if (res.success) {
+        router.push("/components/User/userProfile");
+        return;
+      } else {
+        return;
+      }
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+  };
+
   return (
     <Pressable
       style={{
@@ -137,6 +162,7 @@ const FriendListItemFollowers = ({ item }: friendsListItem) => {
         marginTop: 20,
         gap: 4,
       }}
+      onPress={redirectToUserProfile}
     >
       <View
         style={{
@@ -165,7 +191,6 @@ const FriendListItemFollowers = ({ item }: friendsListItem) => {
                 color: colors.col.PressedIn3,
               }}
             >
-              {"@"}
             </Text>
             <Text
               style={{

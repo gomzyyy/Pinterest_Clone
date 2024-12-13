@@ -41,7 +41,7 @@ import {
         <View style={{ gap: 5, marginTop: 2 }}>
           <Pressable>
             <Text style={{ color: colors.col.PressedIn3 }}>
-              @{c?.admin?.userId || "loading..."}
+              {c?.admin?.userId || "loading..."}
             </Text>
           </Pressable>
           <View style={{ width: "100%" }}>

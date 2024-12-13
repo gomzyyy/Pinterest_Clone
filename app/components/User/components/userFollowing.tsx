@@ -50,6 +50,8 @@ import UserFollowingListItem from "./FriendListItems/userFollowingListItem";
       setSearchResult(searchedUser);
       return;
     };
+
+ 
   
     useEffect(() => {
       if (searchText.trim().length !== 0) {

@@ -6,6 +6,7 @@ import {
   TextInput,
   Image,
   ToastAndroid,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState, useContext } from "react";
 import Feather from "@expo/vector-icons/Feather";
@@ -17,13 +18,19 @@ import { userController, messages } from "@/constants/GlobalConstants";
 import { useRouter } from "expo-router";
 import STATE from "@/ContextAPI";
 import Header from "../components/header";
+import { getTrendingPostsThunk } from "@/Store/Thunk/postThunk";
 import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppDispatch, RootState } from "@/Store/store";
-import { getSearchResultThunk } from "@/Store/Thunk/userThunk";
+import {
+  getAdminHistoryThunk,
+  getSearchResultThunk,
+} from "@/Store/Thunk/userThunk";
 import { POST, USER } from "@/types";
-import FriendListItemFollowing from "../components/Profile/components/FriendListItem/friendsListItemFollowing";
 import AdminPost from "../components/Profile/components/adminPost";
+import SearchResultListItem from "../components/findPageComponents/components/searchResultListItem";
+import { getHistorystate } from "@/Store/Slices/state";
+import HistoryList from "../components/findPageComponents/historyList";
 
 export default function Find() {
   const searchQueryRes = useSelector(
@@ -32,15 +39,24 @@ export default function Find() {
   const resultType = useSelector(
     (t: RootState) => t.searchQuery.response.data.type
   );
+  const token = useSelector((s: RootState) => s.state.token);
+  const adminUserHistory = useSelector(
+    (s: RootState) => s.state.user.history.users
+  );
+  const adminTagsHistory = useSelector(
+    (s: RootState) => s.state.user.history.tags
+  );
   const dispatch = useDispatch<AppDispatch>();
   const logout = userController.logoutUser;
-  const { loginFalse, loginTrue } = useContext(STATE);
   const router = useRouter();
   const [returnMessage, setReturnMessage] = useState<string>("");
   const [searchText, setSearchText] = useState<string>("");
   const [searchResult, setSearchResult] = useState<USER[] | POST[] | undefined>(
     []
   );
+  const [searchBarActive, setSearchBarActive] = useState<boolean>(false);
+  const setSearchBarStatusToActive = () => setSearchBarActive(true);
+  const setSearchBarStatusToInActive = () => setSearchBarActive(false);
   const checkForUserType = (item: any): item is USER => item;
   const checkForPostType = (item: any): item is POST => item;
 
@@ -59,24 +75,22 @@ export default function Find() {
     if (returnMessage !== "" || returnMessage !== null)
       return ToastAndroid.show(returnMessage, ToastAndroid.SHORT);
   }, [returnMessage]);
+ 
 
-  // const getSearchResult = (t: string) => {
-  //   let searchoptions;
-  //   let result: string[] = [];
-  //   imageData.forEach((f) => {
-  //     f.images.forEach((i) => {
-  //       searchoptions = i.tags;
-  //       searchoptions.forEach((s) => {
-  //         if (s.trim().toLocaleLowerCase().includes(t.trim().toLowerCase())) {
-  //           if (!result.includes(i.image)) {
-  //             result.push(i.image);
-  //           }
-  //         }
-  //       });
-  //     });
-  //   });
-  //   setSearchResult(result);
-  // };
+  const getTrendingPosts = async () => {
+    try {
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const res = await dispatch(getTrendingPostsThunk({ token })).unwrap();
+      if (res.success) {
+      }
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+  };
 
   const handleSearchQuery = async () => {
     try {
@@ -92,9 +106,25 @@ export default function Find() {
       const res = await dispatch(getSearchResultThunk(data)).unwrap();
       if (res.success) {
         setSearchResult(searchQueryRes);
-        // console.log(res.data);
         return;
       }
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+  };
+
+  const getSearchHistory = async () => {
+    try {
+      if (!token) {
+        router.replace("/components/GetStarted/GetStarted");
+        return;
+      }
+      const res = await dispatch(getAdminHistoryThunk(token)).unwrap();
+      if (res.success) {
+        dispatch(getHistorystate({ users: res.history.users }));
+      }
+      return;
     } catch (error) {
       console.log(error);
       return;
@@ -118,54 +148,77 @@ export default function Find() {
           paddingHorizontal: 10,
           alignItems: "center",
           paddingVertical: 10,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.col.PressedIn3,
+          height: 80,
+          gap: 2,
+          borderBottomWidth: searchBarActive ? 1 : 0,
+          borderBottomColor: searchBarActive ? colors.col.PressedIn3 : "",
+          backgroundColor: searchBarActive ? "" : colors.col.PressedIn,
         }}
       >
         <Pressable onPress={() => router.back()}>
           <Ionicons
             name="arrow-back-outline"
             size={28}
-            color={colors.col.Black}
-            style={{ width: 30 }}
+            color={colors.col.PressedIn5}
           />
         </Pressable>
         <TextInput
           placeholder="search"
           style={{
-            alignSelf: "flex-start",
-            height: 60,
-            width: "80%",
-            paddingHorizontal: 20,
-            fontSize: 25,
+            height: 50,
+            width: searchText.trim().length !== 0 ? "80%" : "88%",
+            paddingHorizontal: 10,
+            fontSize: 20,
+            backgroundColor: searchBarActive ? "" : colors.col.PressedIn5,
+            borderRadius: 10,
+            marginLeft: 4,
           }}
+          onFocus={getSearchHistory}
+          onBlur={setSearchBarStatusToInActive}
           value={searchText}
           onChangeText={setSearchText}
         />
         {searchText !== "" && (
-          <Pressable onPress={clearBtn}>
-            <MaterialIcons name="clear" size={28} color="black" />
-          </Pressable>
-        )}
-      </View>
-      <View style={{ flex: 1 }}>
-        {searchResult?.length === 0 ? (
-          <Text
+          <TouchableOpacity
+            onPress={clearBtn}
             style={{
-              alignSelf: "center",
-              fontFamily: "pop-mid",
-              marginTop: 50,
-              fontSize: 16,
+              height: 32,
+              width: 32,
+              borderRadius: 16,
+              backgroundColor: colors.col.PressedIn5,
+              alignItems: "center",
+              justifyContent: "center",
+              marginLeft: 4,
             }}
           >
-            {searchResult.length === 0 && searchText.trim() !== ""
-              ? "No result found"
-              : "Results will appear here!"}
-          </Text>
+            <MaterialIcons
+              name="clear"
+              size={24}
+              color={colors.col.PressedIn4}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+      <View style={{ flex: 1,paddingHorizontal:6 }}>
+        {searchResult?.length === 0 ? (
+          adminTagsHistory.length === 0 && adminUserHistory.length === 0 ? (
+            <Text
+              style={{
+                alignSelf: "center",
+                fontFamily: "pop-mid",
+                marginTop: 50,
+                fontSize: 16,
+              }}
+            >
+              {searchResult.length === 0 && searchText.trim() !== ""
+                ? "No result found"
+                : "Results will appear here!"}
+            </Text>
+          ) : (
+            <HistoryList />
+          )
         ) : userData.length !== 0 ? (
-          <View
-          style={{flex:1}}
-          >
+          <View style={{ flex: 1 }}>
             <FlatList
               data={userData}
               keyExtractor={(i) => i._id}
@@ -173,7 +226,7 @@ export default function Find() {
               renderItem={({ item }) => (
                 <>
                   <Pressable>
-                    <FriendListItemFollowing item={item} />
+                    <SearchResultListItem item={item} />
                   </Pressable>
                 </>
               )}
